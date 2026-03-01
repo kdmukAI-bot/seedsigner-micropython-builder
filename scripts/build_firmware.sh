@@ -32,6 +32,12 @@ fi
 
 export IDF_PATH="$IDF_DIR"
 
+MICROPY_CMAKE_ARGS="${CMAKE_ARGS:-}"
+if [ -d "$CMODS_DIR/components" ]; then
+  MICROPY_CMAKE_ARGS="${MICROPY_CMAKE_ARGS} -DMICROPY_EXTRA_COMPONENT_DIRS=$CMODS_DIR/components"
+fi
+echo "Using CMAKE_ARGS: $MICROPY_CMAKE_ARGS"
+
 if [ -z "${IDF_TOOLS_PATH:-}" ]; then
   WORKSPACE_TOOLS_DIR="$ROOT_DIR/.espressif"
   if mkdir -p "$WORKSPACE_TOOLS_DIR" 2>/dev/null; then
@@ -68,6 +74,7 @@ fi
     BOARD="$BOARD" \
     BUILD="$BUILD_DIR" \
     USER_C_MODULES="$CMODS_DIR/usercmodule.cmake" \
+    CMAKE_ARGS="$MICROPY_CMAKE_ARGS" \
     MICROPY_MPYCROSS="$MP_DIR/mpy-cross/build/mpy-cross" \
     IDF_CCACHE_ENABLE=1
 
