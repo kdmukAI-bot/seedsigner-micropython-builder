@@ -23,6 +23,9 @@ jobs:
         shell: bash
     env:
       IDF_TOOLS_PATH: ${{ github.workspace }}/.espressif
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_COMPILERCHECK: content
     container:
       image: ghcr.io/kdmukai-bot/seedsigner-micropython-builder-base:latest
     steps:
@@ -42,9 +45,20 @@ jobs:
           cd sources/seedsigner-c-modules
           git checkout "${{ github.event_name == 'workflow_dispatch' && inputs.c_modules_ref || 'master' }}"
 
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ runner.os }}-${{ hashFiles('Dockerfile.ghcr', '.github/workflows/build-firmware.yml', 'scripts/build_firmware.sh', 'platform_mods/**') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-
+
       - name: Ensure ESP-IDF tools environment
         run: |
           mkdir -p "$IDF_TOOLS_PATH"
+          mkdir -p "$CCACHE_DIR"
+          ccache --max-size=1G
+          ccache --zero-stats || true
           source "$PWD/sources/esp-idf/export.sh" >/dev/null 2>&1 || true
           if ! idf.py --version >/dev/null 2>&1; then
             "$PWD/sources/esp-idf/install.sh" esp32s3
@@ -55,17 +69,28 @@ jobs:
             exit 1
           }
 
+      - name: Show ccache stats (pre-build)
+        run: ccache --show-stats || true
+
       - name: Build firmware + screenshots
         run: |
           ./scripts/ci_build.sh "$PWD/sources"
           ./scripts/run_screenshot_generator.sh "$PWD/sources"
 
+      - name: Show ccache stats (post-build)
+        run: ccache --show-stats || true
+
       - name: Record build provenance
         run: |
           mkdir -p logs
           IDF_VERSION=""
+          CCACHE_SUMMARY=""
           if source sources/esp-idf/export.sh >/dev/null 2>&1; then
             IDF_VERSION="$(idf.py --version 2>/dev/null || true)"
+          fi
+          if command -v ccache >/dev/null 2>&1; then
+            ccache --show-stats > logs/ccache-stats.txt 2>/dev/null || true
+            CCACHE_SUMMARY="$(ccache --show-stats 2>/dev/null | tr '\n' '; ' || true)"
           fi
           {
             echo "timestamp_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -75,6 +100,7 @@ jobs:
             echo "c_modules_head=$(git -C sources/seedsigner-c-modules rev-parse HEAD)"
             echo "idf_head=$(git -C sources/esp-idf rev-parse HEAD)"
             echo "idf_version=${IDF_VERSION}"
+            echo "ccache_summary=${CCACHE_SUMMARY}"
             echo "python=$(python3 --version 2>&1)"
             echo "cmake=$(cmake --version | head -n1)"
           } | tee logs/provenance.txt
