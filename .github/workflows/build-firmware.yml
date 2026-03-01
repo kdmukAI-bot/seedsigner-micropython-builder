@@ -37,7 +37,25 @@ jobs:
           cd sources/seedsigner-c-modules
           git checkout "${{ github.event_name == 'workflow_dispatch' && inputs.c_modules_ref || 'master' }}"
           git submodule update --init --recursive
-          perl -0pi -e 's#(\$\{CMAKE_CURRENT_LIST_DIR\}/modseedsigner_bindings\.c\n)#$1    \${CMAKE_CURRENT_LIST_DIR}/../components/display_manager/display_manager.cpp\n    \${CMAKE_CURRENT_LIST_DIR}/../components/seedsigner/seedsigner.cpp\n    \${CMAKE_CURRENT_LIST_DIR}/../components/seedsigner/components.cpp\n#' bindings/micropython.cmake
+          cat > bindings/ci_stubs.c <<'EOF'
+#include <stddef.h>
+
+typedef void (*display_manager_ui_callback_t)(void *ctx);
+
+void init(void) {}
+const char *run_screen(display_manager_ui_callback_t cb, void *ctx) {
+    if (cb) {
+        cb(ctx);
+    }
+    return NULL;
+}
+
+void demo_screen(void *ctx) { (void)ctx; }
+void button_list_screen(void *ctx_json) { (void)ctx_json; }
+void main_menu_screen(void *ctx) { (void)ctx; }
+void lv_seedsigner_screen_close(void) {}
+EOF
+          perl -0pi -e 's#(\$\{CMAKE_CURRENT_LIST_DIR\}/modseedsigner_bindings\.c\n)#$1    \${CMAKE_CURRENT_LIST_DIR}/ci_stubs.c\n#' bindings/micropython.cmake
 
       - name: Build firmware + screenshots
         run: |
