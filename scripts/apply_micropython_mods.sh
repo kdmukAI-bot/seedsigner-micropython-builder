@@ -20,15 +20,15 @@ CMODS_DIR="$WORKDIR/seedsigner-c-modules"
 
 cd "$MP_DIR"
 
-echo "Applying new file overlay from: $NEW_DIR"
-rsync -a "$NEW_DIR/" "$MP_DIR/"
-
 echo "Applying patch series from: $PATCH_DIR"
 shopt -s nullglob
 for p in "$PATCH_DIR"/*.patch; do
   echo "  -> $(basename "$p")"
   git apply --3way "$p"
 done
+
+echo "Applying new file overlay from: $NEW_DIR"
+rsync -a "$NEW_DIR/" "$MP_DIR/"
 
 cat > "$MP_DIR/.seedsigner-builder.env" <<ENV
 SEEDSIGNER_C_MODULES_DIR=$CMODS_DIR
