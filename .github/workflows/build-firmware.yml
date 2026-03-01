@@ -39,6 +39,14 @@ jobs:
           cd sources/seedsigner-c-modules
           git checkout "${{ github.event_name == 'workflow_dispatch' && inputs.c_modules_ref || 'master' }}"
 
+      - name: Ensure ESP-IDF tools environment
+        run: |
+          mkdir -p "$IDF_TOOLS_PATH"
+          if ! source "$PWD/sources/esp-idf/export.sh" >/dev/null 2>&1; then
+            "$PWD/sources/esp-idf/install.sh" esp32s3
+            source "$PWD/sources/esp-idf/export.sh" >/dev/null 2>&1
+          fi
+
       - name: Build firmware + screenshots
         run: |
           ./scripts/ci_build.sh "$PWD/sources"
@@ -47,6 +55,10 @@ jobs:
       - name: Record build provenance
         run: |
           mkdir -p logs
+          IDF_VERSION=""
+          if source sources/esp-idf/export.sh >/dev/null 2>&1; then
+            IDF_VERSION="$(idf.py --version 2>/dev/null || true)"
+          fi
           {
             echo "timestamp_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "builder_ref=${{ github.event_name == 'workflow_dispatch' && inputs.builder_ref || github.ref }}"
@@ -54,7 +66,7 @@ jobs:
             echo "micropython_head=$(git -C sources/micropython rev-parse HEAD)"
             echo "c_modules_head=$(git -C sources/seedsigner-c-modules rev-parse HEAD)"
             echo "idf_head=$(git -C sources/esp-idf rev-parse HEAD)"
-            echo "idf_version=$(source sources/esp-idf/export.sh >/dev/null 2>&1; idf.py --version 2>/dev/null || true)"
+            echo "idf_version=${IDF_VERSION}"
             echo "python=$(python3 --version 2>&1)"
             echo "cmake=$(cmake --version | head -n1)"
           } | tee logs/provenance.txt
