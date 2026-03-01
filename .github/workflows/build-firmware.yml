@@ -1,0 +1,84 @@
+name: Build SeedSigner MicroPython Firmware
+
+on:
+  workflow_dispatch:
+    inputs:
+      builder_ref:
+        description: "Branch/tag/SHA of seedsigner-micropython-builder to run"
+        required: false
+        default: "main"
+      c_modules_ref:
+        description: "Branch/tag/SHA for seedsigner-c-modules"
+        required: false
+        default: "master"
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout builder repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.builder_ref || github.ref }}
+
+      - name: Install host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git make cmake ninja-build ccache rsync \
+            python3 python3-venv python3-pip \
+            libffi-dev libssl-dev libpng-dev \
+            dfu-util libusb-1.0-0 libsdl2-2.0-0 libslirp0
+
+      - name: Prepare sources workspace
+        run: |
+          mkdir -p sources
+          git clone https://github.com/micropython/micropython.git sources/micropython
+          git clone https://github.com/kdmukAI-bot/seedsigner-c-modules.git sources/seedsigner-c-modules
+          cd sources/seedsigner-c-modules
+          git checkout "${{ github.event_name == 'workflow_dispatch' && inputs.c_modules_ref || 'master' }}"
+          cd "$GITHUB_WORKSPACE"
+          git clone -b v5.5.1 --recursive https://github.com/espressif/esp-idf.git sources/esp-idf
+
+      - name: Setup environment and build
+        run: |
+          ./scripts/setup_env.sh "$PWD/sources"
+          ./scripts/ci_build.sh "$PWD/sources"
+
+      - name: Run screenshot generator
+        run: |
+          ./scripts/run_screenshot_generator.sh "$PWD/sources"
+
+      - name: Collect firmware artifacts
+        run: |
+          BOARD=WAVESHARE_ESP32_S3_TOUCH_LCD_35B
+          BUILD_DIR="$PWD/build/$BOARD"
+          mkdir -p out/firmware out/logs
+          cp "$BUILD_DIR/micropython.bin" out/firmware/
+          cp "$BUILD_DIR/micropython.elf" out/firmware/
+          cp "$BUILD_DIR/flash_args" out/firmware/
+          cp "$BUILD_DIR/bootloader/bootloader.bin" out/firmware/
+          cp "$BUILD_DIR/partition_table/partition-table.bin" out/firmware/
+          cp -r logs/* out/logs/ 2>/dev/null || true
+
+      - name: Collect screenshot artifacts
+        run: |
+          mkdir -p out/screenshots
+          cp -r "$PWD/sources/seedsigner-c-modules/tests/screenshot_generator/screenshots" out/screenshots/
+
+      - name: Upload firmware artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-waveshare-esp32-s3
+          path: |
+            out/firmware/
+            out/logs/
+
+      - name: Upload screenshot artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-waveshare-esp32-s3
+          path: out/screenshots/

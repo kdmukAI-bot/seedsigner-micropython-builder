@@ -1,0 +1,21 @@
+{
+    "deploy": [
+        "../deploy.md"
+    ],
+    "deploy_options": {
+        "flash_offset": "0"
+    },
+    "docs": "",
+    "features": [
+        "BLE",
+        "External Flash",
+        "External RAM",
+        "WiFi"
+    ],
+    "images": [],
+    "mcu": "esp32s3",
+    "product": "ESP32-S3-Touch-LCD-3.5B",
+    "thumbnail": "",
+    "url": "https://www.waveshare.com/wiki/ESP32-S3-Touch-LCD-3.5B",
+    "vendor": "Waveshare"
+}
