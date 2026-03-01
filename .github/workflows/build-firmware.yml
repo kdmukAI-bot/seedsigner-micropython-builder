@@ -45,10 +45,15 @@ jobs:
       - name: Ensure ESP-IDF tools environment
         run: |
           mkdir -p "$IDF_TOOLS_PATH"
-          if ! source "$PWD/sources/esp-idf/export.sh" >/dev/null 2>&1; then
+          source "$PWD/sources/esp-idf/export.sh" >/dev/null 2>&1 || true
+          if ! idf.py --version >/dev/null 2>&1; then
             "$PWD/sources/esp-idf/install.sh" esp32s3
-            source "$PWD/sources/esp-idf/export.sh" >/dev/null 2>&1
+            source "$PWD/sources/esp-idf/export.sh"
           fi
+          idf.py --version >/dev/null 2>&1 || {
+            echo "ERROR: idf.py is not runnable after ESP-IDF bootstrap"
+            exit 1
+          }
 
       - name: Build firmware + screenshots
         run: |

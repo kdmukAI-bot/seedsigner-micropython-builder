@@ -43,11 +43,18 @@ if [ -z "${IDF_TOOLS_PATH:-}" ]; then
 fi
 
 # shellcheck disable=SC1091
-if ! source "$IDF_PATH/export.sh"; then
-  echo "ESP-IDF export failed. Installing tools/python env into: $IDF_TOOLS_PATH"
+source "$IDF_PATH/export.sh" >/dev/null 2>&1 || true
+
+if ! idf.py --version >/dev/null 2>&1; then
+  echo "ESP-IDF env incomplete. Installing tools/python env into: $IDF_TOOLS_PATH"
   "$IDF_PATH/install.sh" esp32s3
   # shellcheck disable=SC1091
   source "$IDF_PATH/export.sh"
+fi
+
+if ! idf.py --version >/dev/null 2>&1; then
+  echo "ERROR: idf.py is not runnable after ESP-IDF bootstrap"
+  exit 1
 fi
 
 # build mpy-cross from canonical tree
