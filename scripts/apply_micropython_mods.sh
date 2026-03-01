@@ -27,7 +27,7 @@ echo "Applying patch series from: $PATCH_DIR"
 shopt -s nullglob
 for p in "$PATCH_DIR"/*.patch; do
   echo "  -> $(basename "$p")"
-  git apply --3way --index "$p"
+  git apply --3way "$p"
 done
 
 cat > "$MP_DIR/.seedsigner-builder.env" <<ENV
