@@ -23,6 +23,16 @@ if [ ! -d "$IDF_DIR" ]; then
   exit 1
 fi
 
+if [ -z "${IDF_TOOLS_PATH:-}" ]; then
+  WORKSPACE_TOOLS_DIR="$ROOT_DIR/.espressif"
+  if mkdir -p "$WORKSPACE_TOOLS_DIR" 2>/dev/null; then
+    export IDF_TOOLS_PATH="$WORKSPACE_TOOLS_DIR"
+  else
+    export IDF_TOOLS_PATH="$HOME/.espressif"
+    mkdir -p "$IDF_TOOLS_PATH"
+  fi
+fi
+
 cd "$IDF_DIR"
 ./install.sh esp32s3
 # shellcheck disable=SC1091

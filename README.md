@@ -40,6 +40,19 @@ GitHub Actions workflow: `.github/workflows/build-firmware.yml`
 
 It clones required upstream repos into `sources/`, applies mods, builds firmware, and uploads artifacts.
 
+### ESP-IDF tools path (`IDF_TOOLS_PATH`)
+
+Build scripts default ESP-IDF tools to a workspace-local path for compatibility across environments:
+
+- preferred: `<repo>/.espressif`
+- fallback (if workspace is not writable): `$HOME/.espressif`
+
+In GitHub Actions, the firmware workflow sets:
+
+- `IDF_TOOLS_PATH=${{ github.workspace }}/.espressif`
+
+You can override `IDF_TOOLS_PATH` explicitly in both CI and local Docker runs if needed.
+
 
 ## Build outputs
 
