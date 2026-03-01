@@ -108,3 +108,17 @@ Defaults:
 - `c_modules_ref = master`
 
 Use this to test feature branches of either repo without changing default CI behavior.
+
+## Prebuilt base image (GHCR)
+
+To reduce repeated setup work, CI uses a prebaked base image with:
+
+- pinned MicroPython baseline (including submodules + prebuilt mpy-cross)
+- pinned ESP-IDF baseline (tools installed)
+- common host/build dependencies
+
+Build/publish this image via workflow:
+
+- `.github/workflows/build-base-image.yml`
+
+Firmware workflow then seeds `sources/` from that image and applies project mods before build.

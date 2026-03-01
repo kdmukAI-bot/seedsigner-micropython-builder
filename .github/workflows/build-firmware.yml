@@ -18,39 +18,44 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/kdmukai-bot/seedsigner-micropython-builder-base:latest
     steps:
       - name: Checkout builder repo
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.builder_ref || github.ref }}
 
-      - name: Install host dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            git make cmake ninja-build ccache rsync \
-            python3 python3-venv python3-pip \
-            libffi-dev libssl-dev libpng-dev \
-            dfu-util libusb-1.0-0 libsdl2-2.0-0 libslirp0
-
-      - name: Prepare sources workspace
+      - name: Prepare sources workspace from prebaked image
         run: |
           mkdir -p sources
-          git clone https://github.com/micropython/micropython.git sources/micropython
+          ./scripts/prepare_sources_from_image.sh "$PWD/sources"
+
+      - name: Clone custom c modules and checkout selected ref
+        run: |
           git clone https://github.com/kdmukAI-bot/seedsigner-c-modules.git sources/seedsigner-c-modules
           cd sources/seedsigner-c-modules
           git checkout "${{ github.event_name == 'workflow_dispatch' && inputs.c_modules_ref || 'master' }}"
-          cd "$GITHUB_WORKSPACE"
-          git clone -b v5.5.1 --recursive https://github.com/espressif/esp-idf.git sources/esp-idf
 
-      - name: Setup environment and build
+      - name: Build firmware + screenshots
         run: |
-          ./scripts/setup_env.sh "$PWD/sources"
           ./scripts/ci_build.sh "$PWD/sources"
-
-      - name: Run screenshot generator
-        run: |
           ./scripts/run_screenshot_generator.sh "$PWD/sources"
+
+      - name: Record build provenance
+        run: |
+          mkdir -p logs
+          {
+            echo "timestamp_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "builder_ref=${{ github.event_name == 'workflow_dispatch' && inputs.builder_ref || github.ref }}"
+            echo "c_modules_ref_input=${{ github.event_name == 'workflow_dispatch' && inputs.c_modules_ref || 'master' }}"
+            echo "micropython_head=$(git -C sources/micropython rev-parse HEAD)"
+            echo "c_modules_head=$(git -C sources/seedsigner-c-modules rev-parse HEAD)"
+            echo "idf_head=$(git -C sources/esp-idf rev-parse HEAD)"
+            echo "idf_version=$(source sources/esp-idf/export.sh >/dev/null 2>&1; idf.py --version 2>/dev/null || true)"
+            echo "python=$(python3 --version 2>&1)"
+            echo "cmake=$(cmake --version | head -n1)"
+          } | tee logs/provenance.txt
 
       - name: Collect firmware artifacts
         run: |
@@ -63,6 +68,7 @@ jobs:
           cp "$BUILD_DIR/bootloader/bootloader.bin" out/firmware/
           cp "$BUILD_DIR/partition_table/partition-table.bin" out/firmware/
           cp -r logs/* out/logs/ 2>/dev/null || true
+          cp logs/provenance.txt out/logs/ 2>/dev/null || true
 
       - name: Collect screenshot artifacts
         run: |

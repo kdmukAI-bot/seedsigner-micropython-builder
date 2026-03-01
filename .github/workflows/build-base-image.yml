@@ -1,0 +1,55 @@
+name: Build Base Builder Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      micropython_ref:
+        description: "MicroPython ref/tag for prebaked baseline"
+        required: false
+        default: "v1.27.0"
+      esp_idf_ref:
+        description: "ESP-IDF ref/tag for prebaked baseline"
+        required: false
+        default: "v5.5.1"
+  push:
+    branches: [ main ]
+    paths:
+      - Dockerfile.ghcr
+      - .github/workflows/build-base-image.yml
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image metadata
+        id: meta
+        run: |
+          OWNER_LC="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          IMAGE="ghcr.io/${OWNER_LC}/seedsigner-micropython-builder-base"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        run: |
+          MP_REF="${{ github.event_name == 'workflow_dispatch' && inputs.micropython_ref || 'v1.27.0' }}"
+          IDF_REF="${{ github.event_name == 'workflow_dispatch' && inputs.esp_idf_ref || 'v5.5.1' }}"
+          docker build -f Dockerfile.ghcr \
+            --build-arg MICROPYTHON_REF="$MP_REF" \
+            --build-arg ESP_IDF_REF="$IDF_REF" \
+            -t "${{ steps.meta.outputs.image }}:latest" \
+            -t "${{ steps.meta.outputs.image }}:mp-${MP_REF}-idf-${IDF_REF}" \
+            .
+          docker push "${{ steps.meta.outputs.image }}:latest"
+          docker push "${{ steps.meta.outputs.image }}:mp-${MP_REF}-idf-${IDF_REF}"

@@ -1,0 +1,33 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ARG MICROPYTHON_REF=v1.27.0
+ARG ESP_IDF_REF=v5.5.1
+
+RUN apt-get update && apt-get install -y \
+    git make cmake ninja-build ccache rsync \
+    python3 python3-venv python3-pip \
+    libffi-dev libssl-dev libpng-dev \
+    dfu-util libusb-1.0-0 libsdl2-2.0-0 libslirp0 \
+    ca-certificates curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Prebaked toolchain/source roots
+RUN mkdir -p /opt/bases /opt/toolchains
+
+# Pin and prefetch MicroPython baseline
+RUN git clone https://github.com/micropython/micropython.git /opt/bases/micropython && \
+    cd /opt/bases/micropython && \
+    git checkout ${MICROPYTHON_REF} && \
+    git submodule update --init --recursive
+
+# Pin and install ESP-IDF baseline
+RUN git clone -b ${ESP_IDF_REF} --recursive https://github.com/espressif/esp-idf.git /opt/toolchains/esp-idf && \
+    /opt/toolchains/esp-idf/install.sh esp32s3
+
+# Build mpy-cross once for pinned baseline
+RUN cd /opt/bases/micropython/mpy-cross && make -j"$(nproc)" USER_C_MODULES=
+
+ENV IDF_PATH=/opt/toolchains/esp-idf
+
+WORKDIR /workspace
