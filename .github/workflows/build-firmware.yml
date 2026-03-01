@@ -18,6 +18,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash
     env:
       IDF_TOOLS_PATH: ${{ github.workspace }}/.espressif
     container:
@@ -42,9 +45,9 @@ jobs:
       - name: Ensure ESP-IDF tools environment
         run: |
           mkdir -p "$IDF_TOOLS_PATH"
-          if ! . "$PWD/sources/esp-idf/export.sh" >/dev/null 2>&1; then
+          if ! source "$PWD/sources/esp-idf/export.sh" >/dev/null 2>&1; then
             "$PWD/sources/esp-idf/install.sh" esp32s3
-            . "$PWD/sources/esp-idf/export.sh" >/dev/null 2>&1
+            source "$PWD/sources/esp-idf/export.sh" >/dev/null 2>&1
           fi
 
       - name: Build firmware + screenshots
@@ -56,7 +59,7 @@ jobs:
         run: |
           mkdir -p logs
           IDF_VERSION=""
-          if . sources/esp-idf/export.sh >/dev/null 2>&1; then
+          if source sources/esp-idf/export.sh >/dev/null 2>&1; then
             IDF_VERSION="$(idf.py --version 2>/dev/null || true)"
           fi
           {
