@@ -74,6 +74,11 @@ Run screenshot generator build + render:
 
 Logs are written under `logs/` with timestamp-first naming.
 
+### TODO (upstream: seedsigner-c-modules)
+
+- Fix `tests/screenshot_generator/CMakeLists.txt` in `kdmukai-bot/seedsigner-c-modules` to avoid hardcoded `references/micropython/.../lvgl__lvgl` path assumptions.
+- Preferred approach: allow `LVGL_ROOT` override (or auto-detect from current workspace) and only use the legacy path as optional fallback.
+
 
 ## Flashing firmware
 
