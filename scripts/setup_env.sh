@@ -24,14 +24,14 @@ if [ ! -d "$IDF_DIR" ]; then
 fi
 
 if [ -z "${IDF_TOOLS_PATH:-}" ]; then
-  WORKSPACE_TOOLS_DIR="$ROOT_DIR/.espressif"
-  if mkdir -p "$WORKSPACE_TOOLS_DIR" 2>/dev/null; then
-    export IDF_TOOLS_PATH="$WORKSPACE_TOOLS_DIR"
+  if [ -d "/opt/espressif" ]; then
+    export IDF_TOOLS_PATH="/opt/espressif"
   else
-    export IDF_TOOLS_PATH="$HOME/.espressif"
-    mkdir -p "$IDF_TOOLS_PATH"
+    export IDF_TOOLS_PATH="$ROOT_DIR/.espressif"
   fi
 fi
+
+mkdir -p "$IDF_TOOLS_PATH"
 
 cd "$IDF_DIR"
 ./install.sh esp32s3

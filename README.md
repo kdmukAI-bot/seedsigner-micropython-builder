@@ -134,6 +134,9 @@ To reduce repeated setup work, CI uses a prebaked base image with:
 - pinned MicroPython baseline (including submodules + prebuilt mpy-cross)
 - pinned ESP-IDF baseline (tools installed)
 - common host/build dependencies
+- fixed `IDF_TOOLS_PATH=/opt/espressif` to avoid runtime `HOME` differences
+- default ccache env (`CCACHE_DIR=/workspace/.ccache`, `CCACHE_BASEDIR=/workspace`, `CCACHE_COMPILERCHECK=content`)
+- build-time validation that `idf.py --version` works
 
 Build/publish this image via workflow:
 

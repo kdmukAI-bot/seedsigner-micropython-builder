@@ -22,7 +22,6 @@ jobs:
       run:
         shell: bash
     env:
-      IDF_TOOLS_PATH: ${{ github.workspace }}/.espressif
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_COMPILERCHECK: content
@@ -59,13 +58,9 @@ jobs:
           mkdir -p "$CCACHE_DIR"
           ccache --max-size=1G
           ccache --zero-stats || true
-          source "$PWD/sources/esp-idf/export.sh" >/dev/null 2>&1 || true
-          if ! idf.py --version >/dev/null 2>&1; then
-            "$PWD/sources/esp-idf/install.sh" esp32s3
-            source "$PWD/sources/esp-idf/export.sh"
-          fi
+          source "$PWD/sources/esp-idf/export.sh"
           idf.py --version >/dev/null 2>&1 || {
-            echo "ERROR: idf.py is not runnable after ESP-IDF bootstrap"
+            echo "ERROR: idf.py is not runnable after sourcing ESP-IDF environment"
             exit 1
           }
 

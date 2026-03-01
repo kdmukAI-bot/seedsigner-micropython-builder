@@ -39,27 +39,24 @@ fi
 echo "Using CMAKE_ARGS: $MICROPY_CMAKE_ARGS"
 
 if [ -z "${IDF_TOOLS_PATH:-}" ]; then
-  WORKSPACE_TOOLS_DIR="$ROOT_DIR/.espressif"
-  if mkdir -p "$WORKSPACE_TOOLS_DIR" 2>/dev/null; then
-    export IDF_TOOLS_PATH="$WORKSPACE_TOOLS_DIR"
+  if [ -d "/opt/espressif" ]; then
+    export IDF_TOOLS_PATH="/opt/espressif"
   else
-    export IDF_TOOLS_PATH="$HOME/.espressif"
-    mkdir -p "$IDF_TOOLS_PATH"
+    export IDF_TOOLS_PATH="$ROOT_DIR/.espressif"
   fi
 fi
 
 # shellcheck disable=SC1091
-source "$IDF_PATH/export.sh" >/dev/null 2>&1 || true
-
-if ! idf.py --version >/dev/null 2>&1; then
-  echo "ESP-IDF env incomplete. Installing tools/python env into: $IDF_TOOLS_PATH"
-  "$IDF_PATH/install.sh" esp32s3
-  # shellcheck disable=SC1091
-  source "$IDF_PATH/export.sh"
+if ! source "$IDF_PATH/export.sh" >/dev/null 2>&1; then
+  echo "ERROR: failed to source ESP-IDF export script: $IDF_PATH/export.sh"
+  echo "Hint: run ./scripts/setup_env.sh (host) or use the prebaked base image workflow."
+  exit 1
 fi
 
 if ! idf.py --version >/dev/null 2>&1; then
-  echo "ERROR: idf.py is not runnable after ESP-IDF bootstrap"
+  echo "ERROR: idf.py is not runnable after sourcing ESP-IDF environment"
+  echo "IDF_TOOLS_PATH=$IDF_TOOLS_PATH"
+  echo "Hint: run ./scripts/setup_env.sh to install ESP-IDF tools for this workspace."
   exit 1
 fi
 

@@ -3,6 +3,10 @@ FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 ARG MICROPYTHON_REF=v1.27.0
 ARG ESP_IDF_REF=v5.5.1
+ENV IDF_TOOLS_PATH=/opt/espressif
+ENV CCACHE_DIR=/workspace/.ccache
+ENV CCACHE_BASEDIR=/workspace
+ENV CCACHE_COMPILERCHECK=content
 
 RUN apt-get update && apt-get install -y \
     git make cmake ninja-build ccache rsync \
@@ -13,7 +17,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Prebaked toolchain/source roots
-RUN mkdir -p /opt/bases /opt/toolchains
+RUN mkdir -p /opt/bases /opt/toolchains "$IDF_TOOLS_PATH"
 
 # Pin and prefetch MicroPython baseline
 RUN git clone https://github.com/micropython/micropython.git /opt/bases/micropython && \
@@ -24,6 +28,9 @@ RUN git clone https://github.com/micropython/micropython.git /opt/bases/micropyt
 # Pin and install ESP-IDF baseline
 RUN git clone -b ${ESP_IDF_REF} --recursive https://github.com/espressif/esp-idf.git /opt/toolchains/esp-idf && \
     /opt/toolchains/esp-idf/install.sh esp32s3
+
+# Validate ESP-IDF Python environment and idf.py availability at image build time.
+RUN bash -lc 'source /opt/toolchains/esp-idf/export.sh >/dev/null 2>&1 && idf.py --version >/dev/null 2>&1'
 
 # Build mpy-cross once for pinned baseline
 RUN cd /opt/bases/micropython/mpy-cross && make -j"$(nproc)" USER_C_MODULES=
