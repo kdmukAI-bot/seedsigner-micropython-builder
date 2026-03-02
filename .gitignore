@@ -1,0 +1,20 @@
+# Local build outputs
+/build/
+/logs/
+/out/
+
+# Local source worktrees cloned/seeded at runtime
+/sources/
+
+# Local tool/cache directories
+/.espressif/
+/.ccache/
+
+# Temporary/local helper scripts
+scripts/run_build_task.sh
+
+# Python / editor noise
+__pycache__/
+*.pyc
+.DS_Store
+.vscode/
