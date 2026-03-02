@@ -14,6 +14,7 @@ on:
   push:
     branches: [ main ]
   pull_request:
+    types: [opened, synchronize, reopened, closed]
 
 permissions:
   contents: write
@@ -32,6 +33,7 @@ jobs:
         run: echo "owner_lc=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
   build:
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     needs: resolve-image-owner
     runs-on: ubuntu-24.04
     defaults:
@@ -193,3 +195,29 @@ jobs:
                 body,
               });
             }
+
+
+  cleanup-pr-preview-pages:
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Remove PR preview directory
+        env:
+          PR_NUM: ${{ github.event.number }}
+        run: |
+          TARGET="previews/pr-${PR_NUM}"
+          if [ -d "$TARGET" ]; then
+            rm -rf "$TARGET"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "pages: remove preview for closed PR #${PR_NUM}"
+            git push
+          else
+            echo "No preview directory for PR #${PR_NUM}; nothing to clean."
+          fi
