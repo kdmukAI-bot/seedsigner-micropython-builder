@@ -95,12 +95,12 @@ jobs:
         run: |
           BOARD=WAVESHARE_ESP32_S3_TOUCH_LCD_35B
           BUILD_DIR="$PWD/build/$BOARD"
-          mkdir -p out/firmware out/logs
-          cp "$BUILD_DIR/micropython.bin" out/firmware/
-          cp "$BUILD_DIR/micropython.elf" out/firmware/
-          cp "$BUILD_DIR/flash_args" out/firmware/
-          cp "$BUILD_DIR/bootloader/bootloader.bin" out/firmware/
-          cp "$BUILD_DIR/partition_table/partition-table.bin" out/firmware/
+          mkdir -p out/bootloader out/partition_table out/logs
+          cp "$BUILD_DIR/micropython.bin" out/
+          cp "$BUILD_DIR/micropython.elf" out/
+          cp "$BUILD_DIR/flash_args" out/
+          cp "$BUILD_DIR/bootloader/bootloader.bin" out/bootloader/
+          cp "$BUILD_DIR/partition_table/partition-table.bin" out/partition_table/
           cp -r logs/* out/logs/ 2>/dev/null || true
           cp logs/provenance.txt out/logs/ 2>/dev/null || true
 
@@ -114,7 +114,7 @@ jobs:
         with:
           name: firmware-waveshare-esp32-s3
           path: |
-            out/firmware/
+            out/
             out/logs/
 
       - name: Upload screenshot artifacts
