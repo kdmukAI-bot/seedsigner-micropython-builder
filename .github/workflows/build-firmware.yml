@@ -170,7 +170,7 @@ jobs:
             const pagesUrl = `https://${owner}.github.io/${repo}/${destDir}/`;
             
             const marker = '<!-- ss-lvgl-render-tests -->';
-            const body = `${marker}\nSeedSigner LVGL screen tests\nGallery: ${pagesUrl}`;
+            const body = `${marker}\n### SeedSigner LVGL screen tests: [view results gallery](${pagesUrl})`;
             
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner,
