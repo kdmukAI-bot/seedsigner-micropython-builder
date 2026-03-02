@@ -26,17 +26,19 @@ jobs:
         run: |
           echo "owner_lc=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
-  build:
+  firmware:
     needs: resolve-image-owner
     runs-on: ubuntu-24.04
     defaults:
       run:
         shell: bash
     env:
+      IDF_PATH: /opt/toolchains/esp-idf
+      IDF_TOOLS_PATH: /opt/espressif
+      IDF_TOOLS_TARGETS: esp32s3
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_COMPILERCHECK: content
-      IDF_TOOLS_TARGETS: esp32s3
     container:
       image: ghcr.io/${{ needs.resolve-image-owner.outputs.owner_lc }}/seedsigner-micropython-builder-base:latest
     steps:
@@ -66,30 +68,23 @@ jobs:
 
       - name: Ensure ESP-IDF tools environment
         run: |
-          if [ -z "${IDF_TOOLS_PATH:-}" ]; then
-            if [ -d "/opt/espressif" ]; then
-              export IDF_TOOLS_PATH="/opt/espressif"
-            else
-              export IDF_TOOLS_PATH="$PWD/.espressif"
-            fi
-          fi
+          echo "Using IDF_TOOLS_PATH=$IDF_TOOLS_PATH"
           mkdir -p "$IDF_TOOLS_PATH"
           mkdir -p "$CCACHE_DIR"
           ccache --max-size=1G
           ccache --zero-stats || true
-          source "$PWD/sources/esp-idf/export.sh"
+          source "$IDF_PATH/export.sh"
           idf.py --version >/dev/null 2>&1 || {
-            echo "ERROR: idf.py is not runnable after sourcing ESP-IDF environment"
+            echo "ERROR: idf.py is not runnable after ESP-IDF environment bootstrap"
             exit 1
           }
 
       - name: Show ccache stats (pre-build)
         run: ccache --show-stats || true
 
-      - name: Build firmware + screenshots
+      - name: Build firmware
         run: |
           ./scripts/ci_build.sh "$PWD/sources"
-          ./scripts/run_screenshot_generator.sh "$PWD/sources"
 
       - name: Show ccache stats (post-build)
         run: ccache --show-stats || true
@@ -99,7 +94,7 @@ jobs:
           mkdir -p logs
           IDF_VERSION=""
           CCACHE_SUMMARY=""
-          if source sources/esp-idf/export.sh >/dev/null 2>&1; then
+          if source "$IDF_PATH/export.sh" >/dev/null 2>&1; then
             IDF_VERSION="$(idf.py --version 2>/dev/null || true)"
           fi
           if command -v ccache >/dev/null 2>&1; then
@@ -112,7 +107,7 @@ jobs:
             echo "c_modules_ref_input=${{ github.event_name == 'workflow_dispatch' && inputs.c_modules_ref || 'master' }}"
             echo "micropython_head=$(git -C sources/micropython rev-parse HEAD)"
             echo "c_modules_head=$(git -C sources/seedsigner-c-modules rev-parse HEAD)"
-            echo "idf_head=$(git -C sources/esp-idf rev-parse HEAD)"
+            echo "idf_head=$(git -C "$IDF_PATH" rev-parse HEAD)"
             echo "idf_version=${IDF_VERSION}"
             echo "ccache_summary=${CCACHE_SUMMARY}"
             echo "python=$(python3 --version 2>&1)"
@@ -132,10 +127,14 @@ jobs:
           cp -r logs/* out/logs/ 2>/dev/null || true
           cp logs/provenance.txt out/logs/ 2>/dev/null || true
 
-      - name: Collect screenshot artifacts
+      - name: Collect LVGL source artifact
         run: |
-          mkdir -p out/screenshots
-          cp -r "$PWD/sources/seedsigner-c-modules/tests/screenshot_generator/screenshots" out/screenshots/
+          BOARD=WAVESHARE_ESP32_S3_TOUCH_LCD_35B
+          LVGL_DIR="$PWD/build/$BOARD/managed_components/lvgl__lvgl"
+          mkdir -p out/lvgl
+          if [ -d "$LVGL_DIR" ]; then
+            cp -r "$LVGL_DIR" out/lvgl/
+          fi
 
       - name: Upload firmware artifacts
         uses: actions/upload-artifact@v4
@@ -144,6 +143,55 @@ jobs:
           path: |
             out/firmware/
             out/logs/
+
+      - name: Upload LVGL source artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lvgl-source-waveshare-esp32-s3
+          path: out/lvgl/
+          if-no-files-found: warn
+
+  screenshots:
+    needs:
+      - resolve-image-owner
+      - firmware
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash
+    container:
+      image: ghcr.io/${{ needs.resolve-image-owner.outputs.owner_lc }}/seedsigner-micropython-builder-base:latest
+    steps:
+      - name: Checkout builder repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.builder_ref || github.ref }}
+
+      - name: Prepare sources workspace from prebaked image
+        run: |
+          mkdir -p sources
+          ./scripts/prepare_sources_from_image.sh "$PWD/sources"
+
+      - name: Clone custom c modules and checkout selected ref
+        run: |
+          git clone https://github.com/kdmukAI-bot/seedsigner-c-modules.git sources/seedsigner-c-modules
+          cd sources/seedsigner-c-modules
+          git checkout "${{ github.event_name == 'workflow_dispatch' && inputs.c_modules_ref || 'master' }}"
+
+      - name: Download LVGL source artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: lvgl-source-waveshare-esp32-s3
+          path: build/WAVESHARE_ESP32_S3_TOUCH_LCD_35B/managed_components/
+
+      - name: Build screenshots
+        run: |
+          ./scripts/run_screenshot_generator.sh "$PWD/sources"
+
+      - name: Collect screenshot artifacts
+        run: |
+          mkdir -p out/screenshots
+          cp -r "$PWD/sources/seedsigner-c-modules/tests/screenshot_generator/screenshots" out/screenshots/
 
       - name: Upload screenshot artifacts
         uses: actions/upload-artifact@v4

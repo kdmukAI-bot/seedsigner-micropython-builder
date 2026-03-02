@@ -6,7 +6,14 @@ ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 WORKDIR="${1:-$ROOT_DIR/sources}"
 MP_DIR="$WORKDIR/micropython"
 CMODS_DIR="$WORKDIR/seedsigner-c-modules"
-IDF_DIR="$WORKDIR/esp-idf"
+IDF_DIR="${IDF_DIR:-}"
+if [ -z "$IDF_DIR" ]; then
+  if [ -d "/opt/toolchains/esp-idf" ]; then
+    IDF_DIR="/opt/toolchains/esp-idf"
+  else
+    IDF_DIR="$WORKDIR/esp-idf"
+  fi
+fi
 BOARD="${BOARD:-WAVESHARE_ESP32_S3_TOUCH_LCD_35B}"
 BUILD_DIR="${BUILD_DIR:-$ROOT_DIR/build/$BOARD}"
 LOGS_DIR="${LOGS_DIR:-$ROOT_DIR/logs}"

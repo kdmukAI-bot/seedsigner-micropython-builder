@@ -13,8 +13,12 @@ if [ ! -d "$WORKDIR/micropython/.git" ]; then
 fi
 
 if [ ! -d "$WORKDIR/esp-idf" ]; then
-  echo "Seeding esp-idf from prebaked image baseline..."
-  cp -a /opt/toolchains/esp-idf "$WORKDIR/esp-idf"
+  if [ -d "/opt/toolchains/esp-idf" ]; then
+    echo "Using baked ESP-IDF at /opt/toolchains/esp-idf (skipping copy to sources/)"
+  else
+    echo "Seeding esp-idf from prebaked image baseline..."
+    cp -a /opt/toolchains/esp-idf "$WORKDIR/esp-idf"
+  fi
 fi
 
 
