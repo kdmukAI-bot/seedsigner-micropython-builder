@@ -3,6 +3,7 @@ FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 ARG MICROPYTHON_REF=v1.27.0
 ARG ESP_IDF_REF=v5.5.1
+ENV IDF_TOOLS_PATH=/opt/espressif
 
 RUN apt-get update && apt-get install -y \
     git make cmake ninja-build ccache rsync \
@@ -13,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     rm -rf /var/lib/apt/lists/*
 
 # Prebaked toolchain/source roots
-RUN mkdir -p /opt/bases /opt/toolchains
+RUN mkdir -p /opt/bases /opt/toolchains "$IDF_TOOLS_PATH"
 
 # Pin and prefetch MicroPython baseline
 RUN git clone https://github.com/micropython/micropython.git /opt/bases/micropython && \
@@ -22,9 +23,13 @@ RUN git clone https://github.com/micropython/micropython.git /opt/bases/micropyt
     git submodule update --init --recursive
 
 # Pin and install ESP-IDF baseline
+# Explicitly export IDF_TOOLS_PATH before running install scripts to ensure consistency
 RUN git clone -b ${ESP_IDF_REF} --recursive https://github.com/espressif/esp-idf.git /opt/toolchains/esp-idf && \
-    /opt/toolchains/esp-idf/install.sh esp32s3 && \
-    python3 /opt/toolchains/esp-idf/tools/idf_tools.py install riscv32-esp-elf-gdb
+    cd /opt/toolchains/esp-idf && \
+    export IDF_TOOLS_PATH=/opt/espressif && \
+    ./install.sh esp32s3 && \
+    . ./export.sh && \
+    python3 tools/idf_tools.py install riscv32-esp-elf-gdb
 
 # Validate ESP-IDF environment in-image
 RUN bash -lc 'source /opt/toolchains/esp-idf/export.sh >/dev/null 2>&1 && idf.py --version >/dev/null 2>&1'
