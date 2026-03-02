@@ -31,6 +31,7 @@ if [ ! -d "$IDF_DIR" ]; then
 fi
 
 export IDF_PATH="$IDF_DIR"
+export IDF_TOOLS_TARGETS="${IDF_TOOLS_TARGETS:-esp32s3}"
 
 MICROPY_CMAKE_ARGS="${CMAKE_ARGS:-}"
 if [ -d "$CMODS_DIR/components" ]; then

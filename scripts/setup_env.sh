@@ -31,6 +31,8 @@ if [ -z "${IDF_TOOLS_PATH:-}" ]; then
   fi
 fi
 
+export IDF_TOOLS_TARGETS="${IDF_TOOLS_TARGETS:-esp32s3}"
+
 mkdir -p "$IDF_TOOLS_PATH"
 
 cd "$IDF_DIR"
