@@ -54,6 +54,13 @@ jobs:
 
       - name: Ensure ESP-IDF tools environment
         run: |
+          if [ -z "${IDF_TOOLS_PATH:-}" ]; then
+            if [ -d "/opt/espressif" ]; then
+              export IDF_TOOLS_PATH="/opt/espressif"
+            else
+              export IDF_TOOLS_PATH="$PWD/.espressif"
+            fi
+          fi
           mkdir -p "$IDF_TOOLS_PATH"
           mkdir -p "$CCACHE_DIR"
           ccache --max-size=1G
