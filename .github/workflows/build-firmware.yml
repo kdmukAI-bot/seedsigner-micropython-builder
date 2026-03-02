@@ -16,7 +16,18 @@ on:
   pull_request:
 
 jobs:
+  resolve-image-owner:
+    runs-on: ubuntu-24.04
+    outputs:
+      owner_lc: ${{ steps.owner.outputs.owner_lc }}
+    steps:
+      - name: Lowercase GHCR owner
+        id: owner
+        run: |
+          echo "owner_lc=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: resolve-image-owner
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -26,7 +37,7 @@ jobs:
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_COMPILERCHECK: content
     container:
-      image: ghcr.io/${{ github.repository_owner }}/seedsigner-micropython-builder-base:latest
+      image: ghcr.io/${{ needs.resolve-image-owner.outputs.owner_lc }}/seedsigner-micropython-builder-base:latest
     steps:
       - name: Checkout builder repo
         uses: actions/checkout@v4
