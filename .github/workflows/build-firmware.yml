@@ -141,7 +141,7 @@ jobs:
             echo "dest_dir=previews/pr-${{ github.event.number }}" >> "$GITHUB_OUTPUT"
             echo "msg=Deploy PR #${{ github.event.number }} preview" >> "$GITHUB_OUTPUT"
           else
-            echo "dest_dir=stable" >> "$GITHUB_OUTPUT"
+            echo "dest_dir=." >> "$GITHUB_OUTPUT"
             echo "msg=Deploy stable screenshots" >> "$GITHUB_OUTPUT"
           fi
 
