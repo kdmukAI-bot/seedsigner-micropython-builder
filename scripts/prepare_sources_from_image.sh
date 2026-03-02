@@ -12,13 +12,13 @@ if [ ! -d "$WORKDIR/micropython/.git" ]; then
   cp -a /opt/bases/micropython "$WORKDIR/micropython"
 fi
 
-if [ ! -d "$WORKDIR/esp-idf" ]; then
-  echo "Seeding esp-idf from prebaked image baseline..."
-  cp -a /opt/toolchains/esp-idf "$WORKDIR/esp-idf"
+if [ -d "/opt/toolchains/esp-idf" ]; then
+  echo "Using baked ESP-IDF at /opt/toolchains/esp-idf"
+elif [ ! -d "$WORKDIR/esp-idf" ]; then
+  echo "ERROR: no baked ESP-IDF found at /opt/toolchains/esp-idf and no fallback at $WORKDIR/esp-idf"
+  exit 1
 fi
 
-
-# Ensure expected upstream remote exists for baseline verification.
 BASELINE_FILE="$ROOT_DIR/platform_mods/micropython_mods/BASELINE"
 if [ -f "$BASELINE_FILE" ]; then
   # shellcheck disable=SC1090

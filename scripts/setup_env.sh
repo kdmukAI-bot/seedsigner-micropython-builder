@@ -4,29 +4,44 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 WORKDIR="${1:-$ROOT_DIR/sources}"
-IDF_DIR="$WORKDIR/esp-idf"
 
-# Host deps (Ubuntu/Debian)
+IDF_OVERRIDE_DIR="${IDF_OVERRIDE_DIR:-}"
+PREBAKED_IDF_DIR="/opt/toolchains/esp-idf"
+FALLBACK_IDF_DIR="$WORKDIR/esp-idf"
+
 if command -v apt-get >/dev/null 2>&1; then
   sudo apt-get update
-  sudo apt-get install -y \
-    git make cmake ninja-build ccache rsync \
-    python3 python3-venv python3-pip \
-    libffi-dev libssl-dev libpng-dev \
-    dfu-util libusb-1.0-0 libsdl2-2.0-0 libslirp0
+  sudo apt-get install -y git make cmake ninja-build ccache rsync python3 python3-venv python3-pip libffi-dev libssl-dev libpng-dev dfu-util libusb-1.0-0 libsdl2-2.0-0 libslirp0
+fi
+
+if [ -n "$IDF_OVERRIDE_DIR" ]; then
+  IDF_DIR="$IDF_OVERRIDE_DIR"
+elif [ -d "$PREBAKED_IDF_DIR" ]; then
+  IDF_DIR="$PREBAKED_IDF_DIR"
+else
+  IDF_DIR="$FALLBACK_IDF_DIR"
 fi
 
 if [ ! -d "$IDF_DIR" ]; then
-  echo "ERROR: ESP-IDF not found at $IDF_DIR"
-  echo "Clone it first under sources/, e.g.:"
-  echo "  git clone -b v5.5.1 --recursive https://github.com/espressif/esp-idf.git $IDF_DIR"
+  echo "ERROR: ESP-IDF not found (checked override/prebaked/fallback)"
   exit 1
 fi
 
-cd "$IDF_DIR"
-./install.sh esp32s3
+if [ -z "${IDF_TOOLS_PATH:-}" ]; then
+  if [ -d "/opt/espressif" ]; then
+    export IDF_TOOLS_PATH="/opt/espressif"
+  else
+    export IDF_TOOLS_PATH="$ROOT_DIR/.espressif"
+  fi
+fi
+mkdir -p "$IDF_TOOLS_PATH"
+
+export IDF_PATH="$IDF_DIR"
 # shellcheck disable=SC1091
-source "$IDF_DIR/export.sh"
-python tools/idf_tools.py check || python tools/idf_tools.py install
+source "$IDF_PATH/export.sh"
+python3 "$IDF_PATH/tools/idf_tools.py" install riscv32-esp-elf-gdb
+idf.py --version >/dev/null
 
 echo "Environment setup complete."
+echo "IDF_PATH=$IDF_PATH"
+echo "IDF_TOOLS_PATH=$IDF_TOOLS_PATH"

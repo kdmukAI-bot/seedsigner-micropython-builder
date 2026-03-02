@@ -23,7 +23,11 @@ RUN git clone https://github.com/micropython/micropython.git /opt/bases/micropyt
 
 # Pin and install ESP-IDF baseline
 RUN git clone -b ${ESP_IDF_REF} --recursive https://github.com/espressif/esp-idf.git /opt/toolchains/esp-idf && \
-    /opt/toolchains/esp-idf/install.sh esp32s3
+    /opt/toolchains/esp-idf/install.sh esp32s3 && \
+    python3 /opt/toolchains/esp-idf/tools/idf_tools.py install riscv32-esp-elf-gdb
+
+# Validate ESP-IDF environment in-image
+RUN bash -lc 'source /opt/toolchains/esp-idf/export.sh >/dev/null 2>&1 && idf.py --version >/dev/null 2>&1'
 
 # Build mpy-cross once for pinned baseline
 RUN cd /opt/bases/micropython/mpy-cross && make -j"$(nproc)" USER_C_MODULES=

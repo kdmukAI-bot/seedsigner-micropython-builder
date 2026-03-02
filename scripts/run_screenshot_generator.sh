@@ -19,9 +19,25 @@ mkdir -p "$LOGS_DIR"
 
 {
   echo "Using custom modules repo: $CMODS_DIR"
+
+  LVGL_ROOT_CANDIDATE="${LVGL_ROOT:-}"
+  if [ -z "$LVGL_ROOT_CANDIDATE" ] || [ ! -d "$LVGL_ROOT_CANDIDATE" ]; then
+    if [ -d "$WORKDIR/micropython/ports/esp32/managed_components/lvgl__lvgl" ]; then
+      LVGL_ROOT_CANDIDATE="$WORKDIR/micropython/ports/esp32/managed_components/lvgl__lvgl"
+    elif [ -d "$ROOT_DIR/build" ]; then
+      LVGL_ROOT_CANDIDATE="$(find "$ROOT_DIR/build" -type d -path '*/managed_components/lvgl__lvgl' | head -n1 || true)"
+    fi
+  fi
+
+  if [ -z "$LVGL_ROOT_CANDIDATE" ] || [ ! -d "$LVGL_ROOT_CANDIDATE" ]; then
+    echo "ERROR: LVGL root not found. Set LVGL_ROOT or run firmware build first so managed_components/lvgl__lvgl exists."
+    exit 1
+  fi
+
+  echo "Using LVGL_ROOT: $LVGL_ROOT_CANDIDATE"
   cd "$CMODS_DIR"
 
-  cmake -S tests/screenshot_generator -B tests/screenshot_generator/build
+  cmake -S tests/screenshot_generator -B tests/screenshot_generator/build -DLVGL_ROOT="$LVGL_ROOT_CANDIDATE"
   cmake --build tests/screenshot_generator/build -j"$(nproc)"
   ./tests/screenshot_generator/build/screenshot_gen
 
