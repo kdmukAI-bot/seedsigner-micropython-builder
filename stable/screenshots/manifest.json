@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-03-02 05:28:00Z",
+  "width": 480,
+  "height": 320,
+  "screenshots": [
+    {
+      "name": "main_menu_screen",
+      "display_name": "main_menu_screen",
+      "path": "img/main_menu_screen.png"
+    },
+    {
+      "name": "button_list_screen",
+      "display_name": "button_list_screen",
+      "path": "img/button_list_screen.png"
+    },
+    {
+      "name": "button_list_screen__1_item",
+      "display_name": "button_list_screen (_1_item)",
+      "path": "img/button_list_screen__1_item.png"
+    },
+    {
+      "name": "button_list_screen__scroll_many",
+      "display_name": "button_list_screen (_scroll_many)",
+      "path": "img/button_list_screen__scroll_many.png"
+    },
+    {
+      "name": "button_list_screen__long_title",
+      "display_name": "button_list_screen (_long_title) [animated]",
+      "path": "img/button_list_screen__long_title.gif"
+    }
+  ]
+}
