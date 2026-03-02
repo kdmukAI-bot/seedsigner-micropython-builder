@@ -26,7 +26,7 @@ jobs:
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_COMPILERCHECK: content
     container:
-      image: ghcr.io/kdmukai-bot/seedsigner-micropython-builder-base:latest
+      image: ghcr.io/${{ github.repository_owner }}/seedsigner-micropython-builder-base:latest
     steps:
       - name: Checkout builder repo
         uses: actions/checkout@v4
