@@ -53,7 +53,8 @@ source "$IDF_PATH/export.sh"
 python3 "$IDF_PATH/tools/idf_tools.py" install riscv32-esp-elf-gdb >/dev/null 2>&1 || true
 idf.py --version >/dev/null 2>&1 || { echo "ERROR: idf.py not runnable"; exit 1; }
 
-MICROPY_CMAKE_ARGS="${CMAKE_ARGS:-}"
+USER_C_MODULES_FILE="$CMODS_DIR/usercmodule.cmake"
+MICROPY_CMAKE_ARGS="${CMAKE_ARGS:-} -DUSER_C_MODULES=$USER_C_MODULES_FILE"
 if [ -d "$CMODS_DIR/components" ]; then
   MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DMICROPY_EXTRA_COMPONENT_DIRS=$CMODS_DIR/components"
 fi
@@ -64,10 +65,15 @@ fi
   make -C "$MP_DIR/ports/esp32" -j"$(nproc)" \
     BOARD="$BOARD" \
     BUILD="$BUILD_DIR" \
-    USER_C_MODULES="$CMODS_DIR/usercmodule.cmake" \
+    USER_C_MODULES="$USER_C_MODULES_FILE" \
     CMAKE_ARGS="$MICROPY_CMAKE_ARGS" \
     MICROPY_MPYCROSS="$MP_DIR/mpy-cross/build/mpy-cross" \
     IDF_CCACHE_ENABLE=1
+
+  if ! grep -Rqs "usercmodule.cmake" "$BUILD_DIR"/CMakeCache.txt "$BUILD_DIR"/esp-idf/main/CMakeFiles 2>/dev/null; then
+    echo "ERROR: USER_C_MODULES not detected in build metadata (expected $USER_C_MODULES_FILE)."
+    exit 1
+  fi
 
   echo "Build complete. Artifacts:"
   ls -lh "$BUILD_DIR"/micropython.bin "$BUILD_DIR"/micropython.elf "$BUILD_DIR"/flash_args
