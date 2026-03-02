@@ -69,6 +69,10 @@ jobs:
 
       - name: Ensure ESP-IDF tools environment
         run: |
+          if [ ! -d "/opt/toolchains/esp-idf" ]; then
+            echo "ERROR: baked ESP-IDF path missing: /opt/toolchains/esp-idf"
+            exit 1
+          fi
           echo "Using IDF_TOOLS_PATH=$IDF_TOOLS_PATH"
           mkdir -p "$IDF_TOOLS_PATH"
           mkdir -p "$CCACHE_DIR"

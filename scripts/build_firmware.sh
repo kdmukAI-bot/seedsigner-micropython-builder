@@ -7,8 +7,13 @@ WORKDIR="${1:-$ROOT_DIR/sources}"
 MP_DIR="$WORKDIR/micropython"
 CMODS_DIR="$WORKDIR/seedsigner-c-modules"
 IDF_DIR="${IDF_DIR:-}"
-if [ "${GITHUB_ACTIONS:-}" = "true" ] && [ -d "/opt/toolchains/esp-idf" ]; then
+if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
   IDF_DIR="/opt/toolchains/esp-idf"
+  if [ ! -d "$IDF_DIR" ]; then
+    echo "ERROR: expected baked ESP-IDF at $IDF_DIR in GitHub Actions container"
+    echo "Hint: verify workflow image points to a correctly built base image."
+    exit 1
+  fi
 elif [ -z "$IDF_DIR" ]; then
   if [ -d "/opt/toolchains/esp-idf" ]; then
     IDF_DIR="/opt/toolchains/esp-idf"
@@ -42,6 +47,9 @@ fi
 export IDF_PATH="$IDF_DIR"
 export IDF_TOOLS_TARGETS="${IDF_TOOLS_TARGETS:-esp32s3}"
 echo "Using IDF_PATH: $IDF_PATH"
+echo "Using IDF_DIR: $IDF_DIR"
+echo "Using IDF_TOOLS_PATH: ${IDF_TOOLS_PATH:-<unset>}"
+echo "Export script path: $(readlink -f "$IDF_DIR/export.sh" 2>/dev/null || echo "$IDF_DIR/export.sh")"
 
 MICROPY_CMAKE_ARGS="${CMAKE_ARGS:-}"
 if [ -d "$CMODS_DIR/components" ]; then
