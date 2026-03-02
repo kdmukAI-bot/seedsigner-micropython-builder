@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-02 04:00:23Z",
+  "generated_at": "2026-03-02 04:17:28Z",
   "width": 480,
   "height": 320,
   "screenshots": [
@@ -25,8 +25,8 @@
     },
     {
       "name": "button_list_screen__long_title",
-      "display_name": "button_list_screen (_long_title)",
-      "path": "img/button_list_screen__long_title.png"
+      "display_name": "button_list_screen (_long_title) [animated]",
+      "path": "img/button_list_screen__long_title.gif"
     }
   ]
 }
