@@ -14,6 +14,13 @@ on:
   push:
     branches: [ main ]
   pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  pull-requests: write
 
 jobs:
   resolve-image-owner:
@@ -26,6 +33,7 @@ jobs:
         run: echo "owner_lc=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
   build:
+    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     needs: resolve-image-owner
     runs-on: ubuntu-24.04
     defaults:
@@ -87,12 +95,12 @@ jobs:
         run: |
           BOARD=WAVESHARE_ESP32_S3_TOUCH_LCD_35B
           BUILD_DIR="$PWD/build/$BOARD"
-          mkdir -p out/firmware out/logs
-          cp "$BUILD_DIR/micropython.bin" out/firmware/
-          cp "$BUILD_DIR/micropython.elf" out/firmware/
-          cp "$BUILD_DIR/flash_args" out/firmware/
-          cp "$BUILD_DIR/bootloader/bootloader.bin" out/firmware/
-          cp "$BUILD_DIR/partition_table/partition-table.bin" out/firmware/
+          mkdir -p out/bootloader out/partition_table out/logs
+          cp "$BUILD_DIR/micropython.bin" out/
+          cp "$BUILD_DIR/micropython.elf" out/
+          cp "$BUILD_DIR/flash_args" out/
+          cp "$BUILD_DIR/bootloader/bootloader.bin" out/bootloader/
+          cp "$BUILD_DIR/partition_table/partition-table.bin" out/partition_table/
           cp -r logs/* out/logs/ 2>/dev/null || true
           cp logs/provenance.txt out/logs/ 2>/dev/null || true
 
@@ -106,7 +114,7 @@ jobs:
         with:
           name: firmware-waveshare-esp32-s3
           path: |
-            out/firmware/
+            out/
             out/logs/
 
       - name: Upload screenshot artifacts
@@ -114,3 +122,102 @@ jobs:
         with:
           name: screenshots-waveshare-esp32-s3
           path: out/screenshots/
+
+  deploy-screenshots:
+    needs: build
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    steps:
+      - name: Download screenshot artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: screenshots-waveshare-esp32-s3
+          path: screenshots
+
+      - name: Determine deploy path
+        id: path
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "dest_dir=previews/pr-${{ github.event.number }}" >> "$GITHUB_OUTPUT"
+            echo "msg=Deploy PR #${{ github.event.number }} preview" >> "$GITHUB_OUTPUT"
+          else
+            echo "dest_dir=stable" >> "$GITHUB_OUTPUT"
+            echo "msg=Deploy stable screenshots" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./screenshots
+          destination_dir: ${{ steps.path.outputs.dest_dir }}
+          commit_message: ${{ steps.path.outputs.msg }}
+          keep_files: true
+
+      - name: Post PR Preview Comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          DEST_DIR: ${{ steps.path.outputs.dest_dir }}
+        with:
+          script: |
+            const destDir = process.env.DEST_DIR;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.payload.pull_request.number;
+            
+            // Construct Pages URL (assuming standard github.io domain)
+            const pagesUrl = `https://${owner}.github.io/${repo}/${destDir}/`;
+            
+            const marker = '<!-- ss-lvgl-render-tests -->';
+            const body = `${marker}\n### SeedSigner LVGL screen tests: [view results gallery](${pagesUrl})`;
+            
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+            });
+            
+            const existingComment = comments.find(c => c.body.includes(marker));
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existingComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body,
+              });
+            }
+
+
+  cleanup-pr-preview-pages:
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Remove PR preview directory
+        env:
+          PR_NUM: ${{ github.event.number }}
+        run: |
+          TARGET="previews/pr-${PR_NUM}"
+          if [ -d "$TARGET" ]; then
+            rm -rf "$TARGET"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "pages: remove preview for closed PR #${PR_NUM}"
+            git push
+          else
+            echo "No preview directory for PR #${PR_NUM}; nothing to clean."
+          fi
