@@ -34,6 +34,7 @@ jobs:
         shell: bash
     env:
       IDF_PATH: /opt/toolchains/esp-idf
+      IDF_DIR: /opt/toolchains/esp-idf
       IDF_TOOLS_PATH: /opt/espressif
       IDF_TOOLS_TARGETS: esp32s3
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -73,7 +74,11 @@ jobs:
           mkdir -p "$CCACHE_DIR"
           ccache --max-size=1G
           ccache --zero-stats || true
-          source "$IDF_PATH/export.sh"
+          source /opt/toolchains/esp-idf/export.sh
+          if [ "$IDF_PATH" != "/opt/toolchains/esp-idf" ]; then
+            echo "ERROR: IDF_PATH drift detected ($IDF_PATH)"
+            exit 1
+          fi
           idf.py --version >/dev/null 2>&1 || {
             echo "ERROR: idf.py is not runnable after ESP-IDF environment bootstrap"
             exit 1
