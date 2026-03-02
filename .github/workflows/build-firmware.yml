@@ -16,10 +16,28 @@ on:
   pull_request:
 
 jobs:
-  build:
+  resolve-image-owner:
     runs-on: ubuntu-24.04
+    outputs:
+      owner_lc: ${{ steps.owner.outputs.owner_lc }}
+    steps:
+      - name: Lowercase GHCR owner
+        id: owner
+        run: echo "owner_lc=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: resolve-image-owner
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash
+    env:
+      IDF_PATH: /opt/toolchains/esp-idf
+      IDF_DIR: /opt/toolchains/esp-idf
+      IDF_TOOLS_PATH: /opt/espressif
+      IDF_TOOLS_TARGETS: esp32s3
     container:
-      image: ghcr.io/kdmukai-bot/seedsigner-micropython-builder-base:latest
+      image: ghcr.io/${{ needs.resolve-image-owner.outputs.owner_lc }}/seedsigner-micropython-builder-base:latest
     steps:
       - name: Checkout builder repo
         uses: actions/checkout@v4
@@ -37,6 +55,14 @@ jobs:
           cd sources/seedsigner-c-modules
           git checkout "${{ github.event_name == 'workflow_dispatch' && inputs.c_modules_ref || 'master' }}"
 
+      - name: Ensure baked ESP-IDF tools environment
+        run: |
+          test -d /opt/toolchains/esp-idf
+          mkdir -p "$IDF_TOOLS_PATH"
+          python3 "$IDF_PATH/tools/idf_tools.py" install riscv32-esp-elf-gdb
+          source "$IDF_PATH/export.sh"
+          idf.py --version
+
       - name: Build firmware + screenshots
         run: |
           ./scripts/ci_build.sh "$PWD/sources"
@@ -51,8 +77,8 @@ jobs:
             echo "c_modules_ref_input=${{ github.event_name == 'workflow_dispatch' && inputs.c_modules_ref || 'master' }}"
             echo "micropython_head=$(git -C sources/micropython rev-parse HEAD)"
             echo "c_modules_head=$(git -C sources/seedsigner-c-modules rev-parse HEAD)"
-            echo "idf_head=$(git -C sources/esp-idf rev-parse HEAD)"
-            echo "idf_version=$(source sources/esp-idf/export.sh >/dev/null 2>&1; idf.py --version 2>/dev/null || true)"
+            echo "idf_head=$(git -C "$IDF_PATH" rev-parse HEAD)"
+            echo "idf_version=$(source "$IDF_PATH/export.sh" >/dev/null 2>&1; idf.py --version 2>/dev/null || true)"
             echo "python=$(python3 --version 2>&1)"
             echo "cmake=$(cmake --version | head -n1)"
           } | tee logs/provenance.txt

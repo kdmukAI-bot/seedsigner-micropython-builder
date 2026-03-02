@@ -122,3 +122,10 @@ Build/publish this image via workflow:
 - `.github/workflows/build-base-image.yml`
 
 Firmware workflow then seeds `sources/` from that image and applies project mods before build.
+
+
+## ESP-IDF handling (current)
+
+- Default path uses the prebaked ESP-IDF baseline from the builder image.
+- `platform_mods/idf_mods` is currently a no-op placeholder (no IDF patch overlay applied).
+- Optional future override is supported via `IDF_OVERRIDE_DIR=/path/to/esp-idf`.
