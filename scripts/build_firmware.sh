@@ -7,7 +7,9 @@ WORKDIR="${1:-$ROOT_DIR/sources}"
 MP_DIR="$WORKDIR/micropython"
 CMODS_DIR="$WORKDIR/seedsigner-c-modules"
 IDF_DIR="${IDF_DIR:-}"
-if [ -z "$IDF_DIR" ]; then
+if [ "${GITHUB_ACTIONS:-}" = "true" ] && [ -d "/opt/toolchains/esp-idf" ]; then
+  IDF_DIR="/opt/toolchains/esp-idf"
+elif [ -z "$IDF_DIR" ]; then
   if [ -d "/opt/toolchains/esp-idf" ]; then
     IDF_DIR="/opt/toolchains/esp-idf"
   else
@@ -39,6 +41,7 @@ fi
 
 export IDF_PATH="$IDF_DIR"
 export IDF_TOOLS_TARGETS="${IDF_TOOLS_TARGETS:-esp32s3}"
+echo "Using IDF_PATH: $IDF_PATH"
 
 MICROPY_CMAKE_ARGS="${CMAKE_ARGS:-}"
 if [ -d "$CMODS_DIR/components" ]; then
