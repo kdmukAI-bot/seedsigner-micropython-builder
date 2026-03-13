@@ -13,8 +13,16 @@
 # Temporary/local helper scripts
 scripts/run_build_task.sh
 
+# Secrets / credentials
+.env
+*.env
+*.key
+*.pem
+secrets/
+
 # Python / editor noise
 __pycache__/
 *.pyc
 .DS_Store
 .vscode/
+CLAUDE.md
