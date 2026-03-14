@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-02 15:42:12Z",
+  "generated_at": "2026-03-14 18:22:53Z",
   "width": 480,
   "height": 320,
   "screenshots": [
@@ -27,6 +27,11 @@
       "name": "button_list_screen__long_title",
       "display_name": "button_list_screen (_long_title) [animated]",
       "path": "img/button_list_screen__long_title.gif"
+    },
+    {
+      "name": "screensaver_screen",
+      "display_name": "screensaver_screen",
+      "path": "img/screensaver_screen.png"
     }
   ]
 }
