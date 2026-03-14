@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# PLACEHOLDER: This script is not currently called. It is intended to be used by
+# apply_idf_mods.sh (mirroring how apply_micropython_mods.sh calls
+# verify_micropython_base.sh) once the project needs to apply patches to ESP-IDF.
+#
+# NOTE: The IDF_DIR path below assumes a local clone at sources/esp-idf. When
+# activating this script, verify the path matches the actual IDF source location
+# (currently ESP-IDF is provided by the Docker image at /opt/toolchains/esp-idf).
+
+echo "verify_idf_base: no-op (IDF verification not enabled yet)"
+exit 0
+
+# --- Inactive verification logic below ---
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 WORKDIR="${1:-$ROOT_DIR/sources}"
@@ -18,7 +31,7 @@ else
   : "${PATCH_BASE:=origin/master}"
 fi
 
-if [ ! -d "$IDF_DIR/.git" ]; then
+if [ ! -e "$IDF_DIR/.git" ]; then
   echo "ERROR: expected ESP-IDF repo at: $IDF_DIR"
   exit 1
 fi
