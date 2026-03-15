@@ -10,6 +10,7 @@ docker-shell:
 		-e HOME=/tmp/home \
 		-e XDG_CACHE_HOME=/tmp/home/.cache \
 		-v $(PWD):/workspace/seedsigner-micropython-builder \
+		-v $(PWD)/.ccache:/tmp/home/.cache \
 		-w /workspace/seedsigner-micropython-builder \
 		$(IMAGE) bash
 
@@ -20,6 +21,7 @@ docker-build-all:
 		-e HOME=/tmp/home \
 		-e XDG_CACHE_HOME=/tmp/home/.cache \
 		-v $(PWD):/workspace/seedsigner-micropython-builder \
+		-v $(PWD)/.ccache:/tmp/home/.cache \
 		-w /workspace/seedsigner-micropython-builder \
 		$(IMAGE) bash -lc './scripts/docker_build_all.sh'
 
