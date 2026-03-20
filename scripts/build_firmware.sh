@@ -3,8 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-WORKDIR="${1:-$ROOT_DIR/sources}"
-MP_DIR="$WORKDIR/micropython"
+WORKDIR="${1:-$ROOT_DIR/deps}"
+MP_DIR="$WORKDIR/micropython/upstream"
 CMODS_DIR="$WORKDIR/seedsigner-c-modules"
 
 IDF_DIR="${IDF_DIR:-}"
@@ -52,11 +52,11 @@ export IDF_PATH="$IDF_DIR"
 source "$IDF_PATH/export.sh"
 idf.py --version >/dev/null 2>&1 || { echo "ERROR: idf.py not runnable (GHCR base image ESP-IDF toolchain missing/broken)"; exit 1; }
 
-USER_C_MODULES_FILE="$CMODS_DIR/usercmodule.cmake"
+PORTS_ESP32_DIR="$ROOT_DIR/ports/esp32"
+USER_C_MODULES_FILE="$ROOT_DIR/usercmodule.cmake"
 MICROPY_CMAKE_ARGS="${CMAKE_ARGS:-} -DUSER_C_MODULES=$USER_C_MODULES_FILE"
-if [ -d "$CMODS_DIR/components" ]; then
-  MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DMICROPY_EXTRA_COMPONENT_DIRS=$CMODS_DIR/components"
-fi
+MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DMICROPY_EXTRA_COMPONENT_DIRS=${PORTS_ESP32_DIR}\;${CMODS_DIR}/components"
+MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DSEEDSIGNER_C_MODULES_DIR=$CMODS_DIR"
 
 {
   make -C "$MP_DIR/mpy-cross" USER_C_MODULES= -j"$(nproc)"
