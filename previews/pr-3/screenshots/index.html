@@ -1,0 +1,32 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unit tests for SeedSigner lvgl screens</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:16px;background:#111;color:#eee}
+.meta{color:#bbb;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(520px,1fr));gap:14px;align-items:start}
+figure{margin:0;background:#1b1b1b;border:1px solid #333;border-radius:8px;padding:10px;overflow:auto}
+img{display:block;width:auto;max-width:100%;height:auto;background:#000;border-radius:6px;margin:0 auto;image-rendering:auto}
+figcaption{margin:0 0 10px 0;font-size:22px;font-weight:700;letter-spacing:.2px;color:#f2f2f2;text-align:center}
+</style>
+</head><body>
+<h1>Unit tests for SeedSigner lvgl screens</h1>
+<div id="meta" class="meta">Loading manifest...</div>
+<div id="grid" class="grid"></div>
+<script>
+fetch('manifest.json').then(r=>{if(!r.ok)throw new Error('manifest load failed');return r.json();}).then(m=>{
+  const meta=document.getElementById('meta');
+  meta.textContent=`Generated: ${m.generated_at} • ${m.width}x${m.height}`;
+  const grid=document.getElementById('grid');
+  for(const s of (m.screenshots||[])){
+    const fig=document.createElement('figure');
+    const cap=document.createElement('figcaption');
+    cap.textContent=s.display_name;
+    const img=document.createElement('img');
+    img.loading='lazy'; img.src=s.path; img.alt=s.display_name; img.width=m.width; img.height=m.height;
+    fig.appendChild(cap); fig.appendChild(img); grid.appendChild(fig);
+  }
+}).catch(e=>{document.getElementById('meta').textContent='Failed to load manifest.json: '+e.message;});
+</script>
+</body></html>
