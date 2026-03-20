@@ -2,18 +2,18 @@
 set -euo pipefail
 
 # Expected layout under builder root:
-#   <builder>/sources/micropython
-#   <builder>/sources/seedsigner-c-modules
-#   <builder>/sources/seedsigner-micropython-builder (this repo)
+#   <builder>/deps/micropython/upstream
+#   <builder>/deps/seedsigner-c-modules
+#   <builder>/deps/micropython/mods/
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-MODS_DIR="$ROOT_DIR/platform_mods/micropython_mods"
+MODS_DIR="$ROOT_DIR/deps/micropython/mods"
 NEW_DIR="$MODS_DIR/new_files"
 PATCH_DIR="$MODS_DIR/patches"
 
-WORKDIR="${1:-$ROOT_DIR/sources}"
-MP_DIR="$WORKDIR/micropython"
+WORKDIR="${1:-$ROOT_DIR/deps}"
+MP_DIR="$WORKDIR/micropython/upstream"
 CMODS_DIR="$WORKDIR/seedsigner-c-modules"
 
 if [ ! -e "$MP_DIR/.git" ]; then
@@ -53,4 +53,4 @@ git status -sb
 
 echo
 echo "Saved helper env file: $MP_DIR/.seedsigner-builder.env"
-echo "Next: source ESP-IDF env, then build with USER_C_MODULES=$CMODS_DIR/usercmodule.cmake"
+echo "Next: source ESP-IDF env, then build with USER_C_MODULES=$ROOT_DIR/usercmodule.cmake"

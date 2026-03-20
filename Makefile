@@ -25,19 +25,19 @@ docker-build-all:
 		-w /workspace/seedsigner-micropython-builder \
 		$(IMAGE) bash -lc './scripts/docker_build_all.sh'
 
-# Safe clean: remove generated build outputs only (keeps sources/ working trees)
+# Safe clean: remove generated build outputs only (keeps deps/ working trees)
 clean:
 	rm -rf \
 		build \
 		logs \
-		sources/micropython/ports/esp32/build* \
-		sources/seedsigner-c-modules/tools/screenshot_generator/build
+		deps/micropython/upstream/ports/esp32/build* \
+		deps/seedsigner-c-modules/tools/screenshot_generator/build
 
 # Deeper clean: clean + purge local ccache
 clean-purge-ccache: clean
 	rm -rf .ccache
 
-# Destructive reset: removes sources/ clones and all generated artifacts.
+# Destructive reset: removes deps/ ephemeral clones and all generated artifacts.
 # Requires explicit confirmation to avoid accidental loss of in-progress work.
 full-reset:
 	@if [ "$(CONFIRM)" != "YES" ]; then \
@@ -45,4 +45,4 @@ full-reset:
 		echo "Run: make full-reset CONFIRM=YES"; \
 		exit 1; \
 	fi
-	rm -rf sources build logs .ccache
+	rm -rf deps/micropython/upstream build logs .ccache

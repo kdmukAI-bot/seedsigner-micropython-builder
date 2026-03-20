@@ -55,14 +55,14 @@ jobs:
 
       - name: Prepare sources workspace from prebaked image
         run: |
-          mkdir -p sources
-          ./scripts/prepare_sources_from_image.sh "$PWD/sources"
+          mkdir -p deps
+          ./scripts/prepare_sources_from_image.sh "$PWD/deps"
 
       - name: Override c-modules ref (workflow_dispatch only)
         if: github.event_name == 'workflow_dispatch' && inputs.c_modules_ref != ''
         run: |
-          git -C sources/seedsigner-c-modules fetch origin
-          git -C sources/seedsigner-c-modules checkout ${{ inputs.c_modules_ref }}
+          git -C deps/seedsigner-c-modules fetch origin
+          git -C deps/seedsigner-c-modules checkout ${{ inputs.c_modules_ref }}
 
       - name: Ensure baked ESP-IDF tools environment
         run: |
@@ -74,8 +74,8 @@ jobs:
 
       - name: Build firmware + screenshots
         run: |
-          ./scripts/ci_build.sh "$PWD/sources"
-          ./scripts/run_screenshot_generator.sh "$PWD/sources"
+          ./scripts/ci_build.sh "$PWD/deps"
+          ./scripts/run_screenshot_generator.sh "$PWD/deps"
 
       - name: Record build provenance
         run: |
@@ -84,8 +84,8 @@ jobs:
             echo "timestamp_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "builder_ref=${{ github.event_name == 'workflow_dispatch' && inputs.builder_ref || github.ref }}"
             echo "c_modules_ref_input=${{ github.event_name == 'workflow_dispatch' && inputs.c_modules_ref || 'pinned-submodule' }}"
-            echo "micropython_head=$(git -C sources/micropython rev-parse HEAD)"
-            echo "c_modules_head=$(git -C sources/seedsigner-c-modules rev-parse HEAD)"
+            echo "micropython_head=$(git -C deps/micropython/upstream rev-parse HEAD)"
+            echo "c_modules_head=$(git -C deps/seedsigner-c-modules rev-parse HEAD)"
             echo "idf_head=$(git -C "$IDF_PATH" rev-parse HEAD)"
             echo "idf_version=$(source "$IDF_PATH/export.sh" >/dev/null 2>&1; idf.py --version 2>/dev/null || true)"
             echo "python=$(python3 --version 2>&1)"
@@ -108,7 +108,7 @@ jobs:
       - name: Collect screenshot artifacts
         run: |
           mkdir -p out/screenshots
-          cp -r "$PWD/sources/seedsigner-c-modules/tools/screenshot_generator/screenshots" out/screenshots/
+          cp -r "$PWD/deps/seedsigner-c-modules/tools/screenshot_generator/screenshots" out/screenshots/
 
       - name: Upload firmware artifacts
         uses: actions/upload-artifact@v4

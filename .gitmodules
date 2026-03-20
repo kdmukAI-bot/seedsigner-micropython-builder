@@ -1,3 +1,3 @@
-[submodule "sources/seedsigner-c-modules"]
-	path = sources/seedsigner-c-modules
+[submodule "deps/seedsigner-c-modules"]
+	path = deps/seedsigner-c-modules
 	url = https://github.com/kdmukAI-bot/seedsigner-c-modules.git

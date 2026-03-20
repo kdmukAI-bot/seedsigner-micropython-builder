@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-WORKDIR="${1:-$ROOT_DIR/sources}"
+WORKDIR="${1:-$ROOT_DIR/deps}"
 
 IDF_OVERRIDE_DIR="${IDF_OVERRIDE_DIR:-}"
 PREBAKED_IDF_DIR="/opt/toolchains/esp-idf"

@@ -2,16 +2,16 @@
 set -euo pipefail
 
 # Expected layout under builder root:
-#   <builder>/sources/micropython
-#   <builder>/sources/seedsigner-c-modules
-#   <builder>/sources/seedsigner-micropython-builder (this repo)
+#   <builder>/deps/micropython/upstream
+#   <builder>/deps/seedsigner-c-modules
+#   <builder>/deps/micropython/mods/
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-BASELINE_FILE="$ROOT_DIR/platform_mods/micropython_mods/BASELINE"
+BASELINE_FILE="$ROOT_DIR/deps/micropython/mods/BASELINE"
 
-WORKDIR="${1:-$ROOT_DIR/sources}"
-MP_DIR="$WORKDIR/micropython"
+WORKDIR="${1:-$ROOT_DIR/deps}"
+MP_DIR="$WORKDIR/micropython/upstream"
 CMODS_DIR="$WORKDIR/seedsigner-c-modules"
 
 if [ ! -e "$MP_DIR/.git" ]; then

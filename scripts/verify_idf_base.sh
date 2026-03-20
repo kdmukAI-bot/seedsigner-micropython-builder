@@ -5,7 +5,7 @@ set -euo pipefail
 # apply_idf_mods.sh (mirroring how apply_micropython_mods.sh calls
 # verify_micropython_base.sh) once the project needs to apply patches to ESP-IDF.
 #
-# NOTE: The IDF_DIR path below assumes a local clone at sources/esp-idf. When
+# NOTE: The IDF_DIR path below assumes a local clone at deps/esp-idf. When
 # activating this script, verify the path matches the actual IDF source location
 # (currently ESP-IDF is provided by the Docker image at /opt/toolchains/esp-idf).
 
@@ -16,9 +16,9 @@ exit 0
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-WORKDIR="${1:-$ROOT_DIR/sources}"
+WORKDIR="${1:-$ROOT_DIR/deps}"
 IDF_DIR="$WORKDIR/esp-idf"
-BASELINE_FILE="$ROOT_DIR/platform_mods/idf_mods/BASELINE"
+BASELINE_FILE="$ROOT_DIR/deps/esp-idf/mods/BASELINE"
 
 if [ ! -f "$BASELINE_FILE" ]; then
   echo "WARN: missing $BASELINE_FILE (using defaults)"

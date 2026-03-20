@@ -4,7 +4,7 @@
 /out/
 
 # Ephemeral source worktrees seeded at build time (not submodules)
-/sources/micropython
+/deps/micropython/upstream
 
 # Local tool/cache directories
 /.espressif/

@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-WORKDIR="${1:-$ROOT_DIR/sources}"
+WORKDIR="${1:-$ROOT_DIR/deps}"
 CMODS_DIR="$WORKDIR/seedsigner-c-modules"
 
 LOGS_DIR="${LOGS_DIR:-$ROOT_DIR/logs}"
@@ -22,8 +22,8 @@ mkdir -p "$LOGS_DIR"
 
   LVGL_ROOT_CANDIDATE="${LVGL_ROOT:-}"
   if [ -z "$LVGL_ROOT_CANDIDATE" ] || [ ! -d "$LVGL_ROOT_CANDIDATE" ]; then
-    if [ -d "$WORKDIR/micropython/ports/esp32/managed_components/lvgl__lvgl" ]; then
-      LVGL_ROOT_CANDIDATE="$WORKDIR/micropython/ports/esp32/managed_components/lvgl__lvgl"
+    if [ -d "$WORKDIR/micropython/upstream/ports/esp32/managed_components/lvgl__lvgl" ]; then
+      LVGL_ROOT_CANDIDATE="$WORKDIR/micropython/upstream/ports/esp32/managed_components/lvgl__lvgl"
     elif [ -d "$ROOT_DIR/build" ]; then
       LVGL_ROOT_CANDIDATE="$(find "$ROOT_DIR/build" -type d -path '*/managed_components/lvgl__lvgl' | head -n1 || true)"
     fi

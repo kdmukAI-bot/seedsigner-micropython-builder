@@ -4,8 +4,10 @@ Build orchestration repo for SeedSigner MicroPython firmware without maintaining
 
 ## Repository roles
 
-- `platform_mods/micropython_mods/` — overlay + patch set for MicroPython
-- `platform_mods/idf_mods/` — overlay + patch set for ESP-IDF
+- `deps/micropython/mods/` — overlay + patch set for MicroPython
+- `deps/esp-idf/mods/` — overlay + patch set for ESP-IDF (placeholder)
+- `ports/esp32/` — ESP32-specific hardware components (display, camera, power, BSP)
+- `bindings/` — MicroPython C module bindings
 - `scripts/` — shared setup/apply/build scripts used by both CI and local dev
 - `.github/workflows/` — CI workflow that runs the same scripts
 
@@ -23,14 +25,14 @@ submodule (LVGL).
 If you've already cloned without `--recursive`, run
 `git submodule update --init --recursive` from the repo root.
 
-## How `sources/` dependencies are managed
+## How `deps/` dependencies are managed
 
-The `sources/` directory holds the two main source trees needed for the build. They are
+The `deps/` directory holds the external source trees needed for the build. They are
 managed differently because they play different roles.
 
-### `sources/seedsigner-c-modules` — git submodule (version-pinned)
+### `deps/seedsigner-c-modules` — git submodule (version-pinned)
 
-This is the project's own C module code (LVGL screens, navigation, hardware bindings). It
+This is the project's shared C module code (LVGL screens, navigation). It
 is tracked as a **git submodule** so the builder repo records exactly which commit is
 known-good. The build uses it as-is — no patches are applied.
 
@@ -40,20 +42,20 @@ known-good. The build uses it as-is — no patches are applied.
 - **Override:** `workflow_dispatch` accepts an optional `c_modules_ref` input to test a
   different branch/tag/SHA without changing the pin
 
-### `sources/micropython` — ephemeral build workspace (not a submodule)
+### `deps/micropython/upstream` — ephemeral build workspace (not a submodule)
 
 MicroPython is an upstream dependency that gets **patched and mutated** during every build.
 The build starts from a clean upstream snapshot, applies the patch series from
-`platform_mods/micropython_mods/patches/`, overlays new files (board definitions,
-partition tables) from `platform_mods/micropython_mods/new_files/`, and compiles the
+`deps/micropython/mods/patches/`, overlays new files (board definitions,
+partition tables) from `deps/micropython/mods/new_files/`, and compiles the
 result. The modified tree is disposable — it is not committed or version-tracked.
 
 - **Local:** seeded from the prebaked Docker image (`/opt/bases/micropython`) on first run
   by `scripts/prepare_sources_from_image.sh`. If the directory already exists, it is left
   as-is.
-- **CI:** same seeding script copies the baseline from the Docker image into `sources/`.
+- **CI:** same seeding script copies the baseline from the Docker image into `deps/`.
 - **Version pin:** the MicroPython version is pinned by `MICROPYTHON_REF` in `Dockerfile.ghcr`
-  and recorded in `platform_mods/micropython_mods/BASELINE`.
+  and recorded in `deps/micropython/mods/BASELINE`.
 - **Developer mode:** if the MicroPython tree has uncommitted changes (dirty working tree),
   `apply_micropython_mods.sh` skips repatching and uses your current tree. This lets you
   edit MicroPython source directly and iterate without the patch step overwriting your work.
@@ -74,7 +76,7 @@ and the `BASELINE` file instead.
 ### ESP-IDF
 
 ESP-IDF is provided by the prebaked Docker image at `/opt/toolchains/esp-idf`. It is not
-stored in `sources/` and is not a submodule.
+stored in `deps/` and is not a submodule.
 
 Policy: local development is containerized only. Do not install build toolchains on host
 machines.
@@ -101,15 +103,15 @@ make docker-build-all
 ```
 
 Notes on default behavior:
-- First run: if `sources/micropython` is missing, it is seeded from the Docker image automatically.
-- Subsequent runs: if `sources/micropython` is dirty, the build uses your current working tree and skips repatching.
+- First run: if `deps/micropython/upstream` is missing, it is seeded from the Docker image automatically.
+- Subsequent runs: if `deps/micropython/upstream` is dirty, the build uses your current working tree and skips repatching.
 
 ## CI
 
 GitHub Actions workflow: `.github/workflows/build-firmware.yml`
 
 CI checks out this repo with `submodules: true` (populating `seedsigner-c-modules` at its
-pinned commit), seeds `sources/micropython` from the prebaked Docker image, applies mods,
+pinned commit), seeds `deps/micropython/upstream` from the prebaked Docker image, applies mods,
 builds firmware, and uploads artifacts.
 
 
@@ -127,8 +129,8 @@ Run screenshot generator build + render:
 
 ```bash
 ./scripts/run_screenshot_generator.sh
-# or with explicit sources dir
-./scripts/run_screenshot_generator.sh /path/to/sources
+# or with explicit deps dir
+./scripts/run_screenshot_generator.sh /path/to/deps
 ```
 
 Logs are written under `logs/` with timestamp-first naming.
@@ -190,11 +192,11 @@ Build/publish this image via workflow:
 
 - `.github/workflows/build-base-image.yml`
 
-Firmware workflow then seeds `sources/` from that image and applies project mods before build.
+Firmware workflow then seeds `deps/` from that image and applies project mods before build.
 
 
 ## ESP-IDF handling (current)
 
 - Default path uses the prebaked ESP-IDF baseline from the builder image.
-- `platform_mods/idf_mods` is currently a no-op placeholder (no IDF patch overlay applied).
+- `deps/esp-idf/mods` is currently a no-op placeholder (no IDF patch overlay applied).
 - Optional future override is supported via `IDF_OVERRIDE_DIR=/path/to/esp-idf`.
