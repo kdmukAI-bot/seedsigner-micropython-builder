@@ -19,3 +19,7 @@
 #define MICROPY_PY_BLUETOOTH               (0)
 #define MICROPY_BLUETOOTH_NIMBLE           (0)
 #define MICROPY_PY_ESPNOW                  (0)
+
+// Initialize display at C-level boot (before REPL).
+extern void seedsigner_board_startup(void);
+#define MICROPY_BOARD_STARTUP seedsigner_board_startup
