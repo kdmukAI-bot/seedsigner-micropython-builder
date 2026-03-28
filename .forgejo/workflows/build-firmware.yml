@@ -1,6 +1,10 @@
 # Forgejo / Codeberg -- Firmware build, screenshot generation, and Pages deployment.
 #
-# Builds inside the prebaked Docker image from the Codeberg container registry.
+# Builds inside the prebaked Docker image. Each instance should set the
+# BASE_IMAGE repository variable to its own container registry:
+#   Codeberg:     codeberg.org/kdmukai-bot/seedsigner-micropython-builder-base:latest
+#   Self-hosted:  kdmukaibot.tail4604d.ts.net:3000/kdmukai-bot/seedsigner-micropython-builder-base:latest
+#
 # Uses single jobs (no artifact upload/download) for Forgejo compatibility.
 # Pages deployment uses branch-based approach (push to "pages" branch).
 
@@ -22,7 +26,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-24.04
     container:
-      image: codeberg.org/kdmukai-bot/seedsigner-micropython-builder-base:latest
+      image: ${{ vars.MP_BUILDER_BASE_IMAGE || 'codeberg.org/kdmukai-bot/seedsigner-micropython-builder-base:latest' }}
     steps:
       - name: Checkout with submodules
         uses: actions/checkout@v4
