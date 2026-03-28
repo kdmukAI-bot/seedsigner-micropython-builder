@@ -59,4 +59,5 @@ git log --oneline -1
 
 echo
 echo "To iterate: edit files, rebuild. Your changes will be on top of this commit."
-echo "To regenerate patch: git -C deps/micropython/upstream diff HEAD~1 > deps/micropython/mods/patches/0001-esp32-integration-mods.patch"
+echo "To regenerate patch: scripts/generate_micropython_patch.sh"
+echo "To restore clean state: scripts/restore_micropython_clean.sh"

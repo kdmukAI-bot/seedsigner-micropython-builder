@@ -1,5 +1,5 @@
-UPSTREAM_REMOTE=upstream
-UPSTREAM_REF=master
-PATCH_BASE=upstream/master
+UPSTREAM_REMOTE=https://github.com/micropython/micropython.git
+UPSTREAM_REF=v1.27.0
+PATCH_BASE=v1.27.0
 IDF_VERSION=v5.5.1
 TARGET_BOARD=WAVESHARE_ESP32_S3_TOUCH_LCD_35B

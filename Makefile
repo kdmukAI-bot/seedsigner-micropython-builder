@@ -8,6 +8,7 @@ DOCKER_RUN = docker run --rm \
 	--user $(shell id -u):$(shell id -g) \
 	-e HOME=/tmp/home \
 	$(if $(BOARD),-e BOARD=$(BOARD)) \
+	$(if $(MP_ALLOW_DIRTY),-e MP_ALLOW_DIRTY=$(MP_ALLOW_DIRTY)) \
 	-v $(PWD):/workspace/seedsigner-micropython-builder \
 	--tmpfs /tmp/home:uid=$(shell id -u),gid=$(shell id -g) \
 	-v $(HOME)/.cache:/tmp/home/.cache \
