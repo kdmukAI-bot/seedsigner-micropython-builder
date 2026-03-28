@@ -1,0 +1,56 @@
+# Forgejo / Codeberg -- Firmware build, screenshot generation, and Pages deployment.
+#
+# Builds inside the prebaked Docker image from the Codeberg container registry.
+# Uses single jobs (no artifact upload/download) for Forgejo compatibility.
+# Pages deployment uses branch-based approach (push to "pages" branch).
+
+name: Build SeedSigner MicroPython Firmware
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  IDF_PATH: /opt/toolchains/esp-idf
+  IDF_DIR: /opt/toolchains/esp-idf
+  IDF_TOOLS_PATH: /opt/espressif
+  IDF_TOOLS_TARGETS: esp32s3
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-24.04
+    container:
+      image: codeberg.org/kdmukai-bot/seedsigner-micropython-builder-base:latest
+    steps:
+      - name: Checkout with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Prepare sources from prebaked image
+        run: scripts/ci/ci.sh prepare-sources
+
+      - name: Install IDF tools
+        run: scripts/ci/ci.sh install-idf-tools
+
+      - name: Build firmware + screenshots
+        run: scripts/ci/ci.sh build
+
+      - name: Record build provenance
+        run: scripts/ci/ci.sh record-provenance
+
+      - name: Collect artifacts
+        run: scripts/ci/ci.sh collect-artifacts
+
+      - name: Upload firmware artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: firmware-waveshare-esp32-s3
+          path: out/
+
+      - name: Deploy screenshots to pages branch
+        if: github.event_name == 'push'
+        run: scripts/ci/ci.sh deploy-pages out/screenshots pages

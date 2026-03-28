@@ -1,0 +1,48 @@
+# GitLab CI -- Firmware build, screenshot generation, and Pages deployment.
+#
+# Builds inside the prebaked Docker image from GitLab Container Registry.
+# Screenshots are deployed to GitLab Pages on pushes to the default branch.
+# PR screenshot comparison is not yet implemented for GitLab.
+
+stages:
+  - build
+  - pages
+
+variables:
+  BASE_IMAGE: registry.gitlab.com/kdmukai-bot/seedsigner-micropython-builder/base:latest
+
+build-firmware:
+  stage: build
+  image: $BASE_IMAGE
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    IDF_PATH: /opt/toolchains/esp-idf
+    IDF_DIR: /opt/toolchains/esp-idf
+    IDF_TOOLS_PATH: /opt/espressif
+    IDF_TOOLS_TARGETS: esp32s3
+  script:
+    - scripts/ci/ci.sh prepare-sources
+    - scripts/ci/ci.sh install-idf-tools
+    - scripts/ci/ci.sh build
+    - scripts/ci/ci.sh record-provenance
+    - scripts/ci/ci.sh collect-artifacts
+  artifacts:
+    paths:
+      - out/
+    expire_in: 30 days
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+pages:
+  stage: pages
+  dependencies:
+    - build-firmware
+  script:
+    - mkdir -p public
+    - cp -r out/screenshots/* public/
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
