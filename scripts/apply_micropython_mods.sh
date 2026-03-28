@@ -42,7 +42,7 @@ echo "Applying patch series from: $PATCH_DIR"
 shopt -s nullglob
 for p in "$PATCH_DIR"/*.patch; do
   echo "  -> $(basename "$p")"
-  git apply --3way "$p"
+  git apply "$p"
 done
 
 echo "Applying new file overlay from: $NEW_DIR"

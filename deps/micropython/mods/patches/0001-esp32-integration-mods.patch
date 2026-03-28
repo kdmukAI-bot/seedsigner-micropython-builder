@@ -1,18 +1,8 @@
 diff --git a/ports/esp32/CMakeLists.txt b/ports/esp32/CMakeLists.txt
-index ee062be203d40b1fcbe4122be52e57f60af67952..51ca483e658bf323ef9368b66078f748c9705cf1 100644
+index 9d6be8010..57eb69e02 100644
 --- a/ports/esp32/CMakeLists.txt
 +++ b/ports/esp32/CMakeLists.txt
-@@ -3,8 +3,7 @@
- # Note for maintainers: Where possible, functionality should be put into
- # esp32_common.cmake not this file. This is because this CMakeLists.txt file
- # needs to be duplicated for out-of-tree builds, and can easily get out of date.
--
--cmake_minimum_required(VERSION 3.16)
-+cmake_minimum_required(VERSION 3.12)
- 
- # Set the board if it's not already set.
- if(NOT MICROPY_BOARD)
-@@ -59,6 +58,19 @@ endforeach()
+@@ -58,6 +58,19 @@ endforeach()
  configure_file(${CMAKE_BINARY_DIR}/sdkconfig.combined.in ${CMAKE_BINARY_DIR}/sdkconfig.combined COPYONLY)
  set(SDKCONFIG_DEFAULTS ${CMAKE_BINARY_DIR}/sdkconfig.combined)
  
@@ -33,7 +23,7 @@ index ee062be203d40b1fcbe4122be52e57f60af67952..51ca483e658bf323ef9368b66078f748
  include($ENV{IDF_PATH}/tools/cmake/project.cmake)
  
 diff --git a/ports/esp32/boards/sdkconfig.base b/ports/esp32/boards/sdkconfig.base
-index 6c8368ac488a283a078292fad814af1d5cc0d6f0..2a6323da7af129c35e04fdebe19862e7805e18e7 100644
+index 6c8368ac4..2a6323da7 100644
 --- a/ports/esp32/boards/sdkconfig.base
 +++ b/ports/esp32/boards/sdkconfig.base
 @@ -32,7 +32,6 @@ CONFIG_LOG_MAXIMUM_LEVEL_INFO=y
@@ -45,7 +35,7 @@ index 6c8368ac488a283a078292fad814af1d5cc0d6f0..2a6323da7af129c35e04fdebe19862e7
  # ESP System Settings
  # Only on: ESP32, ESP32S3
 diff --git a/ports/esp32/esp32_common.cmake b/ports/esp32/esp32_common.cmake
-index d6a4aedb85c681a7e6473dfb8242140b045721bd..bc41c870e0e63280ba268de12f4d07b22c2c59c6 100644
+index e3b1b81ca..bc41c870e 100644
 --- a/ports/esp32/esp32_common.cmake
 +++ b/ports/esp32/esp32_common.cmake
 @@ -107,6 +107,18 @@ if(MICROPY_PY_TINYUSB)
@@ -67,15 +57,7 @@ index d6a4aedb85c681a7e6473dfb8242140b045721bd..bc41c870e0e63280ba268de12f4d07b2
  list(APPEND MICROPY_SOURCE_PORT
      panichandler.c
      adc.c
-@@ -138,7 +150,6 @@ list(APPEND MICROPY_SOURCE_PORT
-     esp32_pcnt.c
-     esp32_rmt.c
-     esp32_ulp.c
--    esp32_ldo.c
-     modesp32.c
-     machine_hw_spi.c
-     mpthreadport.c
-@@ -146,6 +157,24 @@ list(APPEND MICROPY_SOURCE_PORT
+@@ -145,6 +157,24 @@ list(APPEND MICROPY_SOURCE_PORT
      machine_sdcard.c
      modespnow.c
  )
@@ -100,7 +82,7 @@ index d6a4aedb85c681a7e6473dfb8242140b045721bd..bc41c870e0e63280ba268de12f4d07b2
  list(TRANSFORM MICROPY_SOURCE_PORT PREPEND ${MICROPY_PORT_DIR}/)
  list(APPEND MICROPY_SOURCE_PORT ${CMAKE_BINARY_DIR}/pins.c)
  
-@@ -160,43 +189,81 @@ list(APPEND MICROPY_SOURCE_QSTR
+@@ -159,43 +189,81 @@ list(APPEND MICROPY_SOURCE_QSTR
      ${MICROPY_SOURCE_TINYUSB}
  )
  
@@ -219,7 +201,7 @@ index d6a4aedb85c681a7e6473dfb8242140b045721bd..bc41c870e0e63280ba268de12f4d07b2
  
  # Provide the default LD fragment if not set
  if (MICROPY_USER_LDFRAGMENTS)
-@@ -214,6 +281,15 @@ if (UPDATE_SUBMODULES)
+@@ -213,6 +281,15 @@ if (UPDATE_SUBMODULES)
      unset(MICROPY_INC_CORE)
  endif()
  
@@ -235,20 +217,7 @@ index d6a4aedb85c681a7e6473dfb8242140b045721bd..bc41c870e0e63280ba268de12f4d07b2
  # Register the main IDF component.
  idf_component_register(
      SRCS
-@@ -245,11 +321,7 @@ set(MICROPY_TARGET ${COMPONENT_TARGET})
- if(CONFIG_IDF_TARGET_ARCH_XTENSA)
-     set(MICROPY_CROSS_FLAGS -march=xtensawin)
- elseif(CONFIG_IDF_TARGET_ARCH_RISCV)
--    if (CONFIG_IDF_TARGET_ESP32P4)
--        set(MICROPY_CROSS_FLAGS "-march=rv32imc -march-flags=zcmp")
--    else()
--        set(MICROPY_CROSS_FLAGS -march=rv32imc)
--    endif()
-+    set(MICROPY_CROSS_FLAGS -march=rv32imc)
- endif()
- 
- # Set compile options for this port.
-@@ -274,9 +346,11 @@ target_compile_options(${MICROPY_TARGET} PUBLIC
+@@ -269,9 +346,11 @@ target_compile_options(${MICROPY_TARGET} PUBLIC
  )
  
  # Additional include directories needed for private NimBLE headers.
@@ -263,14 +232,7 @@ index d6a4aedb85c681a7e6473dfb8242140b045721bd..bc41c870e0e63280ba268de12f4d07b2
  if (IDF_VERSION VERSION_LESS "5.3")
  # Additional include directories needed for private RMT header.
  #  IDF 5.x versions before 5.3.1
-@@ -289,23 +363,30 @@ endif()
- # Add additional extmod and usermod components.
- if (MICROPY_PY_BTREE)
-     target_link_libraries(${MICROPY_TARGET} $<TARGET_OBJECTS:micropy_extmod_btree>)
--    target_link_libraries(${MICROPY_TARGET} "-u abort_")  # micropy_extmod_btree links to this symbol found in MICROPY_TARGET
- endif()
- target_link_libraries(${MICROPY_TARGET} usermod)
- 
+@@ -290,16 +369,24 @@ target_link_libraries(${MICROPY_TARGET} usermod)
  # Extra linker options
  # (when wrap symbols are in standalone files, --undefined ensures
  # the linker doesn't skip that file.)
@@ -306,7 +268,7 @@ index d6a4aedb85c681a7e6473dfb8242140b045721bd..bc41c870e0e63280ba268de12f4d07b2
  # Collect all of the include directories and compile definitions for the IDF components,
  # including those added by the IDF Component Manager via idf_components.yaml.
 diff --git a/ports/esp32/main/CMakeLists.txt b/ports/esp32/main/CMakeLists.txt
-index 40188abff8e5770ab1d3dc61ba3ecf2162a91385..91305f8cceb08e68b8af6802f72c6e7c55a6ff14 100644
+index 40188abff..91305f8cc 100644
 --- a/ports/esp32/main/CMakeLists.txt
 +++ b/ports/esp32/main/CMakeLists.txt
 @@ -8,4 +8,13 @@ if(NOT MICROPY_PORT_DIR)
@@ -324,10 +286,10 @@ index 40188abff8e5770ab1d3dc61ba3ecf2162a91385..91305f8cceb08e68b8af6802f72c6e7c
 +
  include(${MICROPY_PORT_DIR}/esp32_common.cmake)
 diff --git a/ports/esp32/main/idf_component.yml b/ports/esp32/main/idf_component.yml
-index 176e29c3c486212c3178267093623aa28f4a5835..0ac3b96e7683020a9e298a305a3100955d60a774 100644
+index 176e29c3c..24874bccf 100644
 --- a/ports/esp32/main/idf_component.yml
 +++ b/ports/esp32/main/idf_component.yml
-@@ -1,5 +1,9 @@
+@@ -1,4 +1,8 @@
  dependencies:
 +  lvgl/lvgl: "9.5.0"
 +  espressif/esp_lvgl_port: "2.7.2"
@@ -336,4 +298,3 @@ index 176e29c3c486212c3178267093623aa28f4a5835..0ac3b96e7683020a9e298a305a310095
    espressif/mdns: "~1.1.0"
    espressif/tinyusb:
      rules:
-       - if: "target in [esp32s2, esp32s3, esp32p4]"
