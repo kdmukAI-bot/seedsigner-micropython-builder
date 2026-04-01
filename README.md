@@ -140,7 +140,7 @@ Logs are written under `logs/` with timestamp-first naming.
 
 After a successful build, artifacts are under:
 
-- `build/WAVESHARE_ESP32_S3_TOUCH_LCD_35B/`
+- `build/<BOARD>/` (e.g. `build/WAVESHARE_ESP32_S3_TOUCH_LCD_35B/`)
 
 Key files:
 
@@ -152,20 +152,13 @@ Key files:
 Recommended flash command (uses generated offsets/files):
 
 ```bash
+# ESP32-S3 boards
 cd build/WAVESHARE_ESP32_S3_TOUCH_LCD_35B
 python -m esptool --chip esp32s3 -b 460800   --before default_reset --after hard_reset   write_flash "@flash_args"
-```
 
-If needed, specify serial port explicitly:
-
-```bash
-python -m esptool --chip esp32s3 --port /dev/ttyACM0 -b 460800   --before default_reset --after hard_reset   write_flash "@flash_args"
-```
-
-Or with `idf.py` from MicroPython ESP32 port directory:
-
-```bash
-idf.py -p /dev/ttyACM0 flash
+# ESP32-P4 boards
+cd build/WAVESHARE_ESP32_P4_WIFI6_TOUCH_LCD_43
+python -m esptool --chip esp32p4 --port /dev/ttyACM0   write_flash "@flash_args"
 ```
 
 
