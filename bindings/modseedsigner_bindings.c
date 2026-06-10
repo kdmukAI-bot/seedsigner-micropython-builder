@@ -10,9 +10,19 @@
 #include "seedsigner.h"
 
 #define SEEDSIGNER_RESULT_QUEUE_CAP 16
-#define SEEDSIGNER_RESULT_LABEL_MAX 96
+// 256 holds a full BIP39 passphrase (spec max) when a text-entry screen
+// reports its result through this queue; also bounds button labels.
+#define SEEDSIGNER_RESULT_LABEL_MAX 256
+
+// What produced a queued result. The Python side reads this as the first
+// element of the poll tuple and branches on it.
+typedef enum {
+    SEEDSIGNER_EVENT_BUTTON_SELECTED,
+    SEEDSIGNER_EVENT_TEXT_ENTERED,
+} seedsigner_result_kind_t;
 
 typedef struct {
+    seedsigner_result_kind_t kind;
     uint32_t index;
     char label[SEEDSIGNER_RESULT_LABEL_MAX];
 } seedsigner_result_event_t;
@@ -22,8 +32,9 @@ static uint32_t s_result_head = 0;
 static uint32_t s_result_tail = 0;
 static uint32_t s_result_count = 0;
 
-void seedsigner_lvgl_on_button_selected(uint32_t index, const char *label) {
+static void seedsigner_result_enqueue(seedsigner_result_kind_t kind, uint32_t index, const char *label) {
     seedsigner_result_event_t ev = {
+        .kind = kind,
         .index = index,
         .label = {0},
     };
@@ -41,6 +52,18 @@ void seedsigner_lvgl_on_button_selected(uint32_t index, const char *label) {
     s_result_queue[s_result_tail] = ev;
     s_result_tail = (s_result_tail + 1) % SEEDSIGNER_RESULT_QUEUE_CAP;
     s_result_count++;
+}
+
+void seedsigner_lvgl_on_button_selected(uint32_t index, const char *label) {
+    seedsigner_result_enqueue(SEEDSIGNER_EVENT_BUTTON_SELECTED, index, label);
+}
+
+// Override the weak default in seedsigner.cpp: a text-entry screen (e.g.
+// seed_add_passphrase_screen) calls this on confirm with the entered text.
+// Route it through the same queue so one poll loop sees both the confirmed
+// text and a top-nav back-button press.
+void seedsigner_lvgl_on_text_entered(const char *text) {
+    seedsigner_result_enqueue(SEEDSIGNER_EVENT_TEXT_ENTERED, 0, text);
 }
 
 static void vstr_add_json_escaped(vstr_t *v, const char *src, size_t len) {
@@ -197,6 +220,28 @@ static mp_obj_t mp_seedsigner_lvgl_button_list_screen(mp_obj_t cfg_obj) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(seedsigner_lvgl_button_list_screen_obj, mp_seedsigner_lvgl_button_list_screen);
 
+static mp_obj_t mp_seedsigner_lvgl_seed_add_passphrase_screen(mp_obj_t cfg_obj) {
+    if (!mp_obj_is_type(cfg_obj, &mp_type_dict)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("seed_add_passphrase_screen expects a dict"));
+    }
+
+    // Pass JSON through mostly unchanged and let screen-side C++ validate.
+    vstr_t json;
+    vstr_init(&json, 256);
+    vstr_add_json_from_obj(&json, cfg_obj);
+
+    const char *err = run_screen(seed_add_passphrase_screen, (void *)json.buf);
+
+    vstr_clear(&json);
+
+    if (err) {
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%s"), err);
+    }
+
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(seedsigner_lvgl_seed_add_passphrase_screen_obj, mp_seedsigner_lvgl_seed_add_passphrase_screen);
+
 static mp_obj_t mp_seedsigner_lvgl_poll_for_result(void) {
     if (s_result_count == 0) {
         return mp_const_none;
@@ -206,8 +251,12 @@ static mp_obj_t mp_seedsigner_lvgl_poll_for_result(void) {
     s_result_head = (s_result_head + 1) % SEEDSIGNER_RESULT_QUEUE_CAP;
     s_result_count--;
 
+    qstr kind = (ev.kind == SEEDSIGNER_EVENT_TEXT_ENTERED)
+        ? MP_QSTR_text_entered
+        : MP_QSTR_button_selected;
+
     mp_obj_t out[3];
-    out[0] = MP_OBJ_NEW_QSTR(MP_QSTR_button_selected);
+    out[0] = MP_OBJ_NEW_QSTR(kind);
     out[1] = mp_obj_new_int_from_uint(ev.index);
     out[2] = mp_obj_new_str(ev.label, strlen(ev.label));
     return mp_obj_new_tuple(3, out);
@@ -226,6 +275,7 @@ static const mp_rom_map_elem_t seedsigner_lvgl_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_seedsigner_lvgl) },
     { MP_ROM_QSTR(MP_QSTR_demo_screen), MP_ROM_PTR(&seedsigner_lvgl_demo_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_button_list_screen), MP_ROM_PTR(&seedsigner_lvgl_button_list_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_seed_add_passphrase_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_add_passphrase_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_main_menu_screen), MP_ROM_PTR(&seedsigner_lvgl_main_menu_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_screensaver_screen), MP_ROM_PTR(&seedsigner_lvgl_screensaver_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_poll_for_result), MP_ROM_PTR(&seedsigner_lvgl_poll_for_result_obj) },
