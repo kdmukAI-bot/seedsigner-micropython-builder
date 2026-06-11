@@ -89,6 +89,21 @@ MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DSEEDSIGNER_DISPLAY_HEIGHT=$SEEDSIGNER_
 {
   make -C "$MP_DIR/mpy-cross" USER_C_MODULES= -j"$(nproc)"
   rm -rf "$BUILD_DIR"
+
+  # Initialize the MicroPython submodules this board needs (e.g.
+  # lib/berkeley-db-1.xx for the default MICROPY_PY_BTREE, lib/micropython-lib
+  # for frozen modules). CI checks out submodules non-recursively
+  # (actions/checkout submodules: true), so MicroPython's nested submodules are
+  # absent and CMake config fails. MicroPython's own 'submodules' target
+  # reconfigures in a throwaway dir with UPDATE_SUBMODULES=1, initializing
+  # exactly the board's required set. Pass the same args as the build so the
+  # reconfigure sees our components/board config. Idempotent on full clones.
+  make -C "$MP_DIR/ports/esp32" \
+    BOARD="$BOARD" \
+    BUILD="$BUILD_DIR" \
+    USER_C_MODULES="$USER_C_MODULES_FILE" \
+    CMAKE_ARGS="$MICROPY_CMAKE_ARGS" \
+    submodules
   make -C "$MP_DIR/ports/esp32" -j"$(nproc)" \
     BOARD="$BOARD" \
     BUILD="$BUILD_DIR" \
