@@ -133,7 +133,11 @@ jobs:
   deploy-screenshots:
     needs: build
     runs-on: ubuntu-24.04
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    # Skipped on fork PRs: GitHub forces GITHUB_TOKEN to read-only for
+    # pull_request events from a fork, so the gh-pages push cannot run. Pushes
+    # (merge to main) and same-repo PRs still deploy; a fork->upstream PR skips
+    # this gracefully — the gallery deploys when the bot's own push CI runs.
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false)
     steps:
       - name: Download screenshot artifacts
         uses: actions/download-artifact@v4
@@ -206,7 +210,9 @@ jobs:
 
   cleanup-pr-preview-pages:
     runs-on: ubuntu-24.04
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    # Also skipped on fork PRs: removing the preview pushes to gh-pages, which
+    # the read-only fork-PR token cannot do.
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.fork == false
     steps:
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
