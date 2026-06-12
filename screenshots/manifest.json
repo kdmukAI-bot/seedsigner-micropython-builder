@@ -1,37 +1,343 @@
 {
-  "generated_at": "2026-03-20 19:44:59Z",
-  "width": 480,
-  "height": 320,
-  "screenshots": [
+  "generated_at": "2026-06-12 14:07:01Z",
+  "resolutions": [
     {
-      "name": "main_menu_screen",
-      "display_name": "main_menu_screen",
-      "path": "img/main_menu_screen.png"
+      "width": 240,
+      "height": 240,
+      "label": "240x240",
+      "screenshots": [
+        {
+          "name": "main_menu_screen",
+          "display_name": "main_menu_screen",
+          "path": "img/240x240/main_menu_screen_240x240.png"
+        },
+        {
+          "name": "button_list_screen",
+          "display_name": "button_list_screen",
+          "path": "img/240x240/button_list_screen_240x240.png"
+        },
+        {
+          "name": "button_list_screen__1_item",
+          "display_name": "button_list_screen (_1_item)",
+          "path": "img/240x240/button_list_screen__1_item_240x240.png"
+        },
+        {
+          "name": "button_list_screen__scroll_many",
+          "display_name": "button_list_screen (_scroll_many)",
+          "path": "img/240x240/button_list_screen__scroll_many_240x240.png"
+        },
+        {
+          "name": "button_list_screen__long_title",
+          "display_name": "button_list_screen (_long_title) [animated]",
+          "path": "img/240x240/button_list_screen__long_title_240x240.gif"
+        },
+        {
+          "name": "screensaver_screen",
+          "display_name": "screensaver_screen",
+          "path": "img/240x240/screensaver_screen_240x240.png"
+        },
+        {
+          "name": "large_icon_status_screen",
+          "display_name": "large_icon_status_screen",
+          "path": "img/240x240/large_icon_status_screen_240x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__warning",
+          "display_name": "large_icon_status_screen (_warning)",
+          "path": "img/240x240/large_icon_status_screen__warning_240x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__dire_warning",
+          "display_name": "large_icon_status_screen (_dire_warning)",
+          "path": "img/240x240/large_icon_status_screen__dire_warning_240x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__error",
+          "display_name": "large_icon_status_screen (_error)",
+          "path": "img/240x240/large_icon_status_screen__error_240x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__dire_warning_animated",
+          "display_name": "large_icon_status_screen (_dire_warning_animated) [animated]",
+          "path": "img/240x240/large_icon_status_screen__dire_warning_animated_240x240.gif"
+        },
+        {
+          "name": "seed_add_passphrase_screen",
+          "display_name": "seed_add_passphrase_screen",
+          "path": "img/240x240/seed_add_passphrase_screen_240x240.png"
+        },
+        {
+          "name": "seed_add_passphrase_screen__prefilled",
+          "display_name": "seed_add_passphrase_screen (_prefilled)",
+          "path": "img/240x240/seed_add_passphrase_screen__prefilled_240x240.png"
+        },
+        {
+          "name": "seed_add_passphrase_screen__uppercase",
+          "display_name": "seed_add_passphrase_screen (_uppercase)",
+          "path": "img/240x240/seed_add_passphrase_screen__uppercase_240x240.png"
+        },
+        {
+          "name": "seed_add_passphrase_screen__digits",
+          "display_name": "seed_add_passphrase_screen (_digits)",
+          "path": "img/240x240/seed_add_passphrase_screen__digits_240x240.png"
+        },
+        {
+          "name": "seed_add_passphrase_screen__symbols",
+          "display_name": "seed_add_passphrase_screen (_symbols)",
+          "path": "img/240x240/seed_add_passphrase_screen__symbols_240x240.png"
+        }
+      ]
     },
     {
-      "name": "button_list_screen",
-      "display_name": "button_list_screen",
-      "path": "img/button_list_screen.png"
+      "width": 320,
+      "height": 240,
+      "label": "320x240",
+      "screenshots": [
+        {
+          "name": "main_menu_screen",
+          "display_name": "main_menu_screen",
+          "path": "img/320x240/main_menu_screen_320x240.png"
+        },
+        {
+          "name": "button_list_screen",
+          "display_name": "button_list_screen",
+          "path": "img/320x240/button_list_screen_320x240.png"
+        },
+        {
+          "name": "button_list_screen__1_item",
+          "display_name": "button_list_screen (_1_item)",
+          "path": "img/320x240/button_list_screen__1_item_320x240.png"
+        },
+        {
+          "name": "button_list_screen__scroll_many",
+          "display_name": "button_list_screen (_scroll_many)",
+          "path": "img/320x240/button_list_screen__scroll_many_320x240.png"
+        },
+        {
+          "name": "button_list_screen__long_title",
+          "display_name": "button_list_screen (_long_title) [animated]",
+          "path": "img/320x240/button_list_screen__long_title_320x240.gif"
+        },
+        {
+          "name": "screensaver_screen",
+          "display_name": "screensaver_screen",
+          "path": "img/320x240/screensaver_screen_320x240.png"
+        },
+        {
+          "name": "large_icon_status_screen",
+          "display_name": "large_icon_status_screen",
+          "path": "img/320x240/large_icon_status_screen_320x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__warning",
+          "display_name": "large_icon_status_screen (_warning)",
+          "path": "img/320x240/large_icon_status_screen__warning_320x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__dire_warning",
+          "display_name": "large_icon_status_screen (_dire_warning)",
+          "path": "img/320x240/large_icon_status_screen__dire_warning_320x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__error",
+          "display_name": "large_icon_status_screen (_error)",
+          "path": "img/320x240/large_icon_status_screen__error_320x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__dire_warning_animated",
+          "display_name": "large_icon_status_screen (_dire_warning_animated) [animated]",
+          "path": "img/320x240/large_icon_status_screen__dire_warning_animated_320x240.gif"
+        },
+        {
+          "name": "seed_add_passphrase_screen",
+          "display_name": "seed_add_passphrase_screen",
+          "path": "img/320x240/seed_add_passphrase_screen_320x240.png"
+        },
+        {
+          "name": "seed_add_passphrase_screen__prefilled",
+          "display_name": "seed_add_passphrase_screen (_prefilled)",
+          "path": "img/320x240/seed_add_passphrase_screen__prefilled_320x240.png"
+        },
+        {
+          "name": "seed_add_passphrase_screen__uppercase",
+          "display_name": "seed_add_passphrase_screen (_uppercase)",
+          "path": "img/320x240/seed_add_passphrase_screen__uppercase_320x240.png"
+        },
+        {
+          "name": "seed_add_passphrase_screen__digits",
+          "display_name": "seed_add_passphrase_screen (_digits)",
+          "path": "img/320x240/seed_add_passphrase_screen__digits_320x240.png"
+        },
+        {
+          "name": "seed_add_passphrase_screen__symbols",
+          "display_name": "seed_add_passphrase_screen (_symbols)",
+          "path": "img/320x240/seed_add_passphrase_screen__symbols_320x240.png"
+        }
+      ]
     },
     {
-      "name": "button_list_screen__1_item",
-      "display_name": "button_list_screen (_1_item)",
-      "path": "img/button_list_screen__1_item.png"
+      "width": 480,
+      "height": 320,
+      "label": "480x320",
+      "screenshots": [
+        {
+          "name": "main_menu_screen",
+          "display_name": "main_menu_screen",
+          "path": "img/480x320/main_menu_screen_480x320.png"
+        },
+        {
+          "name": "button_list_screen",
+          "display_name": "button_list_screen",
+          "path": "img/480x320/button_list_screen_480x320.png"
+        },
+        {
+          "name": "button_list_screen__1_item",
+          "display_name": "button_list_screen (_1_item)",
+          "path": "img/480x320/button_list_screen__1_item_480x320.png"
+        },
+        {
+          "name": "button_list_screen__scroll_many",
+          "display_name": "button_list_screen (_scroll_many)",
+          "path": "img/480x320/button_list_screen__scroll_many_480x320.png"
+        },
+        {
+          "name": "button_list_screen__long_title",
+          "display_name": "button_list_screen (_long_title) [animated]",
+          "path": "img/480x320/button_list_screen__long_title_480x320.gif"
+        },
+        {
+          "name": "screensaver_screen",
+          "display_name": "screensaver_screen",
+          "path": "img/480x320/screensaver_screen_480x320.png"
+        },
+        {
+          "name": "large_icon_status_screen",
+          "display_name": "large_icon_status_screen",
+          "path": "img/480x320/large_icon_status_screen_480x320.png"
+        },
+        {
+          "name": "large_icon_status_screen__warning",
+          "display_name": "large_icon_status_screen (_warning)",
+          "path": "img/480x320/large_icon_status_screen__warning_480x320.png"
+        },
+        {
+          "name": "large_icon_status_screen__dire_warning",
+          "display_name": "large_icon_status_screen (_dire_warning)",
+          "path": "img/480x320/large_icon_status_screen__dire_warning_480x320.png"
+        },
+        {
+          "name": "large_icon_status_screen__error",
+          "display_name": "large_icon_status_screen (_error)",
+          "path": "img/480x320/large_icon_status_screen__error_480x320.png"
+        },
+        {
+          "name": "large_icon_status_screen__dire_warning_animated",
+          "display_name": "large_icon_status_screen (_dire_warning_animated) [animated]",
+          "path": "img/480x320/large_icon_status_screen__dire_warning_animated_480x320.gif"
+        },
+        {
+          "name": "seed_add_passphrase_screen",
+          "display_name": "seed_add_passphrase_screen",
+          "path": "img/480x320/seed_add_passphrase_screen_480x320.png"
+        },
+        {
+          "name": "seed_add_passphrase_screen__prefilled",
+          "display_name": "seed_add_passphrase_screen (_prefilled)",
+          "path": "img/480x320/seed_add_passphrase_screen__prefilled_480x320.png"
+        },
+        {
+          "name": "seed_add_passphrase_screen__uppercase",
+          "display_name": "seed_add_passphrase_screen (_uppercase)",
+          "path": "img/480x320/seed_add_passphrase_screen__uppercase_480x320.png"
+        },
+        {
+          "name": "seed_add_passphrase_screen__symbols",
+          "display_name": "seed_add_passphrase_screen (_symbols)",
+          "path": "img/480x320/seed_add_passphrase_screen__symbols_480x320.png"
+        }
+      ]
     },
     {
-      "name": "button_list_screen__scroll_many",
-      "display_name": "button_list_screen (_scroll_many)",
-      "path": "img/button_list_screen__scroll_many.png"
-    },
-    {
-      "name": "button_list_screen__long_title",
-      "display_name": "button_list_screen (_long_title) [animated]",
-      "path": "img/button_list_screen__long_title.gif"
-    },
-    {
-      "name": "screensaver_screen",
-      "display_name": "screensaver_screen",
-      "path": "img/screensaver_screen.png"
+      "width": 800,
+      "height": 480,
+      "label": "800x480",
+      "screenshots": [
+        {
+          "name": "main_menu_screen",
+          "display_name": "main_menu_screen",
+          "path": "img/800x480/main_menu_screen_800x480.png"
+        },
+        {
+          "name": "button_list_screen",
+          "display_name": "button_list_screen",
+          "path": "img/800x480/button_list_screen_800x480.png"
+        },
+        {
+          "name": "button_list_screen__1_item",
+          "display_name": "button_list_screen (_1_item)",
+          "path": "img/800x480/button_list_screen__1_item_800x480.png"
+        },
+        {
+          "name": "button_list_screen__scroll_many",
+          "display_name": "button_list_screen (_scroll_many)",
+          "path": "img/800x480/button_list_screen__scroll_many_800x480.png"
+        },
+        {
+          "name": "button_list_screen__long_title",
+          "display_name": "button_list_screen (_long_title) [animated]",
+          "path": "img/800x480/button_list_screen__long_title_800x480.gif"
+        },
+        {
+          "name": "screensaver_screen",
+          "display_name": "screensaver_screen",
+          "path": "img/800x480/screensaver_screen_800x480.png"
+        },
+        {
+          "name": "large_icon_status_screen",
+          "display_name": "large_icon_status_screen",
+          "path": "img/800x480/large_icon_status_screen_800x480.png"
+        },
+        {
+          "name": "large_icon_status_screen__warning",
+          "display_name": "large_icon_status_screen (_warning)",
+          "path": "img/800x480/large_icon_status_screen__warning_800x480.png"
+        },
+        {
+          "name": "large_icon_status_screen__dire_warning",
+          "display_name": "large_icon_status_screen (_dire_warning)",
+          "path": "img/800x480/large_icon_status_screen__dire_warning_800x480.png"
+        },
+        {
+          "name": "large_icon_status_screen__error",
+          "display_name": "large_icon_status_screen (_error)",
+          "path": "img/800x480/large_icon_status_screen__error_800x480.png"
+        },
+        {
+          "name": "large_icon_status_screen__dire_warning_animated",
+          "display_name": "large_icon_status_screen (_dire_warning_animated) [animated]",
+          "path": "img/800x480/large_icon_status_screen__dire_warning_animated_800x480.gif"
+        },
+        {
+          "name": "seed_add_passphrase_screen",
+          "display_name": "seed_add_passphrase_screen",
+          "path": "img/800x480/seed_add_passphrase_screen_800x480.png"
+        },
+        {
+          "name": "seed_add_passphrase_screen__prefilled",
+          "display_name": "seed_add_passphrase_screen (_prefilled)",
+          "path": "img/800x480/seed_add_passphrase_screen__prefilled_800x480.png"
+        },
+        {
+          "name": "seed_add_passphrase_screen__uppercase",
+          "display_name": "seed_add_passphrase_screen (_uppercase)",
+          "path": "img/800x480/seed_add_passphrase_screen__uppercase_800x480.png"
+        },
+        {
+          "name": "seed_add_passphrase_screen__symbols",
+          "display_name": "seed_add_passphrase_screen (_symbols)",
+          "path": "img/800x480/seed_add_passphrase_screen__symbols_800x480.png"
+        }
+      ]
     }
   ]
 }
