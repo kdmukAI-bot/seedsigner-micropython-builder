@@ -1,7 +1,6 @@
 FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-ARG MICROPYTHON_REF=v1.27.0
 ARG ESP_IDF_REF=v5.5.1
 ENV IDF_TOOLS_PATH=/opt/espressif
 
@@ -17,17 +16,12 @@ RUN apt-get update && apt-get install -y \
 # Add a matching passwd entry to avoid getpwuid warnings in ESP-IDF tooling.
 RUN groupadd -g 1001 builder && useradd -m -u 1001 -g 1001 -s /bin/bash builder
 
-# Prebaked toolchain/source roots
-RUN mkdir -p /opt/bases /opt/toolchains "$IDF_TOOLS_PATH"
+# Prebaked toolchain root
+RUN mkdir -p /opt/toolchains "$IDF_TOOLS_PATH"
 
-# Pin and prefetch MicroPython baseline
-RUN git clone https://github.com/micropython/micropython.git /opt/bases/micropython && \
-    cd /opt/bases/micropython && \
-    git checkout ${MICROPYTHON_REF} && \
-    git submodule update --init --recursive
-
-# Pin and install ESP-IDF baseline
-# Explicitly export IDF_TOOLS_PATH before running install scripts to ensure consistency
+# Pin and install the ESP-IDF baseline. MicroPython is intentionally NOT baked
+# in: it is supplied at build time from the deps/micropython/upstream submodule
+# (the real version pin), and mpy-cross is built there during the firmware build.
 RUN git clone -b ${ESP_IDF_REF} --recursive https://github.com/espressif/esp-idf.git /opt/toolchains/esp-idf && \
     cd /opt/toolchains/esp-idf && \
     export IDF_TOOLS_PATH=/opt/espressif && \
@@ -37,9 +31,6 @@ RUN git clone -b ${ESP_IDF_REF} --recursive https://github.com/espressif/esp-idf
 
 # Validate ESP-IDF environment in-image
 RUN bash -lc 'source /opt/toolchains/esp-idf/export.sh >/dev/null 2>&1 && idf.py --version >/dev/null 2>&1'
-
-# Build mpy-cross once for pinned baseline
-RUN cd /opt/bases/micropython/mpy-cross && make -j"$(nproc)" USER_C_MODULES=
 
 ENV IDF_PATH=/opt/toolchains/esp-idf
 

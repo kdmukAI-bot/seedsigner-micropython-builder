@@ -42,20 +42,22 @@ known-good. The build uses it as-is — no patches are applied.
 - **Override:** `workflow_dispatch` accepts an optional `c_modules_ref` input to test a
   different branch/tag/SHA without changing the pin
 
-### `deps/micropython/upstream` — ephemeral build workspace (not a submodule)
+### `deps/micropython/upstream` — patched build workspace (a pinned submodule)
 
-MicroPython is an upstream dependency that gets **patched and mutated** during every build.
-The build starts from a clean upstream snapshot, applies the patch series from
+MicroPython is a pinned git submodule that gets **patched and mutated** during every build.
+The build starts from the clean pinned snapshot, applies the patch series from
 `deps/micropython/mods/patches/`, overlays new files (board definitions,
 partition tables) from `deps/micropython/mods/new_files/`, and compiles the
-result. The modified tree is disposable — it is not committed or version-tracked.
+result. The patch + overlay are committed inside the submodule as a single
+`seedsigner-builder: applied patch …` commit (nested `lib/` submodules are
+excluded from it). A clean `make docker-build-all` restores the submodule to its
+pinned commit on exit — preserving `lib/` submodules — so the submodule pointer,
+not the mutated tree, is the source of truth.
 
-- **Local:** seeded from the prebaked Docker image (`/opt/bases/micropython`) on first run
-  by `scripts/prepare_sources_from_image.sh`. If the directory already exists, it is left
-  as-is.
-- **CI:** same seeding script copies the baseline from the Docker image into `deps/`.
-- **Version pin:** the MicroPython version is pinned by `MICROPYTHON_REF` in `Dockerfile.ghcr`
-  and recorded in `deps/micropython/mods/BASELINE`.
+- **Local:** populated by `git submodule update --init --recursive`.
+- **CI:** populated by `actions/checkout` with `submodules: true`.
+- **Version pin:** the submodule pointer (recorded in `deps/micropython/mods/BASELINE`) is
+  the single source of truth.
 - **Developer mode:** if the MicroPython tree has uncommitted changes (dirty working tree),
   `apply_micropython_mods.sh` skips repatching and uses your current tree. This lets you
   edit MicroPython source directly and iterate without the patch step overwriting your work.
@@ -66,8 +68,8 @@ result. The modified tree is disposable — it is not committed or version-track
 |---|---|---|
 | Ownership | Project-owned code | Upstream dependency |
 | Modified during build? | No — used as-is | Yes — patched + overlaid |
-| Version tracking | Submodule commit pointer | Docker image `MICROPYTHON_REF` + `BASELINE` file |
-| Working tree after build | Clean | Dirty (patched) |
+| Version tracking | Submodule commit pointer | Submodule commit pointer + `BASELINE` file |
+| Working tree after build | Clean | Patched during build, restored to pinned after a clean build |
 
 A submodule implies a stable, tracked pointer — which makes sense for c-modules but not for
 a tree that is immediately mutated. MicroPython's version is pinned in the Docker base image
@@ -103,16 +105,16 @@ make docker-build-all
 ```
 
 Notes on default behavior:
-- First run: if `deps/micropython/upstream` is missing, it is seeded from the Docker image automatically.
+- First run: initialize submodules (`git submodule update --init --recursive`) if `deps/micropython/upstream` is empty.
 - Subsequent runs: if `deps/micropython/upstream` is dirty, the build uses your current working tree and skips repatching.
 
 ## CI
 
 GitHub Actions workflow: `.github/workflows/build-firmware.yml`
 
-CI checks out this repo with `submodules: true` (populating `seedsigner-c-modules` at its
-pinned commit), seeds `deps/micropython/upstream` from the prebaked Docker image, applies mods,
-builds firmware, and uploads artifacts.
+CI checks out this repo with `submodules: true` (populating `seedsigner-c-modules` and
+`deps/micropython/upstream` at their pinned commits), applies mods, builds firmware, and
+uploads artifacts.
 
 
 ## Build outputs
@@ -173,17 +175,19 @@ The workflow supports `workflow_dispatch` with optional inputs:
 Use this to test feature branches of either repo without changing default CI behavior.
 Leaving `c_modules_ref` blank builds with whatever commit the submodule points at.
 
-## Prebuilt base image (GHCR)
+## Prebuilt base image
 
-To reduce repeated setup work, CI uses a prebaked base image with:
+To reduce repeated setup work, builds run inside a prebaked base image with:
 
-- pinned MicroPython baseline (including submodules + prebuilt mpy-cross)
 - pinned ESP-IDF baseline (tools installed)
 - common host/build dependencies
 
-Build/publish this image via workflow:
+MicroPython is **not** baked in — it comes from the `deps/micropython/upstream`
+submodule (see above), so the image only changes on an ESP-IDF bump.
 
-- `.github/workflows/build-base-image.yml`
+This image is built and published **manually** (not by a CI job) — see
+[Rebuilding and publishing the base image](README-dev.md#rebuilding-and-publishing-the-base-image)
+in the developer guide.
 
 Firmware workflow then seeds `deps/` from that image and applies project mods before build.
 

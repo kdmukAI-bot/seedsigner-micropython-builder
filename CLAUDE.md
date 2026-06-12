@@ -103,6 +103,6 @@ Runs seedsigner Python business logic on MicroPython 1.27.0
 - **GitLab** (`.gitlab-ci.yml`) — Firmware build + GitLab Pages. Base image from GitLab Container Registry.
 - **Forgejo/Codeberg** (`.forgejo/workflows/`) — Firmware build + branch-based Pages. Base image from Codeberg registry.
 - **Shared CI logic** (`scripts/ci/ci.sh`) — Common build steps called by all platform configs.
-- **`build-base-image.yml`** — Builds/publishes Docker image with prebaked MicroPython + ESP-IDF (GitHub-only, images mirrored to other registries manually).
+- **Base image** — Prebaked Docker image with pinned MicroPython + ESP-IDF, built and published **manually** (not via CI) to GHCR + GitLab + Codeberg registries. See `README-dev.md`.
 
 <!-- Git, Builds, and General rules are in the parent /home/kdmukai/dev/CLAUDE.md -->
