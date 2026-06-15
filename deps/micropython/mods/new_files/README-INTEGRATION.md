@@ -17,4 +17,4 @@
 
 ## External dependency
 - This integration depends on external components from:
-  - https://github.com/kdmukAI-bot/custom-c-modules
+  - https://github.com/kdmukAI-bot/custom-lvgl-screens

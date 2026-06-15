@@ -14,10 +14,10 @@ if [ ! -e "$WORKDIR/micropython/upstream/.git" ]; then
   exit 1
 fi
 
-# seedsigner-c-modules is a git submodule; verify it's been initialized.
-if [ ! -e "$WORKDIR/seedsigner-c-modules/.git" ]; then
-  echo "ERROR: seedsigner-c-modules submodule not initialized."
-  echo "Run: git submodule update --init deps/seedsigner-c-modules"
+# seedsigner-lvgl-screens is a git submodule; verify it's been initialized.
+if [ ! -e "$WORKDIR/seedsigner-lvgl-screens/.git" ]; then
+  echo "ERROR: seedsigner-lvgl-screens submodule not initialized."
+  echo "Run: git submodule update --init deps/seedsigner-lvgl-screens"
   exit 1
 fi
 

@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Expected layout under builder root:
 #   <builder>/deps/micropython/upstream   (git submodule)
-#   <builder>/deps/seedsigner-c-modules   (git submodule)
+#   <builder>/deps/seedsigner-lvgl-screens   (git submodule)
 #   <builder>/deps/micropython/mods/
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -14,7 +14,7 @@ PATCH_DIR="$MODS_DIR/patches"
 
 WORKDIR="${1:-$ROOT_DIR/deps}"
 MP_DIR="$WORKDIR/micropython/upstream"
-CMODS_DIR="$WORKDIR/seedsigner-c-modules"
+SCREENS_DIR="$WORKDIR/seedsigner-lvgl-screens"
 
 if [ ! -e "$MP_DIR/.git" ]; then
   echo "ERROR: expected MicroPython repo at: $MP_DIR"

@@ -19,7 +19,7 @@ cd seedsigner-micropython-builder
 git submodule update --init --recursive
 ```
 
-The `--recursive` flag is required because `seedsigner-c-modules` contains its own
+The `--recursive` flag is required because `seedsigner-lvgl-screens` contains its own
 submodule (LVGL).
 
 If you've already cloned without `--recursive`, run
@@ -30,7 +30,7 @@ If you've already cloned without `--recursive`, run
 The `deps/` directory holds the external source trees needed for the build. They are
 managed differently because they play different roles.
 
-### `deps/seedsigner-c-modules` — git submodule (version-pinned)
+### `deps/seedsigner-lvgl-screens` — git submodule (version-pinned)
 
 This is the project's shared C module code (LVGL screens, navigation). It
 is tracked as a **git submodule** so the builder repo records exactly which commit is
@@ -39,7 +39,7 @@ known-good. The build uses it as-is — no patches are applied.
 - **Local:** populated by `git submodule update --init --recursive`
 - **CI:** populated by `actions/checkout` with `submodules: true`
 - **Version pin:** the submodule pointer in this repo is the single source of truth
-- **Override:** `workflow_dispatch` accepts an optional `c_modules_ref` input to test a
+- **Override:** `workflow_dispatch` accepts an optional `screens_ref` input to test a
   different branch/tag/SHA without changing the pin
 
 ### `deps/micropython/upstream` — patched build workspace (a pinned submodule)
@@ -64,14 +64,14 @@ not the mutated tree, is the source of truth.
 
 ### Why the difference?
 
-| | `seedsigner-c-modules` | `micropython` |
+| | `seedsigner-lvgl-screens` | `micropython` |
 |---|---|---|
 | Ownership | Project-owned code | Upstream dependency |
 | Modified during build? | No — used as-is | Yes — patched + overlaid |
 | Version tracking | Submodule commit pointer | Submodule commit pointer + `BASELINE` file |
 | Working tree after build | Clean | Patched during build, restored to pinned after a clean build |
 
-A submodule implies a stable, tracked pointer — which makes sense for c-modules but not for
+A submodule implies a stable, tracked pointer — which makes sense for lvgl-screens but not for
 a tree that is immediately mutated. MicroPython's version is pinned in the Docker base image
 and the `BASELINE` file instead.
 
@@ -112,7 +112,7 @@ Notes on default behavior:
 
 GitHub Actions workflow: `.github/workflows/build-firmware.yml`
 
-CI checks out this repo with `submodules: true` (populating `seedsigner-c-modules` and
+CI checks out this repo with `submodules: true` (populating `seedsigner-lvgl-screens` and
 `deps/micropython/upstream` at their pinned commits), applies mods, builds firmware, and
 uploads artifacts.
 
@@ -169,11 +169,11 @@ python -m esptool --chip esp32p4 --port /dev/ttyACM0   write_flash "@flash_args"
 The workflow supports `workflow_dispatch` with optional inputs:
 
 - `builder_ref` — branch/tag/SHA of this repo to run (default: `main`)
-- `c_modules_ref` — branch/tag/SHA of `seedsigner-c-modules` to use (default: blank,
+- `screens_ref` — branch/tag/SHA of `seedsigner-lvgl-screens` to use (default: blank,
   meaning the pinned submodule commit)
 
 Use this to test feature branches of either repo without changing default CI behavior.
-Leaving `c_modules_ref` blank builds with whatever commit the submodule points at.
+Leaving `screens_ref` blank builds with whatever commit the submodule points at.
 
 ## Prebuilt base image
 

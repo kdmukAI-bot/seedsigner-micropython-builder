@@ -1,9 +1,9 @@
-[submodule "deps/seedsigner-c-modules"]
-	path = deps/seedsigner-c-modules
-	url = https://gitlab.com/kdmukAI-bot/seedsigner-c-modules.git
 [submodule "micropython"]
 	path = deps/micropython/upstream
 	url = https://github.com/micropython/micropython.git
 [submodule "ports/esp32/board_common"]
 	path = ports/esp32/board_common
 	url = https://gitlab.com/kdmukAI-bot/esp-board-common.git
+[submodule "deps/seedsigner-lvgl-screens"]
+	path = deps/seedsigner-lvgl-screens
+	url = https://gitlab.com/kdmukAI-bot/seedsigner-lvgl-screens.git

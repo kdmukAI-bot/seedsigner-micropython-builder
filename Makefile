@@ -51,7 +51,7 @@ clean:
 		dist \
 		logs \
 		deps/micropython/upstream/ports/esp32/build* \
-		deps/seedsigner-c-modules/tools/screenshot_generator/build
+		deps/seedsigner-lvgl-screens/tools/screenshot_generator/build
 
 # Destructive reset: removes all generated artifacts and resets submodule working trees.
 # Requires explicit confirmation to avoid accidental loss of in-progress work.

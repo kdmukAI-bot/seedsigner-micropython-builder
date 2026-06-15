@@ -46,7 +46,7 @@ case "$COMMAND" in
       echo "timestamp_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
       echo "builder_ref=$(git rev-parse HEAD)"
       echo "micropython_head=$(git -C deps/micropython/upstream rev-parse HEAD)"
-      echo "c_modules_head=$(git -C deps/seedsigner-c-modules rev-parse HEAD)"
+      echo "screens_head=$(git -C deps/seedsigner-lvgl-screens rev-parse HEAD)"
       echo "idf_head=$(git -C "$IDF_PATH" rev-parse HEAD 2>/dev/null || echo unknown)"
       echo "idf_version=$(source "$IDF_PATH/export.sh" >/dev/null 2>&1; idf.py --version 2>/dev/null || echo unknown)"
       echo "python=$(python3 --version 2>&1)"
@@ -63,11 +63,11 @@ case "$COMMAND" in
     cp "$BUILD_DIR/bootloader/bootloader.bin" out/bootloader/
     cp "$BUILD_DIR/partition_table/partition-table.bin" out/partition_table/
     cp -r logs/* out/logs/ 2>/dev/null || true
-    cp -r "$DEPS_DIR/seedsigner-c-modules/tools/screenshot_generator/screenshots/"* out/screenshots/
+    cp -r "$DEPS_DIR/seedsigner-lvgl-screens/tools/screenshot_generator/screenshots/"* out/screenshots/
     ;;
 
   # ---------------------------------------------------------------------------
-  # Pages deployment (same pattern as seedsigner-c-modules)
+  # Pages deployment (same pattern as seedsigner-lvgl-screens)
   # ---------------------------------------------------------------------------
 
   deploy-pages)

@@ -2,7 +2,7 @@
 
 ## Context
 
-`seedsigner-c-modules` currently contains both **shared** LVGL screen code and **ESP32-specific** hardware drivers + MicroPython bindings. The raspi-lvgl repo only uses the shared code (`components/seedsigner/`, `components/nlohmann_json/`, `third_party/lvgl`, `tools/`). The ESP-specific code is only consumed by this builder repo. Moving it here makes the dependency boundaries match the actual platform split.
+`seedsigner-lvgl-screens` currently contains both **shared** LVGL screen code and **ESP32-specific** hardware drivers + MicroPython bindings. The raspi-lvgl repo only uses the shared code (`components/seedsigner/`, `components/nlohmann_json/`, `third_party/lvgl`, `tools/`). The ESP-specific code is only consumed by this builder repo. Moving it here makes the dependency boundaries match the actual platform split.
 
 This refactor also improves the repo's directory naming:
 - `sources/` → `deps/` (external dependencies, not "source code")
@@ -11,23 +11,23 @@ This refactor also improves the repo's directory naming:
 
 ### Sequencing Decision: v8 First, v9 Later
 
-An LVGL v8 → v9 migration is in progress in c-modules (PR #12, branch `feature/lvgl-v9-migration`). We restructure against v8 first because:
+An LVGL v8 → v9 migration is in progress in lvgl-screens (PR #12, branch `feature/lvgl-v9-migration`). We restructure against v8 first because:
 
 1. **Separation of concerns** — the restructure is mechanical (move files, update paths); the v9 rewrite is functional (new APIs, hardware-specific flush callback). Mixing them makes debugging harder.
 2. **PR #12 is still open** — building on an unmerged branch is fragile.
 3. **Hardware testing** — the v9 display rewrite (AXS15231B QSPI direct_mode flush) can't be validated without flashing real hardware.
-4. **No conflicts** — our `remove-esp-platform` branch and PR #12 don't touch the same files in c-modules.
+4. **No conflicts** — our `remove-esp-platform` branch and PR #12 don't touch the same files in lvgl-screens.
 
 After this restructure lands:
-1. Merge PR #12 into c-modules `main`
-2. Update micropython-builder submodule to new c-modules `main`
-3. Do v9 display rewrite in micropython-builder (see `seedsigner-c-modules/docs/lvgl-v9-migration-plan.md` Parts 4a–4e for detailed instructions)
+1. Merge PR #12 into lvgl-screens `main`
+2. Update micropython-builder submodule to new lvgl-screens `main`
+3. Do v9 display rewrite in micropython-builder (see `seedsigner-lvgl-screens/docs/lvgl-v9-migration-plan.md` Parts 4a–4e for detailed instructions)
 
 ## What Moves
 
 **ESP platform components** → `ports/esp32/`:
 
-| From c-modules | To micropython-builder |
+| From lvgl-screens | To micropython-builder |
 |---|---|
 | `components/esp_bsp/` | `ports/esp32/esp_bsp/` |
 | `components/esp_lv_port/` | `ports/esp32/esp_lv_port/` |
@@ -37,12 +37,12 @@ After this restructure lands:
 
 **MicroPython bindings** → repo root:
 
-| From c-modules | To micropython-builder |
+| From lvgl-screens | To micropython-builder |
 |---|---|
 | `bindings/*` | `bindings/*` |
 | `usercmodule.cmake` | `usercmodule.cmake` |
 
-**Stays in c-modules**: `components/seedsigner/`, `components/nlohmann_json/`, `third_party/lvgl`, `tools/`, `scripts/`, `tests/`, `docs/`
+**Stays in lvgl-screens**: `components/seedsigner/`, `components/nlohmann_json/`, `third_party/lvgl`, `tools/`, `scripts/`, `tests/`, `docs/`
 
 ## Final Directory Layout
 
@@ -71,7 +71,7 @@ seedsigner-micropython-builder/
     esp-idf/
       mods/                              # was platform_mods/idf_mods/
         BASELINE
-    seedsigner-c-modules/                # git submodule
+    seedsigner-lvgl-screens/                # git submodule
   scripts/
   build/
   Makefile
@@ -79,9 +79,9 @@ seedsigner-micropython-builder/
 
 ## Implementation Steps
 
-### Step 1: Create c-modules feature branch
+### Step 1: Create lvgl-screens feature branch
 
-Branch: `remove-esp-platform` off c-modules `main`
+Branch: `remove-esp-platform` off lvgl-screens `main`
 
 - Delete: `components/esp_bsp/`, `components/esp_lv_port/`, `components/display_manager/`, `components/esp32-camera/`, `components/XPowersLib/`
 - Delete: `bindings/` directory
@@ -90,7 +90,7 @@ Branch: `remove-esp-platform` off c-modules `main`
 
 ### Step 2: Add new files to micropython-builder
 
-**`ports/esp32/`** — copy all 5 ESP component directories verbatim from c-modules main.
+**`ports/esp32/`** — copy all 5 ESP component directories verbatim from lvgl-screens main.
 
 **`bindings/`** — copy .c files verbatim; modify `micropython.cmake`:
 ```cmake
@@ -99,7 +99,7 @@ target_include_directories(usermod_dm INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/../ports/esp32/display_manager
     ${CMAKE_CURRENT_LIST_DIR}/../ports/esp32/esp_bsp
     ${CMAKE_CURRENT_LIST_DIR}/../ports/esp32/esp_lv_port/include
-    ${SEEDSIGNER_C_MODULES_DIR}/components/seedsigner
+    ${SEEDSIGNER_LVGL_SCREENS_DIR}/components/seedsigner
 )
 ```
 
@@ -113,19 +113,19 @@ include(${CMAKE_CURRENT_LIST_DIR}/bindings/micropython.cmake)
 Move and reorganize:
 ```
 sources/micropython/         →  deps/micropython/upstream/
-sources/seedsigner-c-modules →  deps/seedsigner-c-modules/
+sources/seedsigner-lvgl-screens →  deps/seedsigner-lvgl-screens/
 platform_mods/micropython_mods/ → deps/micropython/mods/
 platform_mods/idf_mods/      →  deps/esp-idf/mods/
 ```
 
 Update `.gitmodules`:
 ```
-[submodule "deps/seedsigner-c-modules"]
-    path = deps/seedsigner-c-modules
-    url = https://github.com/kdmukAI-bot/seedsigner-c-modules.git
+[submodule "deps/seedsigner-lvgl-screens"]
+    path = deps/seedsigner-lvgl-screens
+    url = https://github.com/kdmukAI-bot/seedsigner-lvgl-screens.git
 ```
 
-Note: Changing a submodule path requires `git rm sources/seedsigner-c-modules` then re-adding at the new path.
+Note: Changing a submodule path requires `git rm sources/seedsigner-lvgl-screens` then re-adding at the new path.
 
 ### Step 4: Update all scripts for new paths
 
@@ -135,13 +135,13 @@ Note: Changing a submodule path requires `git rm sources/seedsigner-c-modules` t
 ```bash
 WORKDIR="${1:-$ROOT_DIR/deps}"
 MP_DIR="$WORKDIR/micropython/upstream"      # was $WORKDIR/micropython
-CMODS_DIR="$WORKDIR/seedsigner-c-modules"
+SCREENS_DIR="$WORKDIR/seedsigner-lvgl-screens"
 
 PORTS_ESP32_DIR="$ROOT_DIR/ports/esp32"
 USER_C_MODULES_FILE="$ROOT_DIR/usercmodule.cmake"
 MICROPY_CMAKE_ARGS="${CMAKE_ARGS:-} -DUSER_C_MODULES=$USER_C_MODULES_FILE"
-MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DMICROPY_EXTRA_COMPONENT_DIRS=${PORTS_ESP32_DIR}\;${CMODS_DIR}/components"
-MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DSEEDSIGNER_C_MODULES_DIR=$CMODS_DIR"
+MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DMICROPY_EXTRA_COMPONENT_DIRS=${PORTS_ESP32_DIR}\;${SCREENS_DIR}/components"
+MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DSEEDSIGNER_LVGL_SCREENS_DIR=$SCREENS_DIR"
 ```
 
 **`scripts/apply_micropython_mods.sh`**:
@@ -160,13 +160,13 @@ MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DSEEDSIGNER_C_MODULES_DIR=$CMODS_DIR"
 - `BASELINE_FILE="$ROOT_DIR/deps/esp-idf/mods/BASELINE"`
 
 **`scripts/run_screenshot_generator.sh`**:
-- `CMODS_DIR="$WORKDIR/seedsigner-c-modules"` (same relative path, just under deps/)
+- `SCREENS_DIR="$WORKDIR/seedsigner-lvgl-screens"` (same relative path, just under deps/)
 - LVGL path: `$WORKDIR/micropython/upstream/ports/esp32/managed_components/lvgl__lvgl`
 
 **`scripts/docker_build_all.sh`**:
 - `mkdir -p deps` (was `sources`)
 - All `sources/` refs → `deps/`
-- c-modules clone to `$ROOT_DIR/deps/seedsigner-c-modules`
+- lvgl-screens clone to `$ROOT_DIR/deps/seedsigner-lvgl-screens`
 
 **`scripts/ci_build.sh`**:
 - WORKDIR default to `$ROOT_DIR/deps`
@@ -175,15 +175,15 @@ MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DSEEDSIGNER_C_MODULES_DIR=$CMODS_DIR"
 - WORKDIR default to `$ROOT_DIR/deps`
 
 **`Makefile`**:
-- `clean` target: `deps/micropython/upstream/ports/esp32/build*` and `deps/seedsigner-c-modules/tools/...`
+- `clean` target: `deps/micropython/upstream/ports/esp32/build*` and `deps/seedsigner-lvgl-screens/tools/...`
 - `full-reset`: `rm -rf deps build logs .ccache`
 - Comment updates
 
 **`.github/workflows/build-firmware.yml`**:
 - `mkdir -p deps` and `prepare_sources_from_image.sh "$PWD/deps"`
-- `git -C deps/seedsigner-c-modules ...`
+- `git -C deps/seedsigner-lvgl-screens ...`
 - `git -C deps/micropython/upstream ...`
-- Screenshot copy from `deps/seedsigner-c-modules/tools/...`
+- Screenshot copy from `deps/seedsigner-lvgl-screens/tools/...`
 
 ### Step 5: Update MicroPython patch for multi-directory support
 
@@ -203,15 +203,15 @@ endif()
 
 **Approach**: Apply old patch to clean MicroPython, make the edit, regenerate with `git diff`.
 
-### Step 6: Point submodule to c-modules feature branch
+### Step 6: Point submodule to lvgl-screens feature branch
 
 ```bash
-git rm sources/seedsigner-c-modules
-git submodule add https://github.com/kdmukAI-bot/seedsigner-c-modules.git deps/seedsigner-c-modules
-cd deps/seedsigner-c-modules
+git rm sources/seedsigner-lvgl-screens
+git submodule add https://github.com/kdmukAI-bot/seedsigner-lvgl-screens.git deps/seedsigner-lvgl-screens
+cd deps/seedsigner-lvgl-screens
 git checkout remove-esp-platform
 cd ../..
-git add deps/seedsigner-c-modules .gitmodules
+git add deps/seedsigner-lvgl-screens .gitmodules
 ```
 
 ### Step 7: Test build
@@ -219,13 +219,13 @@ git add deps/seedsigner-c-modules .gitmodules
 Run `make docker-build-all` to verify:
 1. Both `EXTRA_COMPONENT_DIRS` entries register correctly
 2. Cross-directory component resolution works (`display_manager` REQUIRES `seedsigner` across dirs)
-3. MicroPython bindings compile with `SEEDSIGNER_C_MODULES_DIR`
+3. MicroPython bindings compile with `SEEDSIGNER_LVGL_SCREENS_DIR`
 4. Screenshot generator still works
 
 ### Step 8: Land PRs
 
-1. PR `remove-esp-platform` branch into c-modules `main`
-2. After merge, update submodule pin to c-modules `main`
+1. PR `remove-esp-platform` branch into lvgl-screens `main`
+2. After merge, update submodule pin to lvgl-screens `main`
 3. PR the micropython-builder changes
 
 ## Follow-up: LVGL v9 Migration — COMPLETED
@@ -234,7 +234,7 @@ Branch: `feature/lvgl-v9-migration` (PR pending — GitHub account suspended as 
 
 ### What was done
 
-1. Updated c-modules submodule to v9 (`2256fbd`)
+1. Updated lvgl-screens submodule to v9 (`2256fbd`)
 2. **Deleted `ports/esp32/esp_lv_port/`** — replaced by `espressif/esp_lvgl_port` v2.7.2
 3. **Rewrote `ports/esp32/display_manager/display_manager.cpp`** for v9
 4. **Deleted custom touch** (`bsp_touch.c/h`) — replaced by `esp_lcd_touch_new_i2c_axs15231b()`
@@ -277,4 +277,4 @@ Future optimization options:
 1. **Shell quoting of semicolons**: `MICROPY_EXTRA_COMPONENT_DIRS` passes through Make → CMake. The `\;` escape should work; fallback is two separate `-D` flags.
 2. **Cross-directory REQUIRES**: `display_manager` depends on `seedsigner` in a different component dir. ESP-IDF collects all dirs before resolving — should work. Verify in Step 7.
 3. **Lock file staleness**: The `dependencies.lock.esp32s3` may need regenerating. If build fails, delete lock file, let it regenerate, update patch.
-4. **Submodule path change**: Changing from `sources/seedsigner-c-modules` to `deps/seedsigner-c-modules` requires `git rm` + `git submodule add` (not just a rename).
+4. **Submodule path change**: Changing from `sources/seedsigner-lvgl-screens` to `deps/seedsigner-lvgl-screens` requires `git rm` + `git submodule add` (not just a rename).

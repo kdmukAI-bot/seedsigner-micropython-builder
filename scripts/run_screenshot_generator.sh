@@ -4,21 +4,21 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 WORKDIR="${1:-$ROOT_DIR/deps}"
-CMODS_DIR="$WORKDIR/seedsigner-c-modules"
+SCREENS_DIR="$WORKDIR/seedsigner-lvgl-screens"
 
 LOGS_DIR="${LOGS_DIR:-$ROOT_DIR/logs}"
 TS="$(date -u +%Y-%m-%d_%H%M%SZ)"
 LOG_FILE="$LOGS_DIR/${TS}-screenshots.log"
 
-if [ ! -e "$CMODS_DIR/.git" ]; then
-  echo "ERROR: expected seedsigner-c-modules repo at: $CMODS_DIR"
+if [ ! -e "$SCREENS_DIR/.git" ]; then
+  echo "ERROR: expected seedsigner-lvgl-screens repo at: $SCREENS_DIR"
   exit 1
 fi
 
 mkdir -p "$LOGS_DIR"
 
 {
-  echo "Using custom modules repo: $CMODS_DIR"
+  echo "Using custom modules repo: $SCREENS_DIR"
 
   LVGL_ROOT_CANDIDATE="${LVGL_ROOT:-}"
   if [ -z "$LVGL_ROOT_CANDIDATE" ] || [ ! -d "$LVGL_ROOT_CANDIDATE" ]; then
@@ -37,7 +37,7 @@ mkdir -p "$LOGS_DIR"
   # Resolve to absolute path before cd into submodule dir.
   LVGL_ROOT_CANDIDATE="$(cd "$LVGL_ROOT_CANDIDATE" && pwd)"
   echo "Using LVGL_ROOT: $LVGL_ROOT_CANDIDATE"
-  cd "$CMODS_DIR"
+  cd "$SCREENS_DIR"
 
   DISPLAY_WIDTH="${DISPLAY_WIDTH:-480}"
   DISPLAY_HEIGHT="${DISPLAY_HEIGHT:-320}"
@@ -49,7 +49,7 @@ mkdir -p "$LOGS_DIR"
   ./tools/screenshot_generator/build/screenshot_gen
 
   echo "Screenshot generation complete."
-  echo "Output root: $CMODS_DIR/tools/screenshot_generator/screenshots"
+  echo "Output root: $SCREENS_DIR/tools/screenshot_generator/screenshots"
 } 2>&1 | tee "$LOG_FILE"
 
 echo "Log saved to: $LOG_FILE"

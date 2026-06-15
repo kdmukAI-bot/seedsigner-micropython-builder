@@ -6,7 +6,7 @@ Build orchestration for compiling MicroPython v1.27.0 firmware targeting ESP32-S
 ### Key Architecture
 - **MicroPython**: Git submodule at `deps/micropython/upstream/` pinned to `v1.27.0`. Patched at build time, restored to clean state after.
 - **ESP-IDF v5.5.1**: Prebaked in Docker image at `/opt/toolchains/esp-idf`
-- **seedsigner-c-modules**: Git submodule at `deps/seedsigner-c-modules/` — version-pinned
+- **seedsigner-lvgl-screens**: Git submodule at `deps/seedsigner-lvgl-screens/` — version-pinned
 - **ESP32 components**: `ports/esp32/` — hardware drivers (display, camera, power, BSP)
 - **MicroPython bindings**: `bindings/` + `usercmodule.cmake` — C module integration
 
@@ -16,7 +16,7 @@ prepare_sources_from_image.sh  →  Verifies submodules + prebaked ESP-IDF
 apply_micropython_mods.sh      →  Applies patches + overlays new board files
 apply_idf_mods.sh              →  (placeholder, no IDF patches yet)
 build_firmware.sh              →  Builds mpy-cross, then ESP32 firmware
-run_screenshot_generator.sh    →  Builds LVGL screenshot gallery from c-modules
+run_screenshot_generator.sh    →  Builds LVGL screenshot gallery from lvgl-screens
 restore_micropython_clean.sh   →  Restores submodule to clean pinned state
 ```
 
@@ -69,26 +69,26 @@ make full-reset CONFIRM=YES           # Remove all ephemeral deps + artifacts
 All boards: Network/Bluetooth disabled at both MicroPython and IDF level.
 
 ## Broader Ecosystem Context
-This repo builds ESP32-S3 and ESP32-P4 firmware variants of SeedSigner. It takes the shared LVGL screens from `seedsigner-c-modules`, combines them with ESP32-specific hardware drivers from `ports/esp32/`, and bakes them into MicroPython firmware images that will eventually run the SeedSigner Python business logic on microcontrollers.
+This repo builds ESP32-S3 and ESP32-P4 firmware variants of SeedSigner. It takes the shared LVGL screens from `seedsigner-lvgl-screens`, combines them with ESP32-specific hardware drivers from `ports/esp32/`, and bakes them into MicroPython firmware images that will eventually run the SeedSigner Python business logic on microcontrollers.
 
 ### The Four Repos (all under `/home/kdmukai/dev/`)
 
 1. **`seedsigner/`** — Production Python application (business logic, views, models). The goal is to make this codebase MicroPython 1.27.0-compatible so it runs on the firmware this repo produces.
 
-2. **`seedsigner-c-modules/`** — Shared LVGL screens (C/C++). This repo consumes it as a git submodule for the platform-agnostic screen code (`components/seedsigner/`, `components/nlohmann_json/`).
+2. **`seedsigner-lvgl-screens/`** — Shared LVGL screens (C/C++). This repo consumes it as a git submodule for the platform-agnostic screen code (`components/seedsigner/`, `components/nlohmann_json/`).
 
-3. **`seedsigner-micropython-builder/`** (this repo) — Compiles MicroPython + c-modules + ESP32 hardware drivers into flashable ESP32-S3 firmware. Owns the MicroPython bindings (`bindings/`, `usercmodule.cmake`) and ESP32-specific components (`ports/esp32/`). Docker-only builds for reproducibility.
+3. **`seedsigner-micropython-builder/`** (this repo) — Compiles MicroPython + lvgl-screens + ESP32 hardware drivers into flashable ESP32-S3 firmware. Owns the MicroPython bindings (`bindings/`, `usercmodule.cmake`) and ESP32-specific components (`ports/esp32/`). Docker-only builds for reproducibility.
 
-4. **`seedsigner-raspi-lvgl/`** — The Pi Zero counterpart: compiles the same LVGL screens from `seedsigner-c-modules` into a CPython extension. Not used by this repo, but produces the equivalent rendering layer for the other platform.
+4. **`seedsigner-raspi-lvgl/`** — The Pi Zero counterpart: compiles the same LVGL screens from `seedsigner-lvgl-screens` into a CPython extension. Not used by this repo, but produces the equivalent rendering layer for the other platform.
 
 ### How They Connect
 ```
-seedsigner-c-modules (git submodule — shared LVGL screens)
+seedsigner-lvgl-screens (git submodule — shared LVGL screens)
        │
        ▼
 seedsigner-micropython-builder (this repo)
        │  patches MicroPython, adds board def,
-       │  compiles firmware with LVGL C modules
+       │  compiles firmware with LVGL screens
        │  + ESP32 hardware drivers (ports/esp32/)
        │  + MicroPython bindings (bindings/)
        ▼

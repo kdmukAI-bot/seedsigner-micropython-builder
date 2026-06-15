@@ -8,7 +8,7 @@ Dependencies live under `deps/`:
 
 - `<builder>/deps/micropython/upstream` — MicroPython git submodule (pinned to v1.27.0)
 - `<builder>/deps/micropython/mods/` — this directory (patches + new files)
-- `<builder>/deps/seedsigner-c-modules` — git submodule
+- `<builder>/deps/seedsigner-lvgl-screens` — git submodule
 
 Where `<builder>` is the repository root (`seedsigner-micropython-builder`).
 

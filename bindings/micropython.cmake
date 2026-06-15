@@ -9,7 +9,7 @@ target_include_directories(usermod_dm INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/../ports/esp32/display_manager
     ${CMAKE_CURRENT_LIST_DIR}/../ports/esp32/board_common/src
-    ${SEEDSIGNER_C_MODULES_DIR}/components/seedsigner
+    ${SEEDSIGNER_LVGL_SCREENS_DIR}/components/seedsigner
 )
 
 # Link bindings against ESP-IDF component libs instead of compiling component C++
