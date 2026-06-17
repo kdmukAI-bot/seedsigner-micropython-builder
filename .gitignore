@@ -22,3 +22,10 @@ __pycache__/
 .DS_Store
 .vscode/
 CLAUDE.md
+
+# On-device webcam verification artifacts (large binaries; keep untracked)
+/device-renders/
+
+# Claude Code session state
+/.claude/
+/.claude-auto-commit

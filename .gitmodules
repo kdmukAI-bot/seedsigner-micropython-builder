@@ -6,4 +6,4 @@
 	url = https://gitlab.com/kdmukAI-bot/esp-board-common.git
 [submodule "deps/seedsigner-lvgl-screens"]
 	path = deps/seedsigner-lvgl-screens
-	url = https://gitlab.com/kdmukAI-bot/seedsigner-lvgl-screens.git
+	url = https://github.com/kdmukAI-bot/seedsigner-lvgl-screens.git

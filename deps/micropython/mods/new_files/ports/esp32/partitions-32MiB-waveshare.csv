@@ -2,7 +2,9 @@
 # NOTE: Layout intentionally matches the 16MiB partition table so firmware
 #       images are compatible across 16MB and 32MB boards. Only ~12MB of
 #       32MB flash is used as a result.
-# Name,   Type, SubType, Offset,  Size, Flags
-nvs,      data, nvs,     0x9000,  0x6000,
-phy_init, data, phy,     0xf000,  0x1000,
-factory,  app,  factory, 0x10000, 0xC00000,
+# Name,    Type, SubType,  Offset,   Size, Flags
+nvs,      data, nvs,      0x9000,   0x6000,
+phy_init, data, phy,      0xf000,   0x1000,
+factory,  app,  factory,  0x10000,  0xC00000,
+# Debug builds: coredump-to-flash target (after factory; still within 16MB).
+coredump, data, coredump, 0xC10000, 0x40000,

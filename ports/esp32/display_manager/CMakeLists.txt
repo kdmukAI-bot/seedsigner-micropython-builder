@@ -7,6 +7,7 @@ list(APPEND component_requires
     "esp_lvgl_port"
     "lvgl"
     "seedsigner"
+    "esp_hw_support"   # esp_ldo_regulator.h — power the P4 SD card VDD rail
 )
 
 idf_component_register(
