@@ -41,15 +41,15 @@ mkdir -p "$LOGS_DIR"
 
   DISPLAY_WIDTH="${DISPLAY_WIDTH:-480}"
   DISPLAY_HEIGHT="${DISPLAY_HEIGHT:-320}"
-  cmake -S tools/screenshot_generator -B tools/screenshot_generator/build \
+  cmake -S tools/apps/screenshot_generator -B tools/apps/screenshot_generator/build \
     -DLVGL_ROOT="$LVGL_ROOT_CANDIDATE" \
     -DDISPLAY_WIDTH="$DISPLAY_WIDTH" \
     -DDISPLAY_HEIGHT="$DISPLAY_HEIGHT"
-  cmake --build tools/screenshot_generator/build -j"$(nproc)"
-  ./tools/screenshot_generator/build/screenshot_gen
+  cmake --build tools/apps/screenshot_generator/build -j"$(nproc)"
+  ./tools/apps/screenshot_generator/build/screenshot_gen
 
   echo "Screenshot generation complete."
-  echo "Output root: $SCREENS_DIR/tools/screenshot_generator/screenshots"
+  echo "Output root: $SCREENS_DIR/tools/apps/screenshot_generator/screenshots"
 } 2>&1 | tee "$LOG_FILE"
 
 echo "Log saved to: $LOG_FILE"

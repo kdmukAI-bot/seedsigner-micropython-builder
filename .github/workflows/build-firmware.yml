@@ -49,7 +49,9 @@ jobs:
       IDF_PATH: /opt/toolchains/esp-idf
       IDF_DIR: /opt/toolchains/esp-idf
       IDF_TOOLS_PATH: /opt/espressif
-      IDF_TOOLS_TARGETS: esp32s3
+      # ESP32-P4 is the first-release target; CI builds the P4 board (RISC-V).
+      IDF_TOOLS_TARGETS: esp32p4
+      BOARD: WAVESHARE_ESP32_P4_WIFI6_TOUCH_LCD_43
     container:
       image: ghcr.io/${{ needs.resolve-image-owner.outputs.owner_lc }}/seedsigner-micropython-builder-base:latest
     steps:
@@ -74,6 +76,10 @@ jobs:
         run: |
           test -d /opt/toolchains/esp-idf
           mkdir -p "$IDF_TOOLS_PATH"
+          # The base image bakes the esp32s3 toolchain; the P4 (RISC-V) needs the
+          # esp32p4 toolset. install is idempotent — the riscv32-esp-elf compiler
+          # may already be present (the S3 ULP uses it), but make it explicit.
+          python3 "$IDF_PATH/tools/idf_tools.py" install --targets=esp32p4
           python3 "$IDF_PATH/tools/idf_tools.py" install riscv32-esp-elf-gdb
           source "$IDF_PATH/export.sh"
           idf.py --version
@@ -100,8 +106,7 @@ jobs:
 
       - name: Collect firmware artifacts
         run: |
-          BOARD=WAVESHARE_ESP32_S3_TOUCH_LCD_35B
-          BUILD_DIR="$PWD/build/$BOARD"
+          BUILD_DIR="$PWD/build/$BOARD"   # BOARD comes from the job env (ESP32-P4)
           mkdir -p out/bootloader out/partition_table out/logs
           cp "$BUILD_DIR/micropython.bin" out/
           cp "$BUILD_DIR/micropython.elf" out/
@@ -114,12 +119,12 @@ jobs:
       - name: Collect screenshot artifacts
         run: |
           mkdir -p out/screenshots
-          cp -r "$PWD/deps/seedsigner-lvgl-screens/tools/screenshot_generator/screenshots" out/screenshots/
+          cp -r "$PWD/deps/seedsigner-lvgl-screens/tools/apps/screenshot_generator/screenshots" out/screenshots/
 
       - name: Upload firmware artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: firmware-waveshare-esp32-s3
+          name: firmware-waveshare-esp32-p4
           path: |
             out/
             out/logs/
@@ -127,7 +132,7 @@ jobs:
       - name: Upload screenshot artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: screenshots-waveshare-esp32-s3
+          name: screenshots-waveshare-esp32-p4
           path: out/screenshots/
 
   deploy-screenshots:
@@ -142,7 +147,7 @@ jobs:
       - name: Download screenshot artifacts
         uses: actions/download-artifact@v4
         with:
-          name: screenshots-waveshare-esp32-s3
+          name: screenshots-waveshare-esp32-p4
           path: screenshots
 
       - name: Determine deploy path
