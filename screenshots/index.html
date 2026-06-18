@@ -1,10 +1,13 @@
 <!doctype html>
 <html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Unit tests for SeedSigner lvgl screens</title>
+<title>SeedSigner LVGL screens — gallery</title>
 <style>
 body{font-family:system-ui,sans-serif;margin:16px;background:#111;color:#eee}
-.meta{color:#bbb;margin-bottom:12px}
+.bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.bar label{color:#bbb;font-size:15px;display:flex;align-items:center;gap:8px}
+select{font:inherit;color:#eee;background:#222;border:1px solid #444;border-radius:6px;padding:6px 10px;min-width:150px}
+.meta{color:#bbb}
 .res-section{margin-bottom:32px}
 .res-header{font-size:24px;font-weight:700;padding:12px 0 8px;border-bottom:2px solid #444;margin-bottom:14px;color:#f2f2f2}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(520px,1fr));gap:14px;align-items:start}
@@ -14,37 +17,105 @@ figcaption{margin:0 0 10px 0;font-size:22px;font-weight:700;letter-spacing:.2px;
 .divider{border:0;border-top:1px solid #333;margin:24px 0}
 </style>
 </head><body>
-<h1>Unit tests for SeedSigner lvgl screens</h1>
-<div id="meta" class="meta">Loading manifest...</div>
+<h1>SeedSigner LVGL screens — gallery</h1>
+<div class="bar">
+  <label>Language <select id="lang"></select></label>
+  <label>Resolution <select id="res"></select></label>
+  <span id="meta" class="meta">Loading…</span>
+</div>
 <div id="content"></div>
 <script>
-fetch('manifest.json').then(r=>{if(!r.ok)throw new Error('manifest load failed');return r.json();}).then(m=>{
-  const meta=document.getElementById('meta');
-  const resolutions=m.resolutions||[];
-  const totalScreenshots=resolutions.reduce((n,r)=>(r.screenshots||[]).length+n,0);
-  meta.textContent=`Generated: ${m.generated_at} \u2022 ${resolutions.length} resolution(s) \u2022 ${totalScreenshots} screenshot(s)`;
-  const content=document.getElementById('content');
-  resolutions.forEach((res,idx)=>{
-    if(idx>0){const hr=document.createElement('hr');hr.className='divider';content.appendChild(hr);}
-    const section=document.createElement('div');
-    section.className='res-section';
-    const header=document.createElement('div');
-    header.className='res-header';
-    header.textContent=`${res.label} (${(res.screenshots||[]).length} screenshots)`;
-    section.appendChild(header);
-    const grid=document.createElement('div');
-    grid.className='grid';
-    for(const s of (res.screenshots||[])){
-      const fig=document.createElement('figure');
-      const cap=document.createElement('figcaption');
-      cap.textContent=s.display_name;
-      const img=document.createElement('img');
-      img.loading='lazy'; img.src=s.path; img.alt=s.display_name; img.width=res.width; img.height=res.height;
-      fig.appendChild(cap); fig.appendChild(img); grid.appendChild(fig);
-    }
-    section.appendChild(grid);
-    content.appendChild(section);
+// Multi-language gallery: a Language picker loads that locale's manifest.json from
+// its subdirectory (<locale>/manifest.json, images under <locale>/img/...); a
+// Resolution picker filters to one resolution (or "All"). Both are mirrored to the
+// URL (?lang=&res=) so a refresh / shared link restores the view.
+var params  = new URLSearchParams(location.search);
+var langSel = document.getElementById('lang');
+var resSel  = document.getElementById('res');
+var content = document.getElementById('content');
+var meta    = document.getElementById('meta');
+var curManifest = null, curLocale = null;
+
+function updateUrl() {
+  var p = new URLSearchParams();
+  if (curLocale) p.set('lang', curLocale);
+  if (resSel.value) p.set('res', resSel.value);
+  history.replaceState(null, '', location.pathname + '?' + p.toString());
+}
+
+function populateRes(resolutions) {
+  var prev = resSel.value || params.get('res') || '';
+  resSel.innerHTML = '';
+  resolutions.forEach(function (r) {
+    var o = document.createElement('option');
+    o.value = r.label; o.textContent = r.width + ' × ' + r.height;
+    resSel.appendChild(o);
   });
-}).catch(e=>{document.getElementById('meta').textContent='Failed to load manifest.json: '+e.message;});
+  var valid = Array.prototype.some.call(resSel.options, function (o) { return o.value === prev; });
+  resSel.value = valid ? prev : (resolutions[0] ? resolutions[0].label : '');
+}
+
+function render() {
+  if (!curManifest) return;
+  content.innerHTML = '';
+  // Cache-bust images by the build's generation time, so a redeploy is picked up
+  // even when the browser has the old PNG cached (GitHub Pages sends a fixed
+  // Cache-Control we can't override). The token is stable within a build and
+  // changes across builds — images still cache normally between refreshes of the
+  // same deploy, and only re-download when the screenshots actually change.
+  var bust = (curManifest.generated_at || '').replace(/\D/g, '');
+  var resolutions = (curManifest.resolutions || []).filter(function (r) {
+    return r.label === resSel.value;
+  });
+  var total = resolutions.reduce(function (n, r) { return (r.screenshots || []).length + n; }, 0);
+  meta.textContent = 'Generated ' + curManifest.generated_at + ' • ' + resolutions.length +
+    ' resolution(s) • ' + total + ' screenshot(s)';
+  resolutions.forEach(function (res, idx) {
+    if (idx > 0) { var hr = document.createElement('hr'); hr.className = 'divider'; content.appendChild(hr); }
+    var section = document.createElement('div'); section.className = 'res-section';
+    var header = document.createElement('div'); header.className = 'res-header';
+    header.textContent = res.label + ' (' + (res.screenshots || []).length + ' screenshots)';
+    section.appendChild(header);
+    var grid = document.createElement('div'); grid.className = 'grid';
+    (res.screenshots || []).forEach(function (s) {
+      var fig = document.createElement('figure');
+      var cap = document.createElement('figcaption'); cap.textContent = s.display_name;
+      var img = document.createElement('img'); img.loading = 'lazy';
+      img.src = curLocale + '/' + s.path + (bust ? '?v=' + bust : ''); img.alt = s.display_name; img.width = res.width; img.height = res.height;
+      fig.appendChild(cap); fig.appendChild(img); grid.appendChild(fig);
+    });
+    section.appendChild(grid); content.appendChild(section);
+  });
+}
+
+function loadLocale(locale) {
+  curLocale = locale;
+  if (langSel.value !== locale) langSel.value = locale;
+  meta.textContent = 'Loading ' + locale + '…';
+  // Fetch the manifest fresh each load (cache-bust per page view) so the per-build
+  // image token derived from it is never itself served stale. The JSON is tiny.
+  fetch(locale + '/manifest.json?_=' + Date.now())
+    .then(function (r) { if (!r.ok) throw new Error('manifest ' + r.status); return r.json(); })
+    .then(function (m) { curManifest = m; populateRes(m.resolutions || []); render(); updateUrl(); })
+    .catch(function (e) { content.innerHTML = ''; meta.textContent = 'Failed to load ' + locale + '/manifest.json: ' + e.message; });
+}
+
+resSel.addEventListener('change', function () { render(); updateUrl(); });
+langSel.addEventListener('change', function () { loadLocale(langSel.value); });
+
+fetch('locales.json?_=' + Date.now())
+  .then(function (r) { return r.json(); })
+  .then(function (list) {
+    (list || []).forEach(function (l) {
+      var o = document.createElement('option'); o.value = l.code; o.textContent = l.name; langSel.appendChild(o);
+    });
+    var codes = (list || []).map(function (l) { return l.code; });
+    var want = params.get('lang');
+    // Default to English (the dev reference) even though the list is alphabetical.
+    var start = (want && codes.indexOf(want) >= 0) ? want
+              : (codes.indexOf('en') >= 0 ? 'en' : ((list && list[0]) ? list[0].code : 'en'));
+    loadLocale(start);
+  })
+  .catch(function (e) { meta.textContent = 'Failed to load locales.json: ' + e.message; });
 </script>
 </body></html>
