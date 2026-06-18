@@ -1,7 +1,11 @@
 add_library(usermod_dm INTERFACE)
 
+# Single unified MicroPython module: seedsigner_lvgl. It exposes init() +
+# load_locale()/unload_locale() + the screens, matching the Pi Zero API name-for-
+# name so the shared Python app needs no platform branching. The hardware/runtime
+# C impl still lives in the display_manager component (linked below); there is no
+# separate `display_manager` Python module.
 target_sources(usermod_dm INTERFACE
-    ${CMAKE_CURRENT_LIST_DIR}/moddisplay_manager_bindings.c
     ${CMAKE_CURRENT_LIST_DIR}/modseedsigner_bindings.c
 )
 

@@ -5,10 +5,9 @@ Copy this file to the ESP32 device and run it from the MicroPython REPL:
 """
 
 import time
-import display_manager
 import seedsigner_lvgl
 
-display_manager.init()
+seedsigner_lvgl.init()
 
 # Show the screensaver (bouncing logo).
 seedsigner_lvgl.screensaver_screen()

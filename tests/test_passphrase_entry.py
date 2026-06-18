@@ -8,10 +8,9 @@ Tap the on-screen keyboard to type, then the in-grid OK key to confirm
 """
 
 import time
-import display_manager
 import seedsigner_lvgl
 
-display_manager.init()
+seedsigner_lvgl.init()
 
 # Show the passphrase entry screen. The screen-side C++ validates this config.
 seedsigner_lvgl.seed_add_passphrase_screen({

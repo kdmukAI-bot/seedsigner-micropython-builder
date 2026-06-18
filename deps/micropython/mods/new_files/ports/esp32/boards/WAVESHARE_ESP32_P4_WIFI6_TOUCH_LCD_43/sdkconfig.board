@@ -15,13 +15,91 @@ CONFIG_LV_FONT_MONTSERRAT_28=y
 CONFIG_LV_FONT_MONTSERRAT_30=y
 CONFIG_LV_USE_REFR_DEBUG=n
 
+# i18n language-pack rendering (matches the desktop/Pi-Zero i18n build):
+#  - TINY_TTF: rasterize the OpenSans Western baked floor + loaded pack .ttf at runtime
+#  - FONT_FMT_TXT_LARGE: large glyph tables (CJK subsets exceed the 16-bit offsets)
+#  - BIDI + ARABIC_PERSIAN_CHARS: right-to-left + Arabic/Persian (fa) joining/shaping
+CONFIG_LV_USE_TINY_TTF=y
+CONFIG_LV_FONT_FMT_TXT_LARGE=y
+CONFIG_LV_USE_BIDI=y
+CONFIG_LV_USE_ARABIC_PERSIAN_CHARS=y
+
+# NB: SD-card long filenames (e.g. zh_Hans_CN/zh_Hans_CN.ttf) are handled by
+# MicroPython's own FAT VFS (lib/oofatfs; MICROPY_FATFS_ENABLE_LFN=1), not
+# ESP-IDF's fatfs — the two can't be linked together (duplicate f_mount/...).
+
+# ── Debugging (maximal) ───────────────────────────────────────────────────
+# Built for maximum diagnosability across all our efforts: readable backtraces,
+# assertions, heap + stack integrity checks, coredump-to-flash + serial panic
+# backtrace, and task-WDT panic so hangs/deadlocks leave a usable trail.
+# See docs/knowledge/esp32-p4-debug-build.md.
+
+# Keep board_common's -O2 (PERF). NB: -Og (COMPILER_OPTIMIZATION_DEBUG) trips a
+# -Werror=maybe-uninitialized in MicroPython's upstream esp32_rmt.c, which the IDF
+# default -Werror=all turns into a build failure. The eh_frame backtraces +
+# coredump + asserts below give strong debuggability without it.
+#
+# Do NOT enable COMPILER_STACK_CHECK (-fstack-protector*): the canary epilogues are
+# incompatible with MicroPython's NLR (setjmp/longjmp exceptions) — it longjmps out
+# of functions, so EVERY exception breaks with "exceptions must derive from
+# BaseException" and the REPL can't run a single statement. FreeRTOS task-stack
+# canaries below give stack-overflow detection without touching the C epilogues.
+
+# RISC-V: print a readable call-stack backtrace on panic (DWARF .eh_frame), and
+# resolve esp_err_t codes to names.
+CONFIG_ESP_SYSTEM_USE_EH_FRAME=y
+CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT=y
+CONFIG_ESP_ERR_TO_NAME_LOOKUP=y
+
+# Coredump to flash (ELF) — uses the 'coredump' partition. Task stacks + registers
+# are enough for backtraces; DRAM capture is left off to keep dumps small/fast.
+CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH=y
+CONFIG_ESP_COREDUMP_DATA_FORMAT_ELF=y
+CONFIG_ESP_COREDUMP_CHECKSUM_CRC32=y
+
+# Task watchdog → PANIC on a hung task so spin-hangs/deadlocks produce a coredump
+# + serial backtrace (e.g. an LVGL-task render hang).
+CONFIG_ESP_TASK_WDT_EN=y
+CONFIG_ESP_TASK_WDT_INIT=y
+CONFIG_ESP_TASK_WDT_PANIC=y
+CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU0=y
+CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU1=y
 CONFIG_ESP_TASK_WDT_TIMEOUT_S=10
 
-# Partition table (32MB flash)
+# Heap integrity: IDF heap poisoning is DISABLED. Both LIGHT and COMPREHENSIVE
+# fault at boot on this P4 build — a Load-access-fault in multi_heap_internal_lock
+# on the very first malloc after heap_init (before app code), i.e. a poisoning vs.
+# P4 heap-config incompatibility (likely SPIRAM_XIP_FROM_PSRAM / a special heap
+# region), not our code. The non-poisoned build boots + runs fine. We rely on the
+# LVGL asserts below (mem-integrity/null/obj) — better targeted at the LVGL
+# render/font path anyway — plus WDT-panic + coredump. See
+# docs/knowledge/esp32-p4-debug-build.md.
+CONFIG_HEAP_POISONING_NONE=y
+
+# FreeRTOS stack-overflow detection.
+CONFIG_FREERTOS_CHECK_STACKOVERFLOW_CANARY=y
+CONFIG_FREERTOS_WATCHPOINT_END_OF_STACK=y
+
+# Logging: INFO by default (DEBUG-default floods the shared serial — the MSPI DQS
+# tuning component prints thousands of lines/sec, breaking REPL automation and
+# slowing boot). VERBOSE is compiled in, so bump any tag at runtime with
+# esp_log_level_set("tag", ESP_LOG_VERBOSE) when investigating.
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_LOG_MAXIMUM_LEVEL_VERBOSE=y
+
+# LVGL self-checks: logging + assertions (null/malloc/mem/obj/style) abort at the
+# point of corruption with a backtrace — ideal for bad font/object pointers.
+CONFIG_LV_USE_LOG=y
+CONFIG_LV_LOG_LEVEL_WARN=y
+CONFIG_LV_USE_ASSERT_NULL=y
+CONFIG_LV_USE_ASSERT_MALLOC=y
+CONFIG_LV_USE_ASSERT_MEM_INTEGRITY=y
+CONFIG_LV_USE_ASSERT_OBJ=y
+CONFIG_LV_USE_ASSERT_STYLE=y
+
+# Partition table (32MB flash) — now includes a 'coredump' partition.
 CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions-32MiB-waveshare.csv"
 CONFIG_PARTITION_TABLE_FILENAME="partitions-32MiB-waveshare.csv"
 
 # P4 has no built-in Bluetooth.
 CONFIG_BT_ENABLED=n
-
-CONFIG_ESP_ERR_TO_NAME_LOOKUP=n

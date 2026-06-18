@@ -7,6 +7,7 @@
 #include "py/runtime.h"
 
 #include "display_manager.h"
+#include "locale_loader.h"   // ss_locale_pack_files / ss_pack_provider_t
 #include "seedsigner.h"
 
 #define SEEDSIGNER_RESULT_QUEUE_CAP 16
@@ -75,7 +76,11 @@ static void vstr_add_json_escaped(vstr_t *v, const char *src, size_t len) {
             case '\n': vstr_add_str(v, "\\n"); break;
             case '\r': vstr_add_str(v, "\\r"); break;
             case '\t': vstr_add_str(v, "\\t"); break;
-            default: vstr_add_char(v, c); break;
+            // Append the RAW byte. NB: vstr_add_char() UTF-8-*encodes* its arg as a
+            // codepoint on a unicode build, so feeding it raw UTF-8 bytes one at a
+            // time re-encodes each byte as a Latin-1 codepoint (设 -> "è®¾"). The
+            // source is already UTF-8; copy it through verbatim.
+            default: vstr_add_byte(v, (byte)c); break;
         }
     }
 }
@@ -271,8 +276,90 @@ static mp_obj_t mp_seedsigner_lvgl_clear_result_queue(void) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(seedsigner_lvgl_clear_result_queue_obj, mp_seedsigner_lvgl_clear_result_queue);
 
+// --- Runtime + i18n -------------------------------------------------------
+// Unified cross-platform surface: the shared Python app calls
+// seedsigner_lvgl.init() / .load_locale() / .unload_locale() identically on
+// Pi Zero and ESP32 — no platform branching. The hardware-specific work (and,
+// here, the SD-card pack provider + LVGL-port locking) lives behind these in
+// display_manager.cpp; the Pi Zero binding implements the same names over its
+// own backend.
+
+// Full board-default bring-up (I2C, display, touch, LVGL port, display profile).
+// Idempotent: hardware is already initialized at C boot, so this is a cheap
+// re-entry that keeps the Pi-parity API (where init() does the real work).
+static mp_obj_t mp_seedsigner_lvgl_init(void) {
+    init();
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_0(seedsigner_lvgl_init_obj, mp_seedsigner_lvgl_init);
+
+// locale_pack_files(locale) -> JSON string array of the pack files this locale
+// needs, e.g. '["th.ttf","runs.bin"]' (or '[]' for a baked-floor locale). The
+// MicroPython side reads each of these off the SD card and passes the bytes to
+// load_locale(). See ss_locale_pack_files() in locale_loader.h.
+static mp_obj_t mp_seedsigner_lvgl_locale_pack_files(mp_obj_t locale_obj) {
+    const char *locale = mp_obj_str_get_str(locale_obj);
+    const char *json = ss_locale_pack_files(locale);
+    return mp_obj_new_str(json, strlen(json));
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(seedsigner_lvgl_locale_pack_files_obj, mp_seedsigner_lvgl_locale_pack_files);
+
+// Pack provider backed by a Python dict {filename(str): bytes}. ESP-IDF's FAT
+// stack can't be linked alongside MicroPython's own FAT VFS, so the SD card is
+// read in Python (machine.SDCard) and the bytes are staged in this dict; the
+// loader pulls each file it needs through here. The bytes objects are kept alive
+// by the dict for the duration of the load, so returning their buffer is safe.
+typedef struct {
+    mp_obj_t packs;  // dict {str: bytes}
+} mp_pack_ctx_t;
+
+static bool mp_pack_provider(const char *locale, const char *file,
+                             const uint8_t **bytes, size_t *len, void *user) {
+    (void)locale;
+    mp_pack_ctx_t *ctx = (mp_pack_ctx_t *)user;
+    mp_map_t *map = mp_obj_dict_get_map(ctx->packs);
+    mp_obj_t key = mp_obj_new_str(file, strlen(file));
+    mp_map_elem_t *elem = mp_map_lookup(map, key, MP_MAP_LOOKUP);
+    if (elem == NULL) {
+        return false;  // pack staged dict is missing this file
+    }
+    mp_buffer_info_t bufinfo;
+    if (!mp_get_buffer(elem->value, &bufinfo, MP_BUFFER_READ) || bufinfo.len == 0) {
+        return false;  // value isn't a bytes-like buffer (don't raise under the LVGL lock)
+    }
+    *bytes = (const uint8_t *)bufinfo.buf;
+    *len = bufinfo.len;
+    return true;
+}
+
+// load_locale(locale, packs) -> bool. `packs` is a dict {filename: bytes} the
+// caller pre-read from the SD card (the filenames come from locale_pack_files()).
+// Returns True on full success, False if a needed pack is missing/unreadable
+// (loader falls back to the baked Western floor).
+static mp_obj_t mp_seedsigner_lvgl_load_locale(mp_obj_t locale_obj, mp_obj_t packs_obj) {
+    const char *locale = mp_obj_str_get_str(locale_obj);
+    if (!mp_obj_is_type(packs_obj, &mp_type_dict)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("load_locale expects (locale, packs_dict)"));
+    }
+    mp_pack_ctx_t ctx = { .packs = packs_obj };
+    bool ok = dm_load_locale(locale, mp_pack_provider, &ctx);
+    return mp_obj_new_bool(ok);
+}
+static MP_DEFINE_CONST_FUN_OBJ_2(seedsigner_lvgl_load_locale_obj, mp_seedsigner_lvgl_load_locale);
+
+// Clear loaded locale packs and restore the baked Western floor.
+static mp_obj_t mp_seedsigner_lvgl_unload_locale(void) {
+    dm_unload_locale();
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_0(seedsigner_lvgl_unload_locale_obj, mp_seedsigner_lvgl_unload_locale);
+
 static const mp_rom_map_elem_t seedsigner_lvgl_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_seedsigner_lvgl) },
+    { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&seedsigner_lvgl_init_obj) },
+    { MP_ROM_QSTR(MP_QSTR_locale_pack_files), MP_ROM_PTR(&seedsigner_lvgl_locale_pack_files_obj) },
+    { MP_ROM_QSTR(MP_QSTR_load_locale), MP_ROM_PTR(&seedsigner_lvgl_load_locale_obj) },
+    { MP_ROM_QSTR(MP_QSTR_unload_locale), MP_ROM_PTR(&seedsigner_lvgl_unload_locale_obj) },
     { MP_ROM_QSTR(MP_QSTR_demo_screen), MP_ROM_PTR(&seedsigner_lvgl_demo_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_button_list_screen), MP_ROM_PTR(&seedsigner_lvgl_button_list_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_seed_add_passphrase_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_add_passphrase_screen_obj) },
