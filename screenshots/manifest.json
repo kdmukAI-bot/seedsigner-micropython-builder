@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-21 19:37:25Z",
+  "generated_at": "2026-06-23 18:31:23Z",
   "resolutions": [
     {
       "width": 240,
@@ -32,9 +32,44 @@
           "path": "img/240x240/button_list_screen__long_title_240x240.gif"
         },
         {
+          "name": "button_list_screen__intro_text",
+          "display_name": "button_list_screen (_intro_text)",
+          "path": "img/240x240/button_list_screen__intro_text_240x240.png"
+        },
+        {
+          "name": "button_list_screen__intro_text_fits",
+          "display_name": "button_list_screen (_intro_text_fits)",
+          "path": "img/240x240/button_list_screen__intro_text_fits_240x240.png"
+        },
+        {
           "name": "screensaver_screen",
           "display_name": "screensaver_screen",
           "path": "img/240x240/screensaver_screen_240x240.png"
+        },
+        {
+          "name": "splash_screen",
+          "display_name": "splash_screen",
+          "path": "img/240x240/splash_screen_240x240.png"
+        },
+        {
+          "name": "splash_screen__boot_logo",
+          "display_name": "splash_screen (_boot_logo)",
+          "path": "img/240x240/splash_screen__boot_logo_240x240.png"
+        },
+        {
+          "name": "splash_screen__cpython_no_partners",
+          "display_name": "splash_screen (_cpython_no_partners)",
+          "path": "img/240x240/splash_screen__cpython_no_partners_240x240.png"
+        },
+        {
+          "name": "splash_screen__micropython_partners",
+          "display_name": "splash_screen (_micropython_partners)",
+          "path": "img/240x240/splash_screen__micropython_partners_240x240.png"
+        },
+        {
+          "name": "splash_screen__micropython_no_partners",
+          "display_name": "splash_screen (_micropython_no_partners)",
+          "path": "img/240x240/splash_screen__micropython_no_partners_240x240.png"
         },
         {
           "name": "large_icon_status_screen",
@@ -60,6 +95,21 @@
           "name": "large_icon_status_screen__dire_warning_animated",
           "display_name": "large_icon_status_screen (_dire_warning_animated) [animated]",
           "path": "img/240x240/large_icon_status_screen__dire_warning_animated_240x240.gif"
+        },
+        {
+          "name": "large_icon_status_screen__long_text_overflow",
+          "display_name": "large_icon_status_screen (_long_text_overflow)",
+          "path": "img/240x240/large_icon_status_screen__long_text_overflow_240x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__long_text_overflow_plain",
+          "display_name": "large_icon_status_screen (_long_text_overflow_plain)",
+          "path": "img/240x240/large_icon_status_screen__long_text_overflow_plain_240x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__newline",
+          "display_name": "large_icon_status_screen (_newline)",
+          "path": "img/240x240/large_icon_status_screen__newline_240x240.png"
         },
         {
           "name": "seed_add_passphrase_screen",
@@ -119,9 +169,44 @@
           "path": "img/320x240/button_list_screen__long_title_320x240.gif"
         },
         {
+          "name": "button_list_screen__intro_text",
+          "display_name": "button_list_screen (_intro_text)",
+          "path": "img/320x240/button_list_screen__intro_text_320x240.png"
+        },
+        {
+          "name": "button_list_screen__intro_text_fits",
+          "display_name": "button_list_screen (_intro_text_fits)",
+          "path": "img/320x240/button_list_screen__intro_text_fits_320x240.png"
+        },
+        {
           "name": "screensaver_screen",
           "display_name": "screensaver_screen",
           "path": "img/320x240/screensaver_screen_320x240.png"
+        },
+        {
+          "name": "splash_screen",
+          "display_name": "splash_screen",
+          "path": "img/320x240/splash_screen_320x240.png"
+        },
+        {
+          "name": "splash_screen__boot_logo",
+          "display_name": "splash_screen (_boot_logo)",
+          "path": "img/320x240/splash_screen__boot_logo_320x240.png"
+        },
+        {
+          "name": "splash_screen__cpython_no_partners",
+          "display_name": "splash_screen (_cpython_no_partners)",
+          "path": "img/320x240/splash_screen__cpython_no_partners_320x240.png"
+        },
+        {
+          "name": "splash_screen__micropython_partners",
+          "display_name": "splash_screen (_micropython_partners)",
+          "path": "img/320x240/splash_screen__micropython_partners_320x240.png"
+        },
+        {
+          "name": "splash_screen__micropython_no_partners",
+          "display_name": "splash_screen (_micropython_no_partners)",
+          "path": "img/320x240/splash_screen__micropython_no_partners_320x240.png"
         },
         {
           "name": "large_icon_status_screen",
@@ -147,6 +232,21 @@
           "name": "large_icon_status_screen__dire_warning_animated",
           "display_name": "large_icon_status_screen (_dire_warning_animated) [animated]",
           "path": "img/320x240/large_icon_status_screen__dire_warning_animated_320x240.gif"
+        },
+        {
+          "name": "large_icon_status_screen__long_text_overflow",
+          "display_name": "large_icon_status_screen (_long_text_overflow)",
+          "path": "img/320x240/large_icon_status_screen__long_text_overflow_320x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__long_text_overflow_plain",
+          "display_name": "large_icon_status_screen (_long_text_overflow_plain)",
+          "path": "img/320x240/large_icon_status_screen__long_text_overflow_plain_320x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__newline",
+          "display_name": "large_icon_status_screen (_newline)",
+          "path": "img/320x240/large_icon_status_screen__newline_320x240.png"
         },
         {
           "name": "seed_add_passphrase_screen",
@@ -206,9 +306,44 @@
           "path": "img/480x320/button_list_screen__long_title_480x320.gif"
         },
         {
+          "name": "button_list_screen__intro_text",
+          "display_name": "button_list_screen (_intro_text)",
+          "path": "img/480x320/button_list_screen__intro_text_480x320.png"
+        },
+        {
+          "name": "button_list_screen__intro_text_fits",
+          "display_name": "button_list_screen (_intro_text_fits)",
+          "path": "img/480x320/button_list_screen__intro_text_fits_480x320.png"
+        },
+        {
           "name": "screensaver_screen",
           "display_name": "screensaver_screen",
           "path": "img/480x320/screensaver_screen_480x320.png"
+        },
+        {
+          "name": "splash_screen",
+          "display_name": "splash_screen",
+          "path": "img/480x320/splash_screen_480x320.png"
+        },
+        {
+          "name": "splash_screen__boot_logo",
+          "display_name": "splash_screen (_boot_logo)",
+          "path": "img/480x320/splash_screen__boot_logo_480x320.png"
+        },
+        {
+          "name": "splash_screen__cpython_no_partners",
+          "display_name": "splash_screen (_cpython_no_partners)",
+          "path": "img/480x320/splash_screen__cpython_no_partners_480x320.png"
+        },
+        {
+          "name": "splash_screen__micropython_partners",
+          "display_name": "splash_screen (_micropython_partners)",
+          "path": "img/480x320/splash_screen__micropython_partners_480x320.png"
+        },
+        {
+          "name": "splash_screen__micropython_no_partners",
+          "display_name": "splash_screen (_micropython_no_partners)",
+          "path": "img/480x320/splash_screen__micropython_no_partners_480x320.png"
         },
         {
           "name": "large_icon_status_screen",
@@ -234,6 +369,21 @@
           "name": "large_icon_status_screen__dire_warning_animated",
           "display_name": "large_icon_status_screen (_dire_warning_animated) [animated]",
           "path": "img/480x320/large_icon_status_screen__dire_warning_animated_480x320.gif"
+        },
+        {
+          "name": "large_icon_status_screen__long_text_overflow",
+          "display_name": "large_icon_status_screen (_long_text_overflow)",
+          "path": "img/480x320/large_icon_status_screen__long_text_overflow_480x320.png"
+        },
+        {
+          "name": "large_icon_status_screen__long_text_overflow_plain",
+          "display_name": "large_icon_status_screen (_long_text_overflow_plain)",
+          "path": "img/480x320/large_icon_status_screen__long_text_overflow_plain_480x320.png"
+        },
+        {
+          "name": "large_icon_status_screen__newline",
+          "display_name": "large_icon_status_screen (_newline)",
+          "path": "img/480x320/large_icon_status_screen__newline_480x320.png"
         },
         {
           "name": "seed_add_passphrase_screen",
@@ -288,9 +438,44 @@
           "path": "img/800x480/button_list_screen__long_title_800x480.gif"
         },
         {
+          "name": "button_list_screen__intro_text",
+          "display_name": "button_list_screen (_intro_text)",
+          "path": "img/800x480/button_list_screen__intro_text_800x480.png"
+        },
+        {
+          "name": "button_list_screen__intro_text_fits",
+          "display_name": "button_list_screen (_intro_text_fits)",
+          "path": "img/800x480/button_list_screen__intro_text_fits_800x480.png"
+        },
+        {
           "name": "screensaver_screen",
           "display_name": "screensaver_screen",
           "path": "img/800x480/screensaver_screen_800x480.png"
+        },
+        {
+          "name": "splash_screen",
+          "display_name": "splash_screen",
+          "path": "img/800x480/splash_screen_800x480.png"
+        },
+        {
+          "name": "splash_screen__boot_logo",
+          "display_name": "splash_screen (_boot_logo)",
+          "path": "img/800x480/splash_screen__boot_logo_800x480.png"
+        },
+        {
+          "name": "splash_screen__cpython_no_partners",
+          "display_name": "splash_screen (_cpython_no_partners)",
+          "path": "img/800x480/splash_screen__cpython_no_partners_800x480.png"
+        },
+        {
+          "name": "splash_screen__micropython_partners",
+          "display_name": "splash_screen (_micropython_partners)",
+          "path": "img/800x480/splash_screen__micropython_partners_800x480.png"
+        },
+        {
+          "name": "splash_screen__micropython_no_partners",
+          "display_name": "splash_screen (_micropython_no_partners)",
+          "path": "img/800x480/splash_screen__micropython_no_partners_800x480.png"
         },
         {
           "name": "large_icon_status_screen",
@@ -316,6 +501,21 @@
           "name": "large_icon_status_screen__dire_warning_animated",
           "display_name": "large_icon_status_screen (_dire_warning_animated) [animated]",
           "path": "img/800x480/large_icon_status_screen__dire_warning_animated_800x480.gif"
+        },
+        {
+          "name": "large_icon_status_screen__long_text_overflow",
+          "display_name": "large_icon_status_screen (_long_text_overflow)",
+          "path": "img/800x480/large_icon_status_screen__long_text_overflow_800x480.png"
+        },
+        {
+          "name": "large_icon_status_screen__long_text_overflow_plain",
+          "display_name": "large_icon_status_screen (_long_text_overflow_plain)",
+          "path": "img/800x480/large_icon_status_screen__long_text_overflow_plain_800x480.png"
+        },
+        {
+          "name": "large_icon_status_screen__newline",
+          "display_name": "large_icon_status_screen (_newline)",
+          "path": "img/800x480/large_icon_status_screen__newline_800x480.png"
         },
         {
           "name": "seed_add_passphrase_screen",
