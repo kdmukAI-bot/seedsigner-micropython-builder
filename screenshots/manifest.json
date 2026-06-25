@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-23 18:31:23Z",
+  "generated_at": "2026-06-25 15:46:49Z",
   "resolutions": [
     {
       "width": 240,
@@ -40,6 +40,46 @@
           "name": "button_list_screen__intro_text_fits",
           "display_name": "button_list_screen (_intro_text_fits)",
           "path": "img/240x240/button_list_screen__intro_text_fits_240x240.png"
+        },
+        {
+          "name": "button_list_screen__left_aligned",
+          "display_name": "button_list_screen (_left_aligned)",
+          "path": "img/240x240/button_list_screen__left_aligned_240x240.png"
+        },
+        {
+          "name": "button_list_screen__icons",
+          "display_name": "button_list_screen (_icons)",
+          "path": "img/240x240/button_list_screen__icons_240x240.png"
+        },
+        {
+          "name": "button_list_screen__icons_centered",
+          "display_name": "button_list_screen (_icons_centered)",
+          "path": "img/240x240/button_list_screen__icons_centered_240x240.png"
+        },
+        {
+          "name": "button_list_screen__checkbox_multi",
+          "display_name": "button_list_screen (_checkbox_multi)",
+          "path": "img/240x240/button_list_screen__checkbox_multi_240x240.png"
+        },
+        {
+          "name": "button_list_screen__radio_single",
+          "display_name": "button_list_screen (_radio_single)",
+          "path": "img/240x240/button_list_screen__radio_single_240x240.png"
+        },
+        {
+          "name": "button_list_screen__top_nav_icon",
+          "display_name": "button_list_screen (_top_nav_icon)",
+          "path": "img/240x240/button_list_screen__top_nav_icon_240x240.png"
+        },
+        {
+          "name": "button_list_screen__i18n_radio",
+          "display_name": "button_list_screen (_i18n_radio)",
+          "path": "img/240x240/button_list_screen__i18n_radio_240x240.png"
+        },
+        {
+          "name": "button_list_screen__i18n_icons",
+          "display_name": "button_list_screen (_i18n_icons)",
+          "path": "img/240x240/button_list_screen__i18n_icons_240x240.png"
         },
         {
           "name": "screensaver_screen",
@@ -179,6 +219,46 @@
           "path": "img/320x240/button_list_screen__intro_text_fits_320x240.png"
         },
         {
+          "name": "button_list_screen__left_aligned",
+          "display_name": "button_list_screen (_left_aligned)",
+          "path": "img/320x240/button_list_screen__left_aligned_320x240.png"
+        },
+        {
+          "name": "button_list_screen__icons",
+          "display_name": "button_list_screen (_icons)",
+          "path": "img/320x240/button_list_screen__icons_320x240.png"
+        },
+        {
+          "name": "button_list_screen__icons_centered",
+          "display_name": "button_list_screen (_icons_centered)",
+          "path": "img/320x240/button_list_screen__icons_centered_320x240.png"
+        },
+        {
+          "name": "button_list_screen__checkbox_multi",
+          "display_name": "button_list_screen (_checkbox_multi)",
+          "path": "img/320x240/button_list_screen__checkbox_multi_320x240.png"
+        },
+        {
+          "name": "button_list_screen__radio_single",
+          "display_name": "button_list_screen (_radio_single)",
+          "path": "img/320x240/button_list_screen__radio_single_320x240.png"
+        },
+        {
+          "name": "button_list_screen__top_nav_icon",
+          "display_name": "button_list_screen (_top_nav_icon)",
+          "path": "img/320x240/button_list_screen__top_nav_icon_320x240.png"
+        },
+        {
+          "name": "button_list_screen__i18n_radio",
+          "display_name": "button_list_screen (_i18n_radio)",
+          "path": "img/320x240/button_list_screen__i18n_radio_320x240.png"
+        },
+        {
+          "name": "button_list_screen__i18n_icons",
+          "display_name": "button_list_screen (_i18n_icons)",
+          "path": "img/320x240/button_list_screen__i18n_icons_320x240.png"
+        },
+        {
           "name": "screensaver_screen",
           "display_name": "screensaver_screen",
           "path": "img/320x240/screensaver_screen_320x240.png"
@@ -316,6 +396,46 @@
           "path": "img/480x320/button_list_screen__intro_text_fits_480x320.png"
         },
         {
+          "name": "button_list_screen__left_aligned",
+          "display_name": "button_list_screen (_left_aligned)",
+          "path": "img/480x320/button_list_screen__left_aligned_480x320.png"
+        },
+        {
+          "name": "button_list_screen__icons",
+          "display_name": "button_list_screen (_icons)",
+          "path": "img/480x320/button_list_screen__icons_480x320.png"
+        },
+        {
+          "name": "button_list_screen__icons_centered",
+          "display_name": "button_list_screen (_icons_centered)",
+          "path": "img/480x320/button_list_screen__icons_centered_480x320.png"
+        },
+        {
+          "name": "button_list_screen__checkbox_multi",
+          "display_name": "button_list_screen (_checkbox_multi)",
+          "path": "img/480x320/button_list_screen__checkbox_multi_480x320.png"
+        },
+        {
+          "name": "button_list_screen__radio_single",
+          "display_name": "button_list_screen (_radio_single)",
+          "path": "img/480x320/button_list_screen__radio_single_480x320.png"
+        },
+        {
+          "name": "button_list_screen__top_nav_icon",
+          "display_name": "button_list_screen (_top_nav_icon)",
+          "path": "img/480x320/button_list_screen__top_nav_icon_480x320.png"
+        },
+        {
+          "name": "button_list_screen__i18n_radio",
+          "display_name": "button_list_screen (_i18n_radio)",
+          "path": "img/480x320/button_list_screen__i18n_radio_480x320.png"
+        },
+        {
+          "name": "button_list_screen__i18n_icons",
+          "display_name": "button_list_screen (_i18n_icons)",
+          "path": "img/480x320/button_list_screen__i18n_icons_480x320.png"
+        },
+        {
           "name": "screensaver_screen",
           "display_name": "screensaver_screen",
           "path": "img/480x320/screensaver_screen_480x320.png"
@@ -446,6 +566,46 @@
           "name": "button_list_screen__intro_text_fits",
           "display_name": "button_list_screen (_intro_text_fits)",
           "path": "img/800x480/button_list_screen__intro_text_fits_800x480.png"
+        },
+        {
+          "name": "button_list_screen__left_aligned",
+          "display_name": "button_list_screen (_left_aligned)",
+          "path": "img/800x480/button_list_screen__left_aligned_800x480.png"
+        },
+        {
+          "name": "button_list_screen__icons",
+          "display_name": "button_list_screen (_icons)",
+          "path": "img/800x480/button_list_screen__icons_800x480.png"
+        },
+        {
+          "name": "button_list_screen__icons_centered",
+          "display_name": "button_list_screen (_icons_centered)",
+          "path": "img/800x480/button_list_screen__icons_centered_800x480.png"
+        },
+        {
+          "name": "button_list_screen__checkbox_multi",
+          "display_name": "button_list_screen (_checkbox_multi)",
+          "path": "img/800x480/button_list_screen__checkbox_multi_800x480.png"
+        },
+        {
+          "name": "button_list_screen__radio_single",
+          "display_name": "button_list_screen (_radio_single)",
+          "path": "img/800x480/button_list_screen__radio_single_800x480.png"
+        },
+        {
+          "name": "button_list_screen__top_nav_icon",
+          "display_name": "button_list_screen (_top_nav_icon)",
+          "path": "img/800x480/button_list_screen__top_nav_icon_800x480.png"
+        },
+        {
+          "name": "button_list_screen__i18n_radio",
+          "display_name": "button_list_screen (_i18n_radio)",
+          "path": "img/800x480/button_list_screen__i18n_radio_800x480.png"
+        },
+        {
+          "name": "button_list_screen__i18n_icons",
+          "display_name": "button_list_screen (_i18n_icons)",
+          "path": "img/800x480/button_list_screen__i18n_icons_800x480.png"
         },
         {
           "name": "screensaver_screen",
