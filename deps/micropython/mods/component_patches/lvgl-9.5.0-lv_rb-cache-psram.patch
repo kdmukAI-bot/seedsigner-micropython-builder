@@ -1,0 +1,139 @@
+--- a/src/misc/lv_rb.c
++++ b/src/misc/lv_rb.c
+@@ -9,6 +9,119 @@
+ #include "lv_rb_private.h"
+ #include "../stdlib/lv_string.h"
+ 
++/* --- SEEDSIGNER PSRAM cache routing (Approach A) ----------------------------
++ * Route the red-black-tree node allocations (the tiny_ttf glyph/draw-data cache
++ * index, and the image-decode caches) out of the small internal LVGL pool into
++ * PSRAM, so they stop fragmenting it under realistic CJK. Only the two allocs
++ * in rb_create_node() are redirected. Frees are handled centrally by the
++ * PSRAM-aware lv_free() guard in src/stdlib/lv_mem.c (it routes any external-RAM
++ * pointer to heap_caps_free), so the lv_free() calls in this file are left as-is.
++ * Design + rationale: docs/approach-a-cache-psram-design.md.
++ *
++ * This managed-component source is also compiled by the host screenshot
++ * generator (no ESP-IDF), so all ESP-only code is gated on ESP_PLATFORM; off
++ * target it is a plain passthrough (nodes stay in the normal allocator).
++ * -------------------------------------------------------------------------- */
++#ifdef ESP_PLATFORM
++#include "esp_heap_caps.h"
++#include "esp_memory_utils.h"   /* esp_ptr_external_ram() */
++#include "esp_log.h"
++#endif
++
++typedef struct {
++    bool     enabled;        /* runtime A/B toggle; default on */
++    uint32_t alloc_total;    /* cumulative PSRAM node allocs */
++    uint32_t free_total;     /* cumulative PSRAM node frees  */
++    uint32_t live_nodes;     /* alloc_total - free_total */
++    uint32_t live_bytes;     /* live PSRAM bytes held by rb nodes */
++    uint32_t fallback_total; /* PSRAM alloc failed -> internal pool */
++} ss_rb_psram_stats_t;
++
++static ss_rb_psram_stats_t s_rb_psram = { .enabled = true };
++#ifdef ESP_PLATFORM
++static bool s_rb_psram_warned_fallback = false;
++#endif
++
++/* Forward declarations (these have no public header; avoids -Wmissing-prototypes). */
++bool lv_rb_psram_owns(const void * p);
++void lv_rb_psram_note_free(void * p);
++void lv_rb_psram_get_stats(uint32_t out[6]);
++void lv_rb_psram_set_enabled(bool en);
++bool lv_rb_psram_is_enabled(void);
++
++/* Zeroed rb node/data allocation. When routing is enabled, place it in PSRAM
++ * (heap_caps_calloc zeroes, matching lv_malloc_zeroed); on PSRAM exhaustion fall
++ * back to the internal pool (still correct -- the lv_free guard routes by pointer
++ * address, not by this flag). */
++static void * ss_rb_psram_alloc(size_t sz)
++{
++#ifdef ESP_PLATFORM
++    if(s_rb_psram.enabled) {
++        void * p = heap_caps_calloc(1, sz, MALLOC_CAP_SPIRAM);
++        if(p != NULL) {
++            s_rb_psram.alloc_total++;
++            s_rb_psram.live_nodes++;
++            /* count the actual block size, so it matches the heap_caps_get_allocated_size()
++               subtracted in lv_rb_psram_note_free() (else live_bytes drifts to 0 over churn) */
++            s_rb_psram.live_bytes += (uint32_t)heap_caps_get_allocated_size(p);
++            return p;
++        }
++        s_rb_psram.fallback_total++;
++        if(!s_rb_psram_warned_fallback) {
++            s_rb_psram_warned_fallback = true;
++            ESP_LOGW("ss_rb_psram", "PSRAM cache-node alloc failed (%u B); falling back to LVGL pool",
++                     (unsigned)sz);
++        }
++    }
++#endif
++    return lv_malloc_zeroed(sz);
++}
++
++/* True if the pointer was handed out from PSRAM (one of our rb nodes). Consumed
++ * by the lv_free() guard in lv_mem.c. */
++bool lv_rb_psram_owns(const void * p)
++{
++#ifdef ESP_PLATFORM
++    return p != NULL && esp_ptr_external_ram(p);
++#else
++    (void)p;
++    return false;
++#endif
++}
++
++/* Free a PSRAM rb node + update accounting. Called only from the lv_free() guard
++ * for pointers lv_rb_psram_owns() accepted. */
++void lv_rb_psram_note_free(void * p)
++{
++#ifdef ESP_PLATFORM
++    s_rb_psram.free_total++;
++    if(s_rb_psram.live_nodes) s_rb_psram.live_nodes--;
++    size_t blk = heap_caps_get_allocated_size(p);
++    if(blk <= s_rb_psram.live_bytes) s_rb_psram.live_bytes -= (uint32_t)blk;
++    else s_rb_psram.live_bytes = 0;
++    heap_caps_free(p);
++#else
++    (void)p;   /* never reached on host: lv_rb_psram_owns() is always false there */
++#endif
++}
++
++/* Instrumentation surface, read by display_manager's dm_mem_stats().
++ * out[0]=enabled out[1]=alloc_total out[2]=free_total out[3]=live_nodes
++ * out[4]=live_bytes out[5]=fallback_total */
++void lv_rb_psram_get_stats(uint32_t out[6])
++{
++    out[0] = s_rb_psram.enabled ? 1u : 0u;
++    out[1] = s_rb_psram.alloc_total;
++    out[2] = s_rb_psram.free_total;
++    out[3] = s_rb_psram.live_nodes;
++    out[4] = s_rb_psram.live_bytes;
++    out[5] = s_rb_psram.fallback_total;
++}
++
++void lv_rb_psram_set_enabled(bool en) { s_rb_psram.enabled = en; }
++bool lv_rb_psram_is_enabled(void) { return s_rb_psram.enabled; }
++/* --- end SEEDSIGNER --------------------------------------------------------- */
++
+ /*********************
+  *      DEFINES
+  *********************/
+@@ -332,13 +445,14 @@
+ 
+ static lv_rb_node_t * rb_create_node(lv_rb_t * tree)
+ {
+-    lv_rb_node_t * node = lv_malloc_zeroed(sizeof(lv_rb_node_t));
++    /* SEEDSIGNER: route to PSRAM (Approach A). See top-of-file banner. */
++    lv_rb_node_t * node = ss_rb_psram_alloc(sizeof(lv_rb_node_t));
+     LV_ASSERT_MALLOC(node);
+     if(node == NULL) {
+         return NULL;
+     }
+ 
+-    node->data = lv_malloc_zeroed(tree->size);
++    node->data = ss_rb_psram_alloc(tree->size);
+     LV_ASSERT_MALLOC(node->data);
+     if(node->data == NULL) {
+         lv_free(node);

@@ -176,14 +176,25 @@ static void vstr_add_json_from_obj(vstr_t *v, mp_obj_t obj) {
     vstr_add_str(v, "null");
 }
 
-static mp_obj_t mp_seedsigner_lvgl_main_menu_screen(void) {
-    const char *err = run_screen(main_menu_screen, NULL);
+static mp_obj_t mp_seedsigner_lvgl_main_menu_screen(mp_obj_t cfg_obj) {
+    // Display values are ALWAYS supplied by the caller: the app (Python/MicroPython) does the
+    // gettext translation -- falling back to the English msgid -- and passes the result in. So
+    // the contract REQUIRES a dict (localized top_nav.title + 4 button_list labels), exactly like
+    // button_list_screen. The C side keeps internal defaults only as a per-key safety net.
+    if (!mp_obj_is_type(cfg_obj, &mp_type_dict)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("main_menu_screen expects a dict"));
+    }
+    vstr_t json;
+    vstr_init(&json, 256);
+    vstr_add_json_from_obj(&json, cfg_obj);
+    const char *err = run_screen(main_menu_screen, (void *)json.buf);
+    vstr_clear(&json);
     if (err) {
-        mp_raise_msg_varg(&mp_type_RuntimeError, MP_ERROR_TEXT("%s"), err);
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%s"), err);
     }
     return mp_const_none;
 }
-static MP_DEFINE_CONST_FUN_OBJ_0(seedsigner_lvgl_main_menu_screen_obj, mp_seedsigner_lvgl_main_menu_screen);
+static MP_DEFINE_CONST_FUN_OBJ_1(seedsigner_lvgl_main_menu_screen_obj, mp_seedsigner_lvgl_main_menu_screen);
 
 static mp_obj_t mp_seedsigner_lvgl_screensaver_screen(void) {
     const char *err = run_screen(screensaver_screen, NULL);
@@ -406,7 +417,7 @@ static mp_obj_t mp_seedsigner_lvgl_mem_stats(void) {
     dm_mem_stats_t s;
     dm_mem_stats(&s);
 
-    mp_obj_t d = mp_obj_new_dict(10);
+    mp_obj_t d = mp_obj_new_dict(16);
 
     // LVGL builtin pool (internal DRAM): live occupancy + high-water + fragmentation.
     mp_obj_dict_store(d, MP_OBJ_NEW_QSTR(MP_QSTR_lvgl_total), mp_obj_new_int_from_uint(s.lvgl_total));
@@ -422,9 +433,28 @@ static mp_obj_t mp_seedsigner_lvgl_mem_stats(void) {
     mp_obj_dict_store(d, MP_OBJ_NEW_QSTR(MP_QSTR_internal_free), mp_obj_new_int_from_uint(s.internal_free));
     mp_obj_dict_store(d, MP_OBJ_NEW_QSTR(MP_QSTR_internal_min_free), mp_obj_new_int_from_uint(s.internal_min_free));
 
+    // rb-cache PSRAM routing (Approach A): is the glyph/draw cache index living in
+    // PSRAM, and is the route healthy? rb_psram_fallback should stay 0; with routing
+    // on, lvgl_max_used should no longer climb under CJK and spiram absorbs the load.
+    mp_obj_dict_store(d, MP_OBJ_NEW_QSTR(MP_QSTR_rb_psram_enabled), mp_obj_new_int_from_uint(s.rb_psram_enabled));
+    mp_obj_dict_store(d, MP_OBJ_NEW_QSTR(MP_QSTR_rb_psram_alloc), mp_obj_new_int_from_uint(s.rb_psram_alloc_total));
+    mp_obj_dict_store(d, MP_OBJ_NEW_QSTR(MP_QSTR_rb_psram_free), mp_obj_new_int_from_uint(s.rb_psram_free_total));
+    mp_obj_dict_store(d, MP_OBJ_NEW_QSTR(MP_QSTR_rb_psram_live_nodes), mp_obj_new_int_from_uint(s.rb_psram_live_nodes));
+    mp_obj_dict_store(d, MP_OBJ_NEW_QSTR(MP_QSTR_rb_psram_live_bytes), mp_obj_new_int_from_uint(s.rb_psram_live_bytes));
+    mp_obj_dict_store(d, MP_OBJ_NEW_QSTR(MP_QSTR_rb_psram_fallback), mp_obj_new_int_from_uint(s.rb_psram_fallback_total));
+
     return d;
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(seedsigner_lvgl_mem_stats_obj, mp_seedsigner_lvgl_mem_stats);
+
+// set_cache_psram(enabled) — runtime A/B toggle for Approach A rb-cache PSRAM
+// routing. Flip off early in a measurement script to reproduce the original
+// in-pool overflow as a control; on (default) for the fix. See dm_set_cache_psram().
+static mp_obj_t mp_seedsigner_lvgl_set_cache_psram(mp_obj_t enabled_obj) {
+    dm_set_cache_psram(mp_obj_is_true(enabled_obj));
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(seedsigner_lvgl_set_cache_psram_obj, mp_seedsigner_lvgl_set_cache_psram);
 
 static const mp_rom_map_elem_t seedsigner_lvgl_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_seedsigner_lvgl_screens) },
@@ -442,6 +472,7 @@ static const mp_rom_map_elem_t seedsigner_lvgl_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_clear_result_queue), MP_ROM_PTR(&seedsigner_lvgl_clear_result_queue_obj) },
     { MP_ROM_QSTR(MP_QSTR_mem_stats), MP_ROM_PTR(&seedsigner_lvgl_mem_stats_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_memory_stats), MP_ROM_PTR(&seedsigner_lvgl_mem_stats_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_cache_psram), MP_ROM_PTR(&seedsigner_lvgl_set_cache_psram_obj) },
 };
 static MP_DEFINE_CONST_DICT(seedsigner_lvgl_module_globals, seedsigner_lvgl_module_globals_table);
 

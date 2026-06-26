@@ -49,6 +49,16 @@ typedef struct {
     uint32_t spiram_min_free;
     uint32_t internal_free;
     uint32_t internal_min_free;
+    /* rb-cache PSRAM routing (Approach A; docs/approach-a-cache-psram-design.md).
+     * rb_psram_enabled: 1 if routing on. alloc/free_total: cumulative PSRAM rb-node
+     * allocs/frees. live_nodes/live_bytes: currently held. fallback_total: PSRAM
+     * alloc failures that fell back to the internal pool (should stay 0). */
+    uint32_t rb_psram_enabled;
+    uint32_t rb_psram_alloc_total;
+    uint32_t rb_psram_free_total;
+    uint32_t rb_psram_live_nodes;
+    uint32_t rb_psram_live_bytes;
+    uint32_t rb_psram_fallback_total;
 } dm_mem_stats_t;
 
 /* Fill *out with a memory snapshot. The LVGL pool read is wrapped in the
@@ -57,6 +67,12 @@ typedef struct {
  * lock is unavailable the lvgl_* fields are left zeroed but the heap fields are
  * still populated. Safe to call with out == NULL (no-op). */
 void dm_mem_stats(dm_mem_stats_t *out);
+
+/* Toggle rb-cache PSRAM routing at runtime (Approach A A/B measurement). Routing
+ * defaults on; flip off early in a test script to reproduce the original in-pool
+ * overflow as a control. Affects only subsequent allocations (existing PSRAM nodes
+ * stay valid and free correctly). Wraps lv_rb_psram_set_enabled(). */
+void dm_set_cache_psram(bool enabled);
 
 #ifdef __cplusplus
 }

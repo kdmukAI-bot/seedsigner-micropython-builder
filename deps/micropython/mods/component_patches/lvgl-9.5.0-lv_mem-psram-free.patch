@@ -1,0 +1,31 @@
+--- a/src/stdlib/lv_mem.c
++++ b/src/stdlib/lv_mem.c
+@@ -42,6 +42,13 @@
+ void lv_mem_monitor_core(lv_mem_monitor_t * mon_p);
+ lv_result_t lv_mem_test_core(void);
+ 
++/* SEEDSIGNER: PSRAM cache-node routing (Approach A). Implemented in misc/lv_rb.c.
++ * lv_free() below routes external-RAM pointers (our rb cache nodes, allocated via
++ * heap_caps in rb_create_node) to the IDF allocator instead of the LVGL TLSF pool.
++ * See docs/approach-a-cache-psram-design.md. */
++bool lv_rb_psram_owns(const void * p);
++void lv_rb_psram_note_free(void * p);
++
+ /**********************
+  *  STATIC VARIABLES
+  **********************/
+@@ -133,6 +140,14 @@
+     if(data == &zero_mem) return;
+     if(data == NULL) return;
+ 
++    /* --- SEEDSIGNER PSRAM cache routing (Approach A) ----------------------------
++     * rb/cache nodes routed to PSRAM are not in the LVGL TLSF pool; lv_free_core
++     * would corrupt. Any external-RAM pointer reaching lv_free is one of ours
++     * (nothing else lv_malloc()s into PSRAM). Route it to the IDF allocator.
++     * See misc/lv_rb.c + docs/approach-a-cache-psram-design.md. */
++    if(lv_rb_psram_owns(data)) { lv_rb_psram_note_free(data); return; }
++    /* --- end SEEDSIGNER --------------------------------------------------------- */
++
+     lv_free_core(data);
+ }
+ 

@@ -104,6 +104,14 @@ MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DSEEDSIGNER_DISPLAY_HEIGHT=$SEEDSIGNER_
     USER_C_MODULES="$USER_C_MODULES_FILE" \
     CMAKE_ARGS="$MICROPY_CMAKE_ARGS" \
     submodules
+
+  # Patch fetched ESP-IDF managed components (e.g. LVGL). The `submodules`
+  # reconfigure above runs the IDF component manager, which materializes
+  # ports/esp32/managed_components/; patch it now, before the real build compiles
+  # it. Idempotent (sentinel/dry-run guarded). See apply_component_patches.sh and
+  # docs/approach-a-cache-psram-design.md.
+  "$SCRIPT_DIR/apply_component_patches.sh" "$WORKDIR"
+
   make -C "$MP_DIR/ports/esp32" -j"$(nproc)" \
     BOARD="$BOARD" \
     BUILD="$BUILD_DIR" \

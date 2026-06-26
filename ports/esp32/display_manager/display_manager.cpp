@@ -30,6 +30,15 @@
 
 static const char *TAG = "display_manager";
 
+// rb-cache PSRAM routing (Approach A; docs/approach-a-cache-psram-design.md).
+// Implemented in the patched LVGL managed component (src/misc/lv_rb.c); declared
+// here because they're not in any LVGL public header.
+extern "C" {
+    void lv_rb_psram_get_stats(uint32_t out[6]);  // [enabled,alloc,free,live_nodes,live_bytes,fallback]
+    void lv_rb_psram_set_enabled(bool en);
+    bool lv_rb_psram_is_enabled(void);
+}
+
 // ---------------------------------------------------------------------------
 // Route LVGL DRAW BUFFERS (tiny_ttf glyph bitmaps + glyph-run masks) to PSRAM.
 //
@@ -123,6 +132,12 @@ extern "C" void init(void)
      * rasterizes the baked Western floor) so even those first bitmaps avoid the
      * 64 KB pool. */
     route_draw_buffers_to_psram();
+
+    /* Approach A: tiny_ttf/image cache index nodes (the lv_rb tree nodes) are
+     * routed to PSRAM in the patched LVGL component so they stop fragmenting the
+     * internal pool under realistic CJK. Log the state for boot-log visibility. */
+    ESP_LOGI(TAG, "rb-cache PSRAM routing (Approach A): %s",
+             lv_rb_psram_is_enabled() ? "enabled" : "disabled");
 
     /* Select the display profile that matches this board's resolution.
      * Landscape mode swaps H/V: LVGL width = V_RES, height = H_RES. */
@@ -269,6 +284,17 @@ extern "C" void dm_mem_stats(dm_mem_stats_t *out)
     out->internal_free     = (uint32_t)heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
     out->internal_min_free = (uint32_t)heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL);
 
+    /* rb-cache PSRAM routing counters (Approach A) — plain volatile reads, no lock
+     * needed; populated even if the LVGL lock below is unavailable. */
+    uint32_t rb[6];
+    lv_rb_psram_get_stats(rb);
+    out->rb_psram_enabled        = rb[0];
+    out->rb_psram_alloc_total    = rb[1];
+    out->rb_psram_free_total     = rb[2];
+    out->rb_psram_live_nodes     = rb[3];
+    out->rb_psram_live_bytes     = rb[4];
+    out->rb_psram_fallback_total = rb[5];
+
     /* lv_mem_monitor walks the LVGL builtin allocator, which the esp_lvgl_port
      * task mutates concurrently — take the same lock the other dm_* wrappers do.
      * If it's unavailable, the lvgl_* fields stay zeroed (heap fields above are
@@ -287,4 +313,12 @@ extern "C" void dm_mem_stats(dm_mem_stats_t *out)
     out->lvgl_max_used     = (uint32_t)mon.max_used;
     out->lvgl_used_pct     = mon.used_pct;
     out->lvgl_frag_pct     = mon.frag_pct;
+}
+
+/* Runtime A/B toggle for rb-cache PSRAM routing (Approach A). See header. */
+extern "C" void dm_set_cache_psram(bool enabled)
+{
+    lv_rb_psram_set_enabled(enabled);
+    ESP_LOGI(TAG, "rb-cache PSRAM routing %s via dm_set_cache_psram",
+             enabled ? "ENABLED" : "DISABLED");
 }
