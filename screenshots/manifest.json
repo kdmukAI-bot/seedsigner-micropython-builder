@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-26 16:56:54Z",
+  "generated_at": "2026-06-30 12:42:16Z",
   "resolutions": [
     {
       "width": 240,
@@ -42,6 +42,16 @@
           "path": "img/240x240/button_list_screen__intro_text_fits_240x240.png"
         },
         {
+          "name": "button_list_screen__intro_text_restore",
+          "display_name": "button_list_screen (_intro_text_restore)",
+          "path": "img/240x240/button_list_screen__intro_text_restore_240x240.png"
+        },
+        {
+          "name": "button_list_screen__intro_text_marginal",
+          "display_name": "button_list_screen (_intro_text_marginal)",
+          "path": "img/240x240/button_list_screen__intro_text_marginal_240x240.png"
+        },
+        {
           "name": "button_list_screen__left_aligned",
           "display_name": "button_list_screen (_left_aligned)",
           "path": "img/240x240/button_list_screen__left_aligned_240x240.png"
@@ -60,6 +70,11 @@
           "name": "button_list_screen__checkbox_multi",
           "display_name": "button_list_screen (_checkbox_multi)",
           "path": "img/240x240/button_list_screen__checkbox_multi_240x240.png"
+        },
+        {
+          "name": "button_list_screen__checkbox_multi_restore",
+          "display_name": "button_list_screen (_checkbox_multi_restore)",
+          "path": "img/240x240/button_list_screen__checkbox_multi_restore_240x240.png"
         },
         {
           "name": "button_list_screen__radio_single",
@@ -175,6 +190,36 @@
           "name": "seed_add_passphrase_screen__symbols",
           "display_name": "seed_add_passphrase_screen (_symbols)",
           "path": "img/240x240/seed_add_passphrase_screen__symbols_240x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen",
+          "display_name": "camera_preview_overlay_screen",
+          "path": "img/240x240/camera_preview_overlay_screen_240x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__scanning_early",
+          "display_name": "camera_preview_overlay_screen (_scanning_early)",
+          "path": "img/240x240/camera_preview_overlay_screen__scanning_early_240x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__scanning_late",
+          "display_name": "camera_preview_overlay_screen (_scanning_late)",
+          "path": "img/240x240/camera_preview_overlay_screen__scanning_late_240x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__frame_repeated",
+          "display_name": "camera_preview_overlay_screen (_frame_repeated)",
+          "path": "img/240x240/camera_preview_overlay_screen__frame_repeated_240x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__force_square",
+          "display_name": "camera_preview_overlay_screen (_force_square)",
+          "path": "img/240x240/camera_preview_overlay_screen__force_square_240x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__fill_landscape",
+          "display_name": "camera_preview_overlay_screen (_fill_landscape)",
+          "path": "img/240x240/camera_preview_overlay_screen__fill_landscape_240x240.png"
         }
       ]
     },
@@ -219,6 +264,16 @@
           "path": "img/320x240/button_list_screen__intro_text_fits_320x240.png"
         },
         {
+          "name": "button_list_screen__intro_text_restore",
+          "display_name": "button_list_screen (_intro_text_restore)",
+          "path": "img/320x240/button_list_screen__intro_text_restore_320x240.png"
+        },
+        {
+          "name": "button_list_screen__intro_text_marginal",
+          "display_name": "button_list_screen (_intro_text_marginal)",
+          "path": "img/320x240/button_list_screen__intro_text_marginal_320x240.png"
+        },
+        {
           "name": "button_list_screen__left_aligned",
           "display_name": "button_list_screen (_left_aligned)",
           "path": "img/320x240/button_list_screen__left_aligned_320x240.png"
@@ -237,6 +292,11 @@
           "name": "button_list_screen__checkbox_multi",
           "display_name": "button_list_screen (_checkbox_multi)",
           "path": "img/320x240/button_list_screen__checkbox_multi_320x240.png"
+        },
+        {
+          "name": "button_list_screen__checkbox_multi_restore",
+          "display_name": "button_list_screen (_checkbox_multi_restore)",
+          "path": "img/320x240/button_list_screen__checkbox_multi_restore_320x240.png"
         },
         {
           "name": "button_list_screen__radio_single",
@@ -352,6 +412,36 @@
           "name": "seed_add_passphrase_screen__symbols",
           "display_name": "seed_add_passphrase_screen (_symbols)",
           "path": "img/320x240/seed_add_passphrase_screen__symbols_320x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen",
+          "display_name": "camera_preview_overlay_screen",
+          "path": "img/320x240/camera_preview_overlay_screen_320x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__scanning_early",
+          "display_name": "camera_preview_overlay_screen (_scanning_early)",
+          "path": "img/320x240/camera_preview_overlay_screen__scanning_early_320x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__scanning_late",
+          "display_name": "camera_preview_overlay_screen (_scanning_late)",
+          "path": "img/320x240/camera_preview_overlay_screen__scanning_late_320x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__frame_repeated",
+          "display_name": "camera_preview_overlay_screen (_frame_repeated)",
+          "path": "img/320x240/camera_preview_overlay_screen__frame_repeated_320x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__force_square",
+          "display_name": "camera_preview_overlay_screen (_force_square)",
+          "path": "img/320x240/camera_preview_overlay_screen__force_square_320x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__fill_landscape",
+          "display_name": "camera_preview_overlay_screen (_fill_landscape)",
+          "path": "img/320x240/camera_preview_overlay_screen__fill_landscape_320x240.png"
         }
       ]
     },
@@ -396,6 +486,16 @@
           "path": "img/480x320/button_list_screen__intro_text_fits_480x320.png"
         },
         {
+          "name": "button_list_screen__intro_text_restore",
+          "display_name": "button_list_screen (_intro_text_restore)",
+          "path": "img/480x320/button_list_screen__intro_text_restore_480x320.png"
+        },
+        {
+          "name": "button_list_screen__intro_text_marginal",
+          "display_name": "button_list_screen (_intro_text_marginal)",
+          "path": "img/480x320/button_list_screen__intro_text_marginal_480x320.png"
+        },
+        {
           "name": "button_list_screen__left_aligned",
           "display_name": "button_list_screen (_left_aligned)",
           "path": "img/480x320/button_list_screen__left_aligned_480x320.png"
@@ -414,6 +514,11 @@
           "name": "button_list_screen__checkbox_multi",
           "display_name": "button_list_screen (_checkbox_multi)",
           "path": "img/480x320/button_list_screen__checkbox_multi_480x320.png"
+        },
+        {
+          "name": "button_list_screen__checkbox_multi_restore",
+          "display_name": "button_list_screen (_checkbox_multi_restore)",
+          "path": "img/480x320/button_list_screen__checkbox_multi_restore_480x320.png"
         },
         {
           "name": "button_list_screen__radio_single",
@@ -524,6 +629,36 @@
           "name": "seed_add_passphrase_screen__symbols",
           "display_name": "seed_add_passphrase_screen (_symbols)",
           "path": "img/480x320/seed_add_passphrase_screen__symbols_480x320.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen",
+          "display_name": "camera_preview_overlay_screen",
+          "path": "img/480x320/camera_preview_overlay_screen_480x320.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__scanning_early",
+          "display_name": "camera_preview_overlay_screen (_scanning_early)",
+          "path": "img/480x320/camera_preview_overlay_screen__scanning_early_480x320.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__scanning_late",
+          "display_name": "camera_preview_overlay_screen (_scanning_late)",
+          "path": "img/480x320/camera_preview_overlay_screen__scanning_late_480x320.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__frame_repeated",
+          "display_name": "camera_preview_overlay_screen (_frame_repeated)",
+          "path": "img/480x320/camera_preview_overlay_screen__frame_repeated_480x320.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__force_square",
+          "display_name": "camera_preview_overlay_screen (_force_square)",
+          "path": "img/480x320/camera_preview_overlay_screen__force_square_480x320.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__fill_landscape",
+          "display_name": "camera_preview_overlay_screen (_fill_landscape)",
+          "path": "img/480x320/camera_preview_overlay_screen__fill_landscape_480x320.png"
         }
       ]
     },
@@ -568,6 +703,16 @@
           "path": "img/800x480/button_list_screen__intro_text_fits_800x480.png"
         },
         {
+          "name": "button_list_screen__intro_text_restore",
+          "display_name": "button_list_screen (_intro_text_restore)",
+          "path": "img/800x480/button_list_screen__intro_text_restore_800x480.png"
+        },
+        {
+          "name": "button_list_screen__intro_text_marginal",
+          "display_name": "button_list_screen (_intro_text_marginal)",
+          "path": "img/800x480/button_list_screen__intro_text_marginal_800x480.png"
+        },
+        {
           "name": "button_list_screen__left_aligned",
           "display_name": "button_list_screen (_left_aligned)",
           "path": "img/800x480/button_list_screen__left_aligned_800x480.png"
@@ -586,6 +731,11 @@
           "name": "button_list_screen__checkbox_multi",
           "display_name": "button_list_screen (_checkbox_multi)",
           "path": "img/800x480/button_list_screen__checkbox_multi_800x480.png"
+        },
+        {
+          "name": "button_list_screen__checkbox_multi_restore",
+          "display_name": "button_list_screen (_checkbox_multi_restore)",
+          "path": "img/800x480/button_list_screen__checkbox_multi_restore_800x480.png"
         },
         {
           "name": "button_list_screen__radio_single",
@@ -696,6 +846,36 @@
           "name": "seed_add_passphrase_screen__symbols",
           "display_name": "seed_add_passphrase_screen (_symbols)",
           "path": "img/800x480/seed_add_passphrase_screen__symbols_800x480.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen",
+          "display_name": "camera_preview_overlay_screen",
+          "path": "img/800x480/camera_preview_overlay_screen_800x480.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__scanning_early",
+          "display_name": "camera_preview_overlay_screen (_scanning_early)",
+          "path": "img/800x480/camera_preview_overlay_screen__scanning_early_800x480.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__scanning_late",
+          "display_name": "camera_preview_overlay_screen (_scanning_late)",
+          "path": "img/800x480/camera_preview_overlay_screen__scanning_late_800x480.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__frame_repeated",
+          "display_name": "camera_preview_overlay_screen (_frame_repeated)",
+          "path": "img/800x480/camera_preview_overlay_screen__frame_repeated_800x480.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__force_square",
+          "display_name": "camera_preview_overlay_screen (_force_square)",
+          "path": "img/800x480/camera_preview_overlay_screen__force_square_800x480.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__fill_landscape",
+          "display_name": "camera_preview_overlay_screen (_fill_landscape)",
+          "path": "img/800x480/camera_preview_overlay_screen__fill_landscape_800x480.png"
         }
       ]
     }
