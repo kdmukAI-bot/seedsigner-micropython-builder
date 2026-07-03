@@ -281,6 +281,42 @@ static mp_obj_t mp_seedsigner_lvgl_seed_mnemonic_entry_screen(size_t n_args, con
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_mnemonic_entry_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_mnemonic_entry_screen);
 
+// loading_screen(cfg={"text": "..."}) -> None. The animated "processing" spinner
+// shown while the host runs a long, blocking task (PSBT parse/verify, seed gen).
+//
+// BEHAVIOR IS DIFFERENT from every other screen binding above — read before use:
+//
+//   * FIRE-AND-FORGET, NOT POLLED. Every other screen is a builder the Python
+//     runner then polls (run_lvgl_screen loops on poll_for_result until a terminal
+//     event). loading_screen takes NO input and produces NO result, so it must NOT
+//     be driven through that polling loop — the loop would spin forever. Python
+//     calls this once, the call builds the widget tree and returns immediately, and
+//     control goes straight back to the caller to start its long task.
+//
+//   * SELF-ANIMATED, NO HOST THREAD. run_screen builds the spinner and installs an
+//     lv_timer that rotates the comet. That timer runs on the esp_lvgl_port task —
+//     the same FreeRTOS task that pumps lv_timer_handler and renders every screen —
+//     so the comet keeps spinning with zero host involvement while the MicroPython
+//     thread is busy inside its blocking task. This REPLACES Python's
+//     LoadingScreenThread (screen.py): on the PIL backend one thread can't both work
+//     and repaint, so a background thread repaints and a stop event ends it; on the
+//     LVGL backend the display task already repaints, so there is no Python thread
+//     and no stop signal to manage.
+//
+//   * "STOP" == LOAD THE NEXT SCREEN. There is deliberately no stop()/hide() API.
+//     When the task finishes, the host simply runs the next screen; the native
+//     load_screen_and_cleanup_previous() deletes this screen, whose LV_EVENT_DELETE
+//     handler tears down the spin timer. No explicit teardown, no join.
+//
+//   * CAVEAT: the comet advances only while the LVGL port task gets CPU. A task that
+//     never yields the FreeRTOS scheduler (a tight, lock-free C loop) can starve it;
+//     the self-driven timer is wall-clock clamped, so under load it visibly SLOWS
+//     rather than jumping. Ordinary Python-level long tasks yield and animate fine.
+static mp_obj_t mp_seedsigner_lvgl_loading_screen(size_t n_args, const mp_obj_t *args) {
+    return run_cfg_screen(loading_screen, "loading_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_loading_screen_obj, 0, 1, mp_seedsigner_lvgl_loading_screen);
+
 static mp_obj_t mp_seedsigner_lvgl_qr_display_screen(size_t n_args, const mp_obj_t *args) {
     // Static or animated QR. A static QR is fully described by the cfg; an animated
     // QR is host-driven -- after this call Python pushes each frame via
@@ -510,6 +546,7 @@ static const mp_rom_map_elem_t seedsigner_lvgl_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_seed_add_passphrase_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_add_passphrase_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_keyboard_screen), MP_ROM_PTR(&seedsigner_lvgl_keyboard_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_seed_mnemonic_entry_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_mnemonic_entry_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_loading_screen), MP_ROM_PTR(&seedsigner_lvgl_loading_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_qr_display_screen), MP_ROM_PTR(&seedsigner_lvgl_qr_display_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_qr_display_set_frame), MP_ROM_PTR(&seedsigner_lvgl_qr_display_set_frame_obj) },
     { MP_ROM_QSTR(MP_QSTR_qr_display_is_tip_active), MP_ROM_PTR(&seedsigner_lvgl_qr_display_is_tip_active_obj) },
