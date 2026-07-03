@@ -67,16 +67,13 @@ jobs:
           # submodules two levels down are absent -- and the build needs them:
           #   board_common -> esp-camera-pipeline -> k_quirc   (ESP-IDF component)
           #   seedsigner-lvgl-screens -> third_party/lvgl      (screenshot generator)
-          # The camera chain's .gitmodules use SSH URLs CI can't authenticate; rewrite
-          # gitlab/github SSH to anonymous HTTPS (all public). lvgl-screens' nested
-          # URLs are already HTTPS. Scope recursion to these two subtrees so
-          # MicroPython's own deep submodules are not pulled.
+          # All submodule URLs in these subtrees are now public HTTPS GitHub, so they
+          # resolve anonymously with no URL rewrite. Scope recursion to these two
+          # subtrees so MicroPython's own deep submodules are not pulled.
           # The workspace repo is owned by a different uid than this step's user and
           # checkout's safe.directory exception only lives under its temporary HOME,
           # so re-add it here or git aborts with "dubious ownership".
           git config --global --add safe.directory '*'
-          git config --global url."https://gitlab.com/".insteadOf "git@gitlab.com:"
-          git config --global url."https://github.com/".insteadOf "git@github.com:"
           git submodule update --init --recursive ports/esp32/board_common deps/seedsigner-lvgl-screens
 
       - name: Prepare sources workspace from prebaked image
