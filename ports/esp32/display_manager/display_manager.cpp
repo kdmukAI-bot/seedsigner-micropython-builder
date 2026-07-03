@@ -27,6 +27,7 @@
 #include "gui_constants.h"
 #include "locale_loader.h"    // ss_load_locale / ss_unload_locale (i18n font packs)
 #include "overlay_manager.h"  // overlay_manager_init / _set_screensaver_timeout
+#include "seedsigner.h"       // splash_screen (boot_logo_only) for the C-boot logo
 
 static const char *TAG = "display_manager";
 
@@ -175,20 +176,18 @@ extern "C" void seedsigner_board_startup(void)
      * docs/knowledge/esp32-p4-sdcard-ldo-power.md. */
     sd_power_on();
 
-    /* Render black screen with backlight off, then turn on backlight.
-     * This avoids a flash of LVGL's default white background — the
-     * first visible frame is a clean black screen. */
-    if (lvgl_disp && lvgl_port_lock(0)) {
-        lv_obj_set_style_bg_color(lv_screen_active(), lv_color_black(), 0);
-#if SEEDSIGNER_DEBUG
-        lv_obj_t *label = lv_label_create(lv_screen_active());
-        lv_label_set_text(label, "device ready");
-        lv_obj_set_style_text_color(label, lv_color_make(128, 128, 128), 0);
-        lv_obj_center(label);
-#endif
-        lvgl_port_unlock();
+    /* First visible frame: the centered SeedSigner boot logo on black, rendered
+     * BEFORE the backlight comes on so power-up feels instant (no flash of LVGL's
+     * default white, no waiting on MicroPython/app startup). Reuses the canonical
+     * splash_screen in boot_logo_only mode, so the logo lands exactly where the
+     * app's OpeningSplash later animates from — a seamless boot->splash handoff
+     * (splash_screen relies on "the held C-boot logo is already there"). This
+     * fully replaces the earlier black / "device ready" frame. run_screen takes
+     * the LVGL lock and swallows exceptions. */
+    if (lvgl_disp) {
+        run_screen(splash_screen, (void *)"{\"boot_logo_only\": true}");
     }
-    /* Give LVGL time to flush the splash frame before backlight on */
+    /* Give LVGL time to flush the boot-logo frame before the backlight turns on. */
     vTaskDelay(pdMS_TO_TICKS(100));
     board_backlight_set(100);
 }

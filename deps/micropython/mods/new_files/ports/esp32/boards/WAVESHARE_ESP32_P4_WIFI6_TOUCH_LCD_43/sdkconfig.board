@@ -6,6 +6,44 @@
 CONFIG_SPIRAM_MEMTEST=y
 CONFIG_SPIRAM_IGNORE_NOTFOUND=n
 
+# ── Camera (MIPI-CSI, OV5647) ──────────────────────────────────────────────
+# The esp_video CSI/ISP video devices are pulled in by board_common, but the
+# SENSOR DRIVER (esp_cam_sensor OV5647) and the ISP pipeline controller are
+# per-application Kconfig — board_common's shared fragment only carries pins, so
+# each app enables them in its own sdkconfig (e.g. scan_coord_test). Without the
+# sensor driver, esp_video_init() returns OK but detects no sensor and registers
+# NO /dev/video0, so cam_pipeline_create() fails at open("/dev/video0"). These
+# three match scan_coord_test's proven set (the camera_scanner module needs them).
+# See docs/knowledge/esp32-p4-camera-missing-sensor-kconfig.md.
+CONFIG_CAMERA_OV5647=y
+CONFIG_CAMERA_OV5647_MIPI_RAW10_1280x960_BINNING_45FPS=y
+CONFIG_ESP_VIDEO_ENABLE_ISP_PIPELINE_CONTROLLER=y
+# Camera RUNTIME requirements (also from scan_coord_test). Without these the
+# sensor is detected but stream-start hangs/crashes:
+#  - Backup buffer ENABLED (default-disabled elsewhere): the CSI driver needs its
+#    internal DMA backup buffer or the first frame stalls and the priming DQBUF in
+#    cam_pipeline_create() blocks forever (the start() hang observed on device).
+#  - Timer task stack 4096: the ISP pipeline controller runs on the FreeRTOS timer
+#    task; the 2048 default overflows.
+CONFIG_ESP_VIDEO_DISABLE_MIPI_CSI_DRIVER_BACKUP_BUFFER=n
+CONFIG_FREERTOS_TIMER_TASK_STACK_DEPTH=4096
+# CSI auto-exposure target (0 = ISP default; bright image decodes a binary QR best).
+CONFIG_BOARD_CSI_AE_TARGET=0
+# k_quirc contrast stretch (decode tuning, matches scan_coord_test).
+CONFIG_K_QUIRC_CONTRAST_STRETCH=y
+
+# ── Orientation ────────────────────────────────────────────────────────────
+# The firmware runs the display in LANDSCAPE at runtime (display_manager.cpp
+# calls board_init({.landscape=true})), but the compile-time convenience macros
+# BOARD_DISP_H_RES/V_RES and the camera-rotation compensation in board_pipeline.c
+# are gated on CONFIG_BOARD_LANDSCAPE. Without it those macros stay PORTRAIT
+# (480x800) and the camera loses its +270° landscape rotation — so the live
+# preview appears 90° CCW and the camera_scanner overlay (which sizes/places the
+# status bar from BOARD_DISP_*_RES) lands off-screen. Every bare board_common app
+# sets this in its sdkconfig.landscape; the firmware needs it too.
+# See docs/knowledge/esp32-p4-landscape-preview-fps-lock-contention.md.
+CONFIG_BOARD_LANDSCAPE=y
+
 # LVGL fonts
 CONFIG_LV_FONT_MONTSERRAT_20=y
 CONFIG_LV_FONT_MONTSERRAT_22=y
@@ -81,8 +119,12 @@ CONFIG_ESP_COREDUMP_CHECKSUM_CRC32=y
 CONFIG_ESP_TASK_WDT_EN=y
 CONFIG_ESP_TASK_WDT_INIT=y
 CONFIG_ESP_TASK_WDT_PANIC=y
-CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU0=y
-CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU1=y
+# Idle-task WDT checks OFF: the CSI camera's DQBUF blocks the idle task during
+# streaming (scan_coord_test disables the WDT entirely for this). We keep the WDT
+# + panic so genuine task hangs/deadlocks still produce a coredump+backtrace, and
+# only exempt the idle tasks so normal camera streaming doesn't false-panic.
+CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU0=n
+CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU1=n
 CONFIG_ESP_TASK_WDT_TIMEOUT_S=10
 
 # Heap integrity: IDF heap poisoning is DISABLED. Both LIGHT and COMPREHENSIVE
@@ -99,12 +141,32 @@ CONFIG_HEAP_POISONING_NONE=y
 CONFIG_FREERTOS_CHECK_STACKOVERFLOW_CANARY=y
 CONFIG_FREERTOS_WATCHPOINT_END_OF_STACK=y
 
-# Logging: INFO by default (DEBUG-default floods the shared serial — the MSPI DQS
-# tuning component prints thousands of lines/sec, breaking REPL automation and
-# slowing boot). VERBOSE is compiled in, so bump any tag at runtime with
-# esp_log_level_set("tag", ESP_LOG_VERBOSE) when investigating.
+# Logging: INFO, compiled-in maximum also INFO (NOT verbose).
+#
+# CRITICAL for the camera: esp_video's CSI DMA-done path logs at DEBUG from
+# INTERRUPT context (csi_video_on_trans_finished, per DMA transfer). ESP_LOGx
+# checks esp_log_is_tag_loggable(), which takes the log mutex (xQueueSemaphoreTake)
+# — illegal in an ISR. With VERBOSE compiled in, that ESP_LOGD is emitted, the ISR
+# blocks on the mutex with interrupts disabled, and the board dies with an
+# "Interrupt wdt timeout on CPU1" the moment the camera streams. Capping the
+# compiled-in maximum at INFO makes ESP_LOGD/V no-ops at compile time, so the ISR
+# never touches the log lock (this is why scan_coord_test, which never enabled
+# verbose, runs the same camera fine). Also kills the ISP IPA per-frame auto-
+# exposure/histogram DEBUG flood. Trade-off: no runtime tag-bump to VERBOSE; flip
+# back ONLY for non-camera debugging. See docs/knowledge/esp32-p4-camera-*.
 CONFIG_LOG_DEFAULT_LEVEL_INFO=y
-CONFIG_LOG_MAXIMUM_LEVEL_VERBOSE=y
+CONFIG_LOG_MAXIMUM_LEVEL_INFO=y
+
+# Camera pipeline fps/timing instrumentation. Emits "DISP CPU: avg=… us" (the
+# landscape rotate-flush cost) and "DISP INTERVAL" (push cadence) as ESP_LOGI —
+# board-code logs only, NOT esp_video ISR logs, so it's safe with the camera (does
+# not re-enable the ISR-unsafe DEBUG/VERBOSE path capped above). Lets us measure the
+# real flush cost / fps on device. Drop once the display path is finalized.
+CONFIG_CAM_PIPELINE_DEBUG=y
+
+# QR decode task flattened to 1 (== lvgl + CSI + VM), so the heavy quirc decode on
+# core 1 doesn't preempt the VM's present()/overlay updates. See board_common note.
+CONFIG_CAM_PIPELINE_QR_TASK_PRIORITY=1
 
 # LVGL self-checks: logging + assertions (null/malloc/mem/obj/style) abort at the
 # point of corruption with a backtrace — ideal for bad font/object pointers.

@@ -55,7 +55,16 @@ idf.py --version >/dev/null 2>&1 || { echo "ERROR: idf.py not runnable (GHCR bas
 PORTS_ESP32_DIR="$ROOT_DIR/ports/esp32"
 USER_C_MODULES_FILE="$ROOT_DIR/usercmodule.cmake"
 MICROPY_CMAKE_ARGS="${CMAKE_ARGS:-} -DUSER_C_MODULES=$USER_C_MODULES_FILE"
-MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DMICROPY_EXTRA_COMPONENT_DIRS=${PORTS_ESP32_DIR}\;${SCREENS_DIR}/components"
+# Component search path. Includes board_common's nested camera components so that
+# board_common's REQUIRES (esp-camera-pipeline, cam_pipeline_qr) resolve — same set
+# the board_common apps (scan_coord_test, qr_overlay_test) point EXTRA_COMPONENT_DIRS at.
+BOARD_COMMON_COMPONENTS="${PORTS_ESP32_DIR}/board_common/components"
+MICROPY_EXTRA_DIRS="${PORTS_ESP32_DIR}"
+MICROPY_EXTRA_DIRS="${MICROPY_EXTRA_DIRS}\;${BOARD_COMMON_COMPONENTS}"
+MICROPY_EXTRA_DIRS="${MICROPY_EXTRA_DIRS}\;${BOARD_COMMON_COMPONENTS}/esp-camera-pipeline"
+MICROPY_EXTRA_DIRS="${MICROPY_EXTRA_DIRS}\;${BOARD_COMMON_COMPONENTS}/esp-camera-pipeline/components"
+MICROPY_EXTRA_DIRS="${MICROPY_EXTRA_DIRS}\;${SCREENS_DIR}/components"
+MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DMICROPY_EXTRA_COMPONENT_DIRS=${MICROPY_EXTRA_DIRS}"
 MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DSEEDSIGNER_LVGL_SCREENS_DIR=$SCREENS_DIR"
 
 # board_common board config: maps MicroPython board name to board_common board dir.
