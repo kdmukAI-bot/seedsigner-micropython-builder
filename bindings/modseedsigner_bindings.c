@@ -281,6 +281,14 @@ static mp_obj_t mp_seedsigner_lvgl_seed_mnemonic_entry_screen(size_t n_args, con
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_mnemonic_entry_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_mnemonic_entry_screen);
 
+static mp_obj_t mp_seedsigner_lvgl_seed_finalize_screen(size_t n_args, const mp_obj_t *args) {
+    // Fingerprint readout + bottom-pinned button list. cfg requires "fingerprint";
+    // the screen-side C++ validates + supplies title/button_list defaults. Standard
+    // polled screen: button selection comes back via on_button_selected.
+    return run_cfg_screen(seed_finalize_screen, "seed_finalize_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_finalize_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_finalize_screen);
+
 // loading_screen(cfg={"text": "..."}) -> None. The animated "processing" spinner
 // shown while the host runs a long, blocking task (PSBT parse/verify, seed gen).
 //
@@ -546,6 +554,7 @@ static const mp_rom_map_elem_t seedsigner_lvgl_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_seed_add_passphrase_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_add_passphrase_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_keyboard_screen), MP_ROM_PTR(&seedsigner_lvgl_keyboard_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_seed_mnemonic_entry_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_mnemonic_entry_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_seed_finalize_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_finalize_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_loading_screen), MP_ROM_PTR(&seedsigner_lvgl_loading_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_qr_display_screen), MP_ROM_PTR(&seedsigner_lvgl_qr_display_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_qr_display_set_frame), MP_ROM_PTR(&seedsigner_lvgl_qr_display_set_frame_obj) },
