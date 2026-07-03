@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-30 12:42:16Z",
+  "generated_at": "2026-07-03 14:29:51Z",
   "resolutions": [
     {
       "width": 240,
@@ -220,6 +220,71 @@
           "name": "camera_preview_overlay_screen__fill_landscape",
           "display_name": "camera_preview_overlay_screen (_fill_landscape)",
           "path": "img/240x240/camera_preview_overlay_screen__fill_landscape_240x240.png"
+        },
+        {
+          "name": "keyboard_screen",
+          "display_name": "keyboard_screen",
+          "path": "img/240x240/keyboard_screen_240x240.png"
+        },
+        {
+          "name": "keyboard_screen__derivation",
+          "display_name": "keyboard_screen (_derivation)",
+          "path": "img/240x240/keyboard_screen__derivation_240x240.png"
+        },
+        {
+          "name": "keyboard_screen__coin_flip",
+          "display_name": "keyboard_screen (_coin_flip)",
+          "path": "img/240x240/keyboard_screen__coin_flip_240x240.png"
+        },
+        {
+          "name": "keyboard_screen__dice",
+          "display_name": "keyboard_screen (_dice)",
+          "path": "img/240x240/keyboard_screen__dice_240x240.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen",
+          "display_name": "seed_mnemonic_entry_screen",
+          "path": "img/240x240/seed_mnemonic_entry_screen_240x240.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__partial",
+          "display_name": "seed_mnemonic_entry_screen (_partial)",
+          "path": "img/240x240/seed_mnemonic_entry_screen__partial_240x240.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__narrowed",
+          "display_name": "seed_mnemonic_entry_screen (_narrowed)",
+          "path": "img/240x240/seed_mnemonic_entry_screen__narrowed_240x240.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__single_match",
+          "display_name": "seed_mnemonic_entry_screen (_single_match)",
+          "path": "img/240x240/seed_mnemonic_entry_screen__single_match_240x240.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__word_selected",
+          "display_name": "seed_mnemonic_entry_screen (_word_selected)",
+          "path": "img/240x240/seed_mnemonic_entry_screen__word_selected_240x240.png"
+        },
+        {
+          "name": "qr_display_screen",
+          "display_name": "qr_display_screen",
+          "path": "img/240x240/qr_display_screen_240x240.png"
+        },
+        {
+          "name": "qr_display_screen__compactseedqr",
+          "display_name": "qr_display_screen (_compactseedqr)",
+          "path": "img/240x240/qr_display_screen__compactseedqr_240x240.png"
+        },
+        {
+          "name": "qr_display_screen__xpub_export",
+          "display_name": "qr_display_screen (_xpub_export)",
+          "path": "img/240x240/qr_display_screen__xpub_export_240x240.png"
+        },
+        {
+          "name": "qr_display_screen__animated_bbqr",
+          "display_name": "qr_display_screen (_animated_bbqr)",
+          "path": "img/240x240/qr_display_screen__animated_bbqr_240x240.png"
         }
       ]
     },
@@ -442,6 +507,71 @@
           "name": "camera_preview_overlay_screen__fill_landscape",
           "display_name": "camera_preview_overlay_screen (_fill_landscape)",
           "path": "img/320x240/camera_preview_overlay_screen__fill_landscape_320x240.png"
+        },
+        {
+          "name": "keyboard_screen",
+          "display_name": "keyboard_screen",
+          "path": "img/320x240/keyboard_screen_320x240.png"
+        },
+        {
+          "name": "keyboard_screen__derivation",
+          "display_name": "keyboard_screen (_derivation)",
+          "path": "img/320x240/keyboard_screen__derivation_320x240.png"
+        },
+        {
+          "name": "keyboard_screen__coin_flip",
+          "display_name": "keyboard_screen (_coin_flip)",
+          "path": "img/320x240/keyboard_screen__coin_flip_320x240.png"
+        },
+        {
+          "name": "keyboard_screen__dice",
+          "display_name": "keyboard_screen (_dice)",
+          "path": "img/320x240/keyboard_screen__dice_320x240.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen",
+          "display_name": "seed_mnemonic_entry_screen",
+          "path": "img/320x240/seed_mnemonic_entry_screen_320x240.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__partial",
+          "display_name": "seed_mnemonic_entry_screen (_partial)",
+          "path": "img/320x240/seed_mnemonic_entry_screen__partial_320x240.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__narrowed",
+          "display_name": "seed_mnemonic_entry_screen (_narrowed)",
+          "path": "img/320x240/seed_mnemonic_entry_screen__narrowed_320x240.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__single_match",
+          "display_name": "seed_mnemonic_entry_screen (_single_match)",
+          "path": "img/320x240/seed_mnemonic_entry_screen__single_match_320x240.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__word_selected",
+          "display_name": "seed_mnemonic_entry_screen (_word_selected)",
+          "path": "img/320x240/seed_mnemonic_entry_screen__word_selected_320x240.png"
+        },
+        {
+          "name": "qr_display_screen",
+          "display_name": "qr_display_screen",
+          "path": "img/320x240/qr_display_screen_320x240.png"
+        },
+        {
+          "name": "qr_display_screen__compactseedqr",
+          "display_name": "qr_display_screen (_compactseedqr)",
+          "path": "img/320x240/qr_display_screen__compactseedqr_320x240.png"
+        },
+        {
+          "name": "qr_display_screen__xpub_export",
+          "display_name": "qr_display_screen (_xpub_export)",
+          "path": "img/320x240/qr_display_screen__xpub_export_320x240.png"
+        },
+        {
+          "name": "qr_display_screen__animated_bbqr",
+          "display_name": "qr_display_screen (_animated_bbqr)",
+          "path": "img/320x240/qr_display_screen__animated_bbqr_320x240.png"
         }
       ]
     },
@@ -659,6 +789,71 @@
           "name": "camera_preview_overlay_screen__fill_landscape",
           "display_name": "camera_preview_overlay_screen (_fill_landscape)",
           "path": "img/480x320/camera_preview_overlay_screen__fill_landscape_480x320.png"
+        },
+        {
+          "name": "keyboard_screen",
+          "display_name": "keyboard_screen",
+          "path": "img/480x320/keyboard_screen_480x320.png"
+        },
+        {
+          "name": "keyboard_screen__derivation",
+          "display_name": "keyboard_screen (_derivation)",
+          "path": "img/480x320/keyboard_screen__derivation_480x320.png"
+        },
+        {
+          "name": "keyboard_screen__coin_flip",
+          "display_name": "keyboard_screen (_coin_flip)",
+          "path": "img/480x320/keyboard_screen__coin_flip_480x320.png"
+        },
+        {
+          "name": "keyboard_screen__dice",
+          "display_name": "keyboard_screen (_dice)",
+          "path": "img/480x320/keyboard_screen__dice_480x320.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen",
+          "display_name": "seed_mnemonic_entry_screen",
+          "path": "img/480x320/seed_mnemonic_entry_screen_480x320.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__partial",
+          "display_name": "seed_mnemonic_entry_screen (_partial)",
+          "path": "img/480x320/seed_mnemonic_entry_screen__partial_480x320.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__narrowed",
+          "display_name": "seed_mnemonic_entry_screen (_narrowed)",
+          "path": "img/480x320/seed_mnemonic_entry_screen__narrowed_480x320.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__single_match",
+          "display_name": "seed_mnemonic_entry_screen (_single_match)",
+          "path": "img/480x320/seed_mnemonic_entry_screen__single_match_480x320.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__word_selected",
+          "display_name": "seed_mnemonic_entry_screen (_word_selected)",
+          "path": "img/480x320/seed_mnemonic_entry_screen__word_selected_480x320.png"
+        },
+        {
+          "name": "qr_display_screen",
+          "display_name": "qr_display_screen",
+          "path": "img/480x320/qr_display_screen_480x320.png"
+        },
+        {
+          "name": "qr_display_screen__compactseedqr",
+          "display_name": "qr_display_screen (_compactseedqr)",
+          "path": "img/480x320/qr_display_screen__compactseedqr_480x320.png"
+        },
+        {
+          "name": "qr_display_screen__xpub_export",
+          "display_name": "qr_display_screen (_xpub_export)",
+          "path": "img/480x320/qr_display_screen__xpub_export_480x320.png"
+        },
+        {
+          "name": "qr_display_screen__animated_bbqr",
+          "display_name": "qr_display_screen (_animated_bbqr)",
+          "path": "img/480x320/qr_display_screen__animated_bbqr_480x320.png"
         }
       ]
     },
@@ -876,6 +1071,71 @@
           "name": "camera_preview_overlay_screen__fill_landscape",
           "display_name": "camera_preview_overlay_screen (_fill_landscape)",
           "path": "img/800x480/camera_preview_overlay_screen__fill_landscape_800x480.png"
+        },
+        {
+          "name": "keyboard_screen",
+          "display_name": "keyboard_screen",
+          "path": "img/800x480/keyboard_screen_800x480.png"
+        },
+        {
+          "name": "keyboard_screen__derivation",
+          "display_name": "keyboard_screen (_derivation)",
+          "path": "img/800x480/keyboard_screen__derivation_800x480.png"
+        },
+        {
+          "name": "keyboard_screen__coin_flip",
+          "display_name": "keyboard_screen (_coin_flip)",
+          "path": "img/800x480/keyboard_screen__coin_flip_800x480.png"
+        },
+        {
+          "name": "keyboard_screen__dice",
+          "display_name": "keyboard_screen (_dice)",
+          "path": "img/800x480/keyboard_screen__dice_800x480.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen",
+          "display_name": "seed_mnemonic_entry_screen",
+          "path": "img/800x480/seed_mnemonic_entry_screen_800x480.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__partial",
+          "display_name": "seed_mnemonic_entry_screen (_partial)",
+          "path": "img/800x480/seed_mnemonic_entry_screen__partial_800x480.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__narrowed",
+          "display_name": "seed_mnemonic_entry_screen (_narrowed)",
+          "path": "img/800x480/seed_mnemonic_entry_screen__narrowed_800x480.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__single_match",
+          "display_name": "seed_mnemonic_entry_screen (_single_match)",
+          "path": "img/800x480/seed_mnemonic_entry_screen__single_match_800x480.png"
+        },
+        {
+          "name": "seed_mnemonic_entry_screen__word_selected",
+          "display_name": "seed_mnemonic_entry_screen (_word_selected)",
+          "path": "img/800x480/seed_mnemonic_entry_screen__word_selected_800x480.png"
+        },
+        {
+          "name": "qr_display_screen",
+          "display_name": "qr_display_screen",
+          "path": "img/800x480/qr_display_screen_800x480.png"
+        },
+        {
+          "name": "qr_display_screen__compactseedqr",
+          "display_name": "qr_display_screen (_compactseedqr)",
+          "path": "img/800x480/qr_display_screen__compactseedqr_800x480.png"
+        },
+        {
+          "name": "qr_display_screen__xpub_export",
+          "display_name": "qr_display_screen (_xpub_export)",
+          "path": "img/800x480/qr_display_screen__xpub_export_800x480.png"
+        },
+        {
+          "name": "qr_display_screen__animated_bbqr",
+          "display_name": "qr_display_screen (_animated_bbqr)",
+          "path": "img/800x480/qr_display_screen__animated_bbqr_800x480.png"
         }
       ]
     }
