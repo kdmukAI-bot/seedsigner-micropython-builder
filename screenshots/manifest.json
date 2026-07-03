@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-03 14:29:51Z",
+  "generated_at": "2026-07-03 15:39:20Z",
   "resolutions": [
     {
       "width": 240,
@@ -285,6 +285,26 @@
           "name": "qr_display_screen__animated_bbqr",
           "display_name": "qr_display_screen (_animated_bbqr)",
           "path": "img/240x240/qr_display_screen__animated_bbqr_240x240.png"
+        },
+        {
+          "name": "seed_finalize_screen",
+          "display_name": "seed_finalize_screen",
+          "path": "img/240x240/seed_finalize_screen_240x240.png"
+        },
+        {
+          "name": "seed_finalize_screen__no_passphrase",
+          "display_name": "seed_finalize_screen (_no_passphrase)",
+          "path": "img/240x240/seed_finalize_screen__no_passphrase_240x240.png"
+        },
+        {
+          "name": "loading_screen",
+          "display_name": "loading_screen [animated]",
+          "path": "img/240x240/loading_screen_240x240.gif"
+        },
+        {
+          "name": "loading_screen__no_text",
+          "display_name": "loading_screen (_no_text) [animated]",
+          "path": "img/240x240/loading_screen__no_text_240x240.gif"
         }
       ]
     },
@@ -572,6 +592,26 @@
           "name": "qr_display_screen__animated_bbqr",
           "display_name": "qr_display_screen (_animated_bbqr)",
           "path": "img/320x240/qr_display_screen__animated_bbqr_320x240.png"
+        },
+        {
+          "name": "seed_finalize_screen",
+          "display_name": "seed_finalize_screen",
+          "path": "img/320x240/seed_finalize_screen_320x240.png"
+        },
+        {
+          "name": "seed_finalize_screen__no_passphrase",
+          "display_name": "seed_finalize_screen (_no_passphrase)",
+          "path": "img/320x240/seed_finalize_screen__no_passphrase_320x240.png"
+        },
+        {
+          "name": "loading_screen",
+          "display_name": "loading_screen [animated]",
+          "path": "img/320x240/loading_screen_320x240.gif"
+        },
+        {
+          "name": "loading_screen__no_text",
+          "display_name": "loading_screen (_no_text) [animated]",
+          "path": "img/320x240/loading_screen__no_text_320x240.gif"
         }
       ]
     },
@@ -854,6 +894,26 @@
           "name": "qr_display_screen__animated_bbqr",
           "display_name": "qr_display_screen (_animated_bbqr)",
           "path": "img/480x320/qr_display_screen__animated_bbqr_480x320.png"
+        },
+        {
+          "name": "seed_finalize_screen",
+          "display_name": "seed_finalize_screen",
+          "path": "img/480x320/seed_finalize_screen_480x320.png"
+        },
+        {
+          "name": "seed_finalize_screen__no_passphrase",
+          "display_name": "seed_finalize_screen (_no_passphrase)",
+          "path": "img/480x320/seed_finalize_screen__no_passphrase_480x320.png"
+        },
+        {
+          "name": "loading_screen",
+          "display_name": "loading_screen [animated]",
+          "path": "img/480x320/loading_screen_480x320.gif"
+        },
+        {
+          "name": "loading_screen__no_text",
+          "display_name": "loading_screen (_no_text) [animated]",
+          "path": "img/480x320/loading_screen__no_text_480x320.gif"
         }
       ]
     },
@@ -1136,6 +1196,26 @@
           "name": "qr_display_screen__animated_bbqr",
           "display_name": "qr_display_screen (_animated_bbqr)",
           "path": "img/800x480/qr_display_screen__animated_bbqr_800x480.png"
+        },
+        {
+          "name": "seed_finalize_screen",
+          "display_name": "seed_finalize_screen",
+          "path": "img/800x480/seed_finalize_screen_800x480.png"
+        },
+        {
+          "name": "seed_finalize_screen__no_passphrase",
+          "display_name": "seed_finalize_screen (_no_passphrase)",
+          "path": "img/800x480/seed_finalize_screen__no_passphrase_800x480.png"
+        },
+        {
+          "name": "loading_screen",
+          "display_name": "loading_screen [animated]",
+          "path": "img/800x480/loading_screen_800x480.gif"
+        },
+        {
+          "name": "loading_screen__no_text",
+          "display_name": "loading_screen (_no_text) [animated]",
+          "path": "img/800x480/loading_screen__no_text_800x480.gif"
         }
       ]
     }
