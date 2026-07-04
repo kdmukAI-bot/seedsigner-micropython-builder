@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-04 14:39:11Z",
+  "generated_at": "2026-07-04 20:37:41Z",
   "resolutions": [
     {
       "width": 240,
@@ -220,6 +220,21 @@
           "name": "camera_preview_overlay_screen__fill_landscape",
           "display_name": "camera_preview_overlay_screen (_fill_landscape)",
           "path": "img/240x240/camera_preview_overlay_screen__fill_landscape_240x240.png"
+        },
+        {
+          "name": "camera_entropy_overlay_screen",
+          "display_name": "camera_entropy_overlay_screen",
+          "path": "img/240x240/camera_entropy_overlay_screen_240x240.png"
+        },
+        {
+          "name": "camera_entropy_overlay_screen__capturing",
+          "display_name": "camera_entropy_overlay_screen (_capturing)",
+          "path": "img/240x240/camera_entropy_overlay_screen__capturing_240x240.png"
+        },
+        {
+          "name": "camera_entropy_overlay_screen__confirm",
+          "display_name": "camera_entropy_overlay_screen (_confirm)",
+          "path": "img/240x240/camera_entropy_overlay_screen__confirm_240x240.png"
         },
         {
           "name": "keyboard_screen",
@@ -529,6 +544,21 @@
           "path": "img/320x240/camera_preview_overlay_screen__fill_landscape_320x240.png"
         },
         {
+          "name": "camera_entropy_overlay_screen",
+          "display_name": "camera_entropy_overlay_screen",
+          "path": "img/320x240/camera_entropy_overlay_screen_320x240.png"
+        },
+        {
+          "name": "camera_entropy_overlay_screen__capturing",
+          "display_name": "camera_entropy_overlay_screen (_capturing)",
+          "path": "img/320x240/camera_entropy_overlay_screen__capturing_320x240.png"
+        },
+        {
+          "name": "camera_entropy_overlay_screen__confirm",
+          "display_name": "camera_entropy_overlay_screen (_confirm)",
+          "path": "img/320x240/camera_entropy_overlay_screen__confirm_320x240.png"
+        },
+        {
           "name": "keyboard_screen",
           "display_name": "keyboard_screen",
           "path": "img/320x240/keyboard_screen_320x240.png"
@@ -831,6 +861,21 @@
           "path": "img/480x320/camera_preview_overlay_screen__fill_landscape_480x320.png"
         },
         {
+          "name": "camera_entropy_overlay_screen",
+          "display_name": "camera_entropy_overlay_screen",
+          "path": "img/480x320/camera_entropy_overlay_screen_480x320.png"
+        },
+        {
+          "name": "camera_entropy_overlay_screen__capturing",
+          "display_name": "camera_entropy_overlay_screen (_capturing)",
+          "path": "img/480x320/camera_entropy_overlay_screen__capturing_480x320.png"
+        },
+        {
+          "name": "camera_entropy_overlay_screen__confirm",
+          "display_name": "camera_entropy_overlay_screen (_confirm)",
+          "path": "img/480x320/camera_entropy_overlay_screen__confirm_480x320.png"
+        },
+        {
           "name": "keyboard_screen",
           "display_name": "keyboard_screen",
           "path": "img/480x320/keyboard_screen_480x320.png"
@@ -1131,6 +1176,21 @@
           "name": "camera_preview_overlay_screen__fill_landscape",
           "display_name": "camera_preview_overlay_screen (_fill_landscape)",
           "path": "img/800x480/camera_preview_overlay_screen__fill_landscape_800x480.png"
+        },
+        {
+          "name": "camera_entropy_overlay_screen",
+          "display_name": "camera_entropy_overlay_screen",
+          "path": "img/800x480/camera_entropy_overlay_screen_800x480.png"
+        },
+        {
+          "name": "camera_entropy_overlay_screen__capturing",
+          "display_name": "camera_entropy_overlay_screen (_capturing)",
+          "path": "img/800x480/camera_entropy_overlay_screen__capturing_800x480.png"
+        },
+        {
+          "name": "camera_entropy_overlay_screen__confirm",
+          "display_name": "camera_entropy_overlay_screen (_confirm)",
+          "path": "img/800x480/camera_entropy_overlay_screen__confirm_800x480.png"
         },
         {
           "name": "keyboard_screen",
