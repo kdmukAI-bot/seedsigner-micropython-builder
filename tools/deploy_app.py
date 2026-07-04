@@ -20,12 +20,21 @@ Modes:
                            report success / full traceback (no reset, no main.py)
     --mode run            push, write /main.py that calls Controller.start(), reset
 
+By default the app + embit are compiled to `.mpy` bytecode on the host (with the
+version-matched mpy-cross from deps/micropython/upstream/mpy-cross) and the .mpy
+is pushed instead of raw .py. This kills the 2-4s first-import stall the device
+otherwise pays lexing+parsing+compiling big modules (e.g. seed_views.py) from
+source. Pass --source to push raw .py instead.
+
     python3 tools/deploy_app.py [--mode import-smoke] [--clean] [--port /dev/ttyACM0]
 """
 import argparse
+import atexit
 import base64
 import os
+import subprocess
 import sys
+import tempfile
 
 # Reuse the proven raw-REPL primitives from the SD pusher.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -36,6 +45,25 @@ SS_SRC = "/home/kdmukai/dev/seedsigner/src/seedsigner"
 EMBIT_SRC = "/home/kdmukai/dev/embit/src/embit"
 SS_DST = "/lib/seedsigner"
 EMBIT_DST = "/lib/embit"
+
+# Host-side mpy-cross. The .mpy bytecode ABI is pinned to the firmware's
+# MicroPython version, so we use the mpy-cross built from THIS tree's pinned
+# submodule (deps/micropython/upstream) — never a random `pip install mpy-cross`,
+# which may emit a mismatched .mpy version. The app is pure Python, so no -march
+# is needed (bytecode is architecture-independent).
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+MPY_CROSS_DIR = os.path.join(REPO_ROOT, "deps", "micropython", "upstream", "mpy-cross")
+MPY_CROSS_CANDIDATES = (
+    os.path.join(MPY_CROSS_DIR, "build", "mpy-cross"),  # current layout
+    os.path.join(MPY_CROSS_DIR, "mpy-cross"),           # older layout
+)
+
+# The P4 USB-CDC drops bytes on multi-KB transfers (docs/knowledge/
+# deploy-serial-truncation.md), which either aborts a batch with a base64 error
+# or silently truncates a file. Push is retried this many times; each round
+# re-reads the device tree so only missing/mismatched files re-push, and we
+# refuse to boot a tree that never verifies clean.
+PUSH_ATTEMPTS = 4
 
 # micropython-lib stdlib modules the import closure needs. As of the
 # firmware-rebuild milestone, logging + hmac are FROZEN into the board manifest
@@ -159,8 +187,101 @@ def ensure_dev_deps(ser):
     print("[vendor] /lib/secp256k1.py (dev shim)")
 
 
+def resolve_mpy_cross(explicit=None, allow_build=True):
+    """Return the path to a usable mpy-cross, building it from the pinned
+    submodule if it isn't present yet. Order: --mpy-cross, $MPY_CROSS, the
+    submodule build dir, then a one-shot `make -C .../mpy-cross`."""
+    if explicit:
+        if not os.path.exists(explicit):
+            sys.exit("[mpy] --mpy-cross not found: %s" % explicit)
+        return explicit
+    env = os.environ.get("MPY_CROSS")
+    if env and os.path.exists(env):
+        return env
+    for c in MPY_CROSS_CANDIDATES:
+        if os.path.exists(c):
+            return c
+    if not allow_build:
+        sys.exit("[mpy] mpy-cross not found; build it: make -C %s" % MPY_CROSS_DIR)
+    print("[mpy] mpy-cross not built; building it (one-time) in %s ..." % MPY_CROSS_DIR)
+    try:
+        subprocess.run(["make", "-C", MPY_CROSS_DIR], check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        sys.exit("[mpy] failed to build mpy-cross (%s).\n"
+                 "      build it manually: make -C %s\n"
+                 "      or push raw source with: --source" % (e, MPY_CROSS_DIR))
+    for c in MPY_CROSS_CANDIDATES:
+        if os.path.exists(c):
+            return c
+    sys.exit("[mpy] build succeeded but no binary at %s" % (MPY_CROSS_CANDIDATES,))
+
+
+def mpy_cross_banner(mpy_cross):
+    """First line of `mpy-cross --version`, for a logged sanity check that the
+    compiler matches the firmware (both come from the same pinned submodule)."""
+    try:
+        r = subprocess.run([mpy_cross, "--version"], capture_output=True, text=True)
+        return ((r.stdout or "") + (r.stderr or "")).strip().splitlines()[0]
+    except Exception as e:  # noqa: BLE001 — informational only
+        return "version unknown (%s)" % e
+
+
+# One reusable host temp file for the compiler's -o target (overwritten per call).
+_MPY_TMP = []
+
+
+def _compile_mpy(mpy_cross, src_py, dev_src_name):
+    """Compile one .py to .mpy on the host. Return (bytecode_bytes, None) on
+    success, or (None, reason) if mpy-cross can't compile it.
+
+    A per-file failure is expected for the rare module using @micropython.native
+    /viper, which needs a target -march we deliberately don't set (a wrong-arch
+    .mpy would be rejected by the firmware at import). The caller ships those as
+    raw .py — they compile on-device only if imported, and none is a module the
+    on-device compile stall actually cares about.
+
+    `dev_src_name` is embedded as the source filename (mpy-cross -s) so on-device
+    tracebacks read as the import path (e.g. 'seedsigner/views/seed_views.py')
+    instead of a host temp path. -s sets the embedded filename only; it does NOT
+    strip line numbers, so tracebacks stay fully useful in dev."""
+    if not _MPY_TMP:
+        fd, path = tempfile.mkstemp(suffix=".mpy", prefix="deploy_")
+        os.close(fd)
+        _MPY_TMP.append(path)
+        atexit.register(lambda: os.path.exists(path) and os.remove(path))
+    out = _MPY_TMP[0]
+    r = subprocess.run([mpy_cross, "-o", out, "-s", dev_src_name, src_py],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        reason = (r.stderr.strip().splitlines() or ["mpy-cross failed"])[-1]
+        return None, reason
+    with open(out, "rb") as f:
+        return f.read(), None
+
+
+def _dev_src_name(remote_path):
+    """Strip the '/lib/' VFS prefix so the embedded traceback filename reads as
+    an import path ('seedsigner/...') rather than a device absolute path."""
+    return remote_path[5:] if remote_path.startswith("/lib/") else remote_path.lstrip("/")
+
+
+def _remove_remote(ser, paths, batch_bytes=18000):
+    """Batch-delete device files. Used to clear a superseded .py/.mpy counterpart
+    left by a prior deploy in the other mode, so the importer can't shadow the
+    fresh file with stale bytecode/source."""
+    batch, acc = [], 0
+    for p in paths:
+        call = "_rmrf('%s')" % p
+        if acc + len(call) > batch_bytes:
+            raw_exec(ser, "\n".join(batch)); batch, acc = [], 0
+        batch.append(call); acc += len(call) + 1
+    if batch:
+        raw_exec(ser, "\n".join(batch))
+
+
 def push_tree(ser, local_root, remote_root, label, excl_dirs, excl_suffix,
-              expected, on_dev=None, force=False, batch_bytes=18000):
+              expected, on_dev=None, force=False, batch_bytes=18000,
+              compile_mpy=False, mpy_cross=None):
     """Collect the tree, mkdir -p all dirs in few calls, then write files in
     batched raw_exec payloads (the per-call REPL handshake dominates, so packing
     many small files per call is the win). Records expected sizes into `expected`
@@ -197,8 +318,26 @@ def push_tree(ser, local_root, remote_root, label, excl_dirs, excl_suffix,
             state["cur"] = 0
             print("[push] %-9s %d files written ..." % (label, state["pushed"]), flush=True)
 
+    stale = []     # device counterparts (.py<->.mpy) a mode switch supersedes
+    fallback = []  # (path, reason) for .py shipped as source because mpy-cross balked
     for lp, rp in sorted(files):
-        data = open(lp, "rb").read()
+        is_py = lp.endswith(".py")
+        if compile_mpy and is_py:
+            # Ship bytecode: compile on the host so the device skips the
+            # lex+parse+compile that stalls first import of big modules.
+            data, err = _compile_mpy(mpy_cross, lp, _dev_src_name(rp))
+            if data is None:
+                fallback.append((rp, err))               # ship raw .py instead
+                data = open(lp, "rb").read()
+                stale_path = rp[:-3] + ".mpy"             # drop any stale bytecode
+            else:
+                stale_path = rp                           # old source, if present
+                rp = rp[:-3] + ".mpy"
+        else:
+            data = open(lp, "rb").read()
+            stale_path = rp[:-3] + ".mpy" if is_py else None  # old bytecode, if present
+        if stale_path and on_dev and stale_path in on_dev:
+            stale.append(stale_path)
         expected[rp] = len(data)
         count += 1
         total += len(data)
@@ -216,8 +355,16 @@ def push_tree(ser, local_root, remote_root, label, excl_dirs, excl_suffix,
         state["batch"].append("_w('%s','%s')" % (rp, b64))
         state["cur"] += len(b64)
     flush()
-    print("[push] %-9s done: %d files (%d pushed, %d unchanged), %d bytes"
-          % (label, count, count - skipped, skipped, total), flush=True)
+    for rp_, err_ in fallback:
+        print("[push] %-9s ship source (mpy-cross: %s): %s" % (label, err_, rp_),
+              flush=True)
+    if stale:
+        _remove_remote(ser, stale, batch_bytes)
+        print("[push] %-9s removed %d superseded counterpart(s)" % (label, len(stale)),
+              flush=True)
+    print("[push] %-9s done: %d files (%d pushed, %d unchanged), %d bytes%s"
+          % (label, count, count - skipped, skipped, total,
+             " [.mpy]" if compile_mpy else " [.py]"), flush=True)
     return count, total
 
 
@@ -264,7 +411,28 @@ def main():
                     help="re-push every file even if its size matches the device")
     ap.add_argument("--resources", action="store_true",
                     help="also push src/seedsigner/resources (25MB; skipped by default)")
+    ap.add_argument("--source", action="store_true",
+                    help="push raw .py instead of host-compiled .mpy (default is .mpy)")
+    ap.add_argument("--mpy-cross", default=None,
+                    help="path to mpy-cross (default: build from the pinned submodule)")
+    ap.add_argument("--no-build-mpy-cross", action="store_true",
+                    help="fail instead of auto-building mpy-cross if it's missing")
+    ap.add_argument("--seedsigner-src", default=SS_SRC,
+                    help="seedsigner package dir to push (default: %(default)s). Point at a "
+                         "git-archive export to pin the push to a committed tip instead of a "
+                         "live (possibly drifting) working tree.")
+    ap.add_argument("--embit-src", default=EMBIT_SRC,
+                    help="embit package dir to push (default: %(default)s)")
     args = ap.parse_args()
+    print("[deploy] seedsigner src: %s" % args.seedsigner_src)
+    print("[deploy] embit src:      %s" % args.embit_src)
+
+    compile_mpy = not args.source
+    mpy_cross = None
+    if compile_mpy and args.mode != "smoke-only":  # smoke-only pushes nothing
+        mpy_cross = resolve_mpy_cross(args.mpy_cross,
+                                      allow_build=not args.no_build_mpy_cross)
+        print("[mpy] using %s (%s)" % (mpy_cross, mpy_cross_banner(mpy_cross)))
 
     print("[deploy] poll-opening REPL (no hard reset) ...")
     ser = hard_reset_and_wait(args.port, do_reset=False)
@@ -284,16 +452,37 @@ def main():
             print("[deploy] cleaning %s and %s ..." % (SS_DST, EMBIT_DST))
             raw_exec(ser, "_rmrf('%s'); _rmrf('%s'); print('cleaned')" % (SS_DST, EMBIT_DST))
 
-        # Incremental: pull the device tree once so unchanged files are skipped.
-        on_dev = {} if args.clean else device_tree(ser)
         ss_excl = {"__pycache__"} if args.resources else {"__pycache__", "resources"}
+
+        # Push with auto-retry against racy CDC truncation. Each round re-reads
+        # the device tree (device_tree), so push_tree's size-match skip re-pushes
+        # only the files that are missing or truncated; a dropped-chunk batch that
+        # raises is retried too. We proceed only once verify() is clean.
+        ok = False
         expected = {}
-        push_tree(ser, SS_SRC, SS_DST, "seedsigner", ss_excl, (".pyc",),
-                  expected, on_dev, args.force)
-        push_tree(ser, EMBIT_SRC, EMBIT_DST, "embit", {"__pycache__"}, (".pyc",),
-                  expected, on_dev, args.force)
-        ok = verify(ser, expected)
-        print("[deploy] verify:", "PASS" if ok else "FAIL")
+        for attempt in range(1, PUSH_ATTEMPTS + 1):
+            expected = {}
+            on_dev = {} if (args.clean and attempt == 1) else device_tree(ser)
+            force = args.force and attempt == 1  # after round 1, only re-push bad files
+            try:
+                push_tree(ser, args.seedsigner_src, SS_DST, "seedsigner", ss_excl, (".pyc",),
+                          expected, on_dev, force,
+                          compile_mpy=compile_mpy, mpy_cross=mpy_cross)
+                push_tree(ser, args.embit_src, EMBIT_DST, "embit", {"__pycache__"}, (".pyc",),
+                          expected, on_dev, force,
+                          compile_mpy=compile_mpy, mpy_cross=mpy_cross)
+                ok = verify(ser, expected)
+            except RuntimeError as e:
+                print("[deploy] push error (attempt %d/%d): %s" % (attempt, PUSH_ATTEMPTS, e))
+                ok = False
+            if ok:
+                print("[deploy] verify: PASS (attempt %d/%d)" % (attempt, PUSH_ATTEMPTS))
+                break
+            if attempt < PUSH_ATTEMPTS:
+                print("[deploy] verify FAILED — re-pushing missing/mismatched files ...")
+        if not ok:
+            sys.exit("[deploy] verify: FAIL after %d attempts — refusing to boot a "
+                     "partial/truncated tree. Check the USB-CDC link and re-run." % PUSH_ATTEMPTS)
         ensure_dev_deps(ser)
 
         if args.mode == "import-smoke":
