@@ -278,7 +278,7 @@ index 40188abff..e19673f41 100644
 +# Pull in external display stack + camera (scan + entropy) components from
 +# EXTRA_COMPONENT_DIRS. None is reached via the IDF requires graph (the usermod
 +# links them post-hoc), so all must be force-included here to be compiled.
-+list(APPEND IDF_COMPONENTS display_manager camera_scanner camera_entropy)
++list(APPEND IDF_COMPONENTS display_manager camera_scanner camera_entropy cUR)
 +
 +# Force-exclude network stack components when building offline firmware.
 +if(MICROPY_DISABLE_NETWORK)

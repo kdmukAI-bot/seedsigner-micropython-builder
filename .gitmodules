@@ -7,3 +7,7 @@
 [submodule "deps/seedsigner-lvgl-screens"]
 	path = deps/seedsigner-lvgl-screens
 	url = https://github.com/kdmukAI-bot/seedsigner-lvgl-screens.git
+[submodule "deps/cUR"]
+	path = deps/cUR
+	url = https://github.com/kdmukAI-bot/cUR.git
+	branch = seedsigner-dev

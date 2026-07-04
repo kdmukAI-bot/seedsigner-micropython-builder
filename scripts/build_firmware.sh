@@ -64,6 +64,10 @@ MICROPY_EXTRA_DIRS="${MICROPY_EXTRA_DIRS}\;${BOARD_COMMON_COMPONENTS}"
 MICROPY_EXTRA_DIRS="${MICROPY_EXTRA_DIRS}\;${BOARD_COMMON_COMPONENTS}/esp-camera-pipeline"
 MICROPY_EXTRA_DIRS="${MICROPY_EXTRA_DIRS}\;${BOARD_COMMON_COMPONENTS}/esp-camera-pipeline/components"
 MICROPY_EXTRA_DIRS="${MICROPY_EXTRA_DIRS}\;${SCREENS_DIR}/components"
+# cUR: native BC-UR (fountain) decoder as a plain IDF component (dir name -> component `cUR`).
+# The uUR.c MicroPython binding is compiled in usermod (bindings/micropython.cmake) and
+# links __idf_cUR — same plain-C-lib split as camera_scanner/k_quirc.
+MICROPY_EXTRA_DIRS="${MICROPY_EXTRA_DIRS}\;${WORKDIR}/cUR"
 MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DMICROPY_EXTRA_COMPONENT_DIRS=${MICROPY_EXTRA_DIRS}"
 MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DSEEDSIGNER_LVGL_SCREENS_DIR=$SCREENS_DIR"
 
