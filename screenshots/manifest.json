@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-05 14:03:04Z",
+  "generated_at": "2026-07-05 17:48:19Z",
   "resolutions": [
     {
       "width": 240,
@@ -320,6 +320,41 @@
           "name": "loading_screen__no_text",
           "display_name": "loading_screen (_no_text) [animated]",
           "path": "img/240x240/loading_screen__no_text_240x240.gif"
+        },
+        {
+          "name": "psbt_overview_screen",
+          "display_name": "psbt_overview_screen [animated]",
+          "path": "img/240x240/psbt_overview_screen_240x240.gif"
+        },
+        {
+          "name": "psbt_overview_screen__single_input",
+          "display_name": "psbt_overview_screen (_single_input) [animated]",
+          "path": "img/240x240/psbt_overview_screen__single_input_240x240.gif"
+        },
+        {
+          "name": "psbt_overview_screen__many_inputs_many_recipients",
+          "display_name": "psbt_overview_screen (_many_inputs_many_recipients) [animated]",
+          "path": "img/240x240/psbt_overview_screen__many_inputs_many_recipients_240x240.gif"
+        },
+        {
+          "name": "psbt_overview_screen__self_transfer_full_spend",
+          "display_name": "psbt_overview_screen (_self_transfer_full_spend) [animated]",
+          "path": "img/240x240/psbt_overview_screen__self_transfer_full_spend_240x240.gif"
+        },
+        {
+          "name": "psbt_overview_screen__op_return_and_change",
+          "display_name": "psbt_overview_screen (_op_return_and_change) [animated]",
+          "path": "img/240x240/psbt_overview_screen__op_return_and_change_240x240.gif"
+        },
+        {
+          "name": "psbt_overview_screen__testnet",
+          "display_name": "psbt_overview_screen (_testnet) [animated]",
+          "path": "img/240x240/psbt_overview_screen__testnet_240x240.gif"
+        },
+        {
+          "name": "locale_picker_screen",
+          "display_name": "locale_picker_screen",
+          "path": "img/240x240/locale_picker_screen_240x240.png"
         }
       ]
     },
@@ -642,6 +677,41 @@
           "name": "loading_screen__no_text",
           "display_name": "loading_screen (_no_text) [animated]",
           "path": "img/320x240/loading_screen__no_text_320x240.gif"
+        },
+        {
+          "name": "psbt_overview_screen",
+          "display_name": "psbt_overview_screen [animated]",
+          "path": "img/320x240/psbt_overview_screen_320x240.gif"
+        },
+        {
+          "name": "psbt_overview_screen__single_input",
+          "display_name": "psbt_overview_screen (_single_input) [animated]",
+          "path": "img/320x240/psbt_overview_screen__single_input_320x240.gif"
+        },
+        {
+          "name": "psbt_overview_screen__many_inputs_many_recipients",
+          "display_name": "psbt_overview_screen (_many_inputs_many_recipients) [animated]",
+          "path": "img/320x240/psbt_overview_screen__many_inputs_many_recipients_320x240.gif"
+        },
+        {
+          "name": "psbt_overview_screen__self_transfer_full_spend",
+          "display_name": "psbt_overview_screen (_self_transfer_full_spend) [animated]",
+          "path": "img/320x240/psbt_overview_screen__self_transfer_full_spend_320x240.gif"
+        },
+        {
+          "name": "psbt_overview_screen__op_return_and_change",
+          "display_name": "psbt_overview_screen (_op_return_and_change) [animated]",
+          "path": "img/320x240/psbt_overview_screen__op_return_and_change_320x240.gif"
+        },
+        {
+          "name": "psbt_overview_screen__testnet",
+          "display_name": "psbt_overview_screen (_testnet) [animated]",
+          "path": "img/320x240/psbt_overview_screen__testnet_320x240.gif"
+        },
+        {
+          "name": "locale_picker_screen",
+          "display_name": "locale_picker_screen",
+          "path": "img/320x240/locale_picker_screen_320x240.png"
         }
       ]
     },
@@ -959,6 +1029,41 @@
           "name": "loading_screen__no_text",
           "display_name": "loading_screen (_no_text) [animated]",
           "path": "img/480x320/loading_screen__no_text_480x320.gif"
+        },
+        {
+          "name": "psbt_overview_screen",
+          "display_name": "psbt_overview_screen [animated]",
+          "path": "img/480x320/psbt_overview_screen_480x320.gif"
+        },
+        {
+          "name": "psbt_overview_screen__single_input",
+          "display_name": "psbt_overview_screen (_single_input) [animated]",
+          "path": "img/480x320/psbt_overview_screen__single_input_480x320.gif"
+        },
+        {
+          "name": "psbt_overview_screen__many_inputs_many_recipients",
+          "display_name": "psbt_overview_screen (_many_inputs_many_recipients) [animated]",
+          "path": "img/480x320/psbt_overview_screen__many_inputs_many_recipients_480x320.gif"
+        },
+        {
+          "name": "psbt_overview_screen__self_transfer_full_spend",
+          "display_name": "psbt_overview_screen (_self_transfer_full_spend) [animated]",
+          "path": "img/480x320/psbt_overview_screen__self_transfer_full_spend_480x320.gif"
+        },
+        {
+          "name": "psbt_overview_screen__op_return_and_change",
+          "display_name": "psbt_overview_screen (_op_return_and_change) [animated]",
+          "path": "img/480x320/psbt_overview_screen__op_return_and_change_480x320.gif"
+        },
+        {
+          "name": "psbt_overview_screen__testnet",
+          "display_name": "psbt_overview_screen (_testnet) [animated]",
+          "path": "img/480x320/psbt_overview_screen__testnet_480x320.gif"
+        },
+        {
+          "name": "locale_picker_screen",
+          "display_name": "locale_picker_screen",
+          "path": "img/480x320/locale_picker_screen_480x320.png"
         }
       ]
     },
@@ -1276,6 +1381,41 @@
           "name": "loading_screen__no_text",
           "display_name": "loading_screen (_no_text) [animated]",
           "path": "img/800x480/loading_screen__no_text_800x480.gif"
+        },
+        {
+          "name": "psbt_overview_screen",
+          "display_name": "psbt_overview_screen [animated]",
+          "path": "img/800x480/psbt_overview_screen_800x480.gif"
+        },
+        {
+          "name": "psbt_overview_screen__single_input",
+          "display_name": "psbt_overview_screen (_single_input) [animated]",
+          "path": "img/800x480/psbt_overview_screen__single_input_800x480.gif"
+        },
+        {
+          "name": "psbt_overview_screen__many_inputs_many_recipients",
+          "display_name": "psbt_overview_screen (_many_inputs_many_recipients) [animated]",
+          "path": "img/800x480/psbt_overview_screen__many_inputs_many_recipients_800x480.gif"
+        },
+        {
+          "name": "psbt_overview_screen__self_transfer_full_spend",
+          "display_name": "psbt_overview_screen (_self_transfer_full_spend) [animated]",
+          "path": "img/800x480/psbt_overview_screen__self_transfer_full_spend_800x480.gif"
+        },
+        {
+          "name": "psbt_overview_screen__op_return_and_change",
+          "display_name": "psbt_overview_screen (_op_return_and_change) [animated]",
+          "path": "img/800x480/psbt_overview_screen__op_return_and_change_800x480.gif"
+        },
+        {
+          "name": "psbt_overview_screen__testnet",
+          "display_name": "psbt_overview_screen (_testnet) [animated]",
+          "path": "img/800x480/psbt_overview_screen__testnet_800x480.gif"
+        },
+        {
+          "name": "locale_picker_screen",
+          "display_name": "locale_picker_screen",
+          "path": "img/800x480/locale_picker_screen_800x480.png"
         }
       ]
     }
