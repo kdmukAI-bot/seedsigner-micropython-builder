@@ -682,7 +682,7 @@ static mp_obj_t mp_seedsigner_lvgl_set_cache_psram(mp_obj_t enabled_obj) {
 static MP_DEFINE_CONST_FUN_OBJ_1(seedsigner_lvgl_set_cache_psram_obj, mp_seedsigner_lvgl_set_cache_psram);
 
 static const mp_rom_map_elem_t seedsigner_lvgl_module_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_seedsigner_lvgl_screens) },
+    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR__seedsigner_lvgl_screens) },
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&seedsigner_lvgl_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_screensaver_timeout), MP_ROM_PTR(&seedsigner_lvgl_set_screensaver_timeout_obj) },
     { MP_ROM_QSTR(MP_QSTR_locale_pack_files), MP_ROM_PTR(&seedsigner_lvgl_locale_pack_files_obj) },
@@ -718,4 +718,12 @@ const mp_obj_module_t seedsigner_lvgl_user_cmodule = {
     .globals = (mp_obj_dict_t *)&seedsigner_lvgl_module_globals,
 };
 
-MP_REGISTER_MODULE(MP_QSTR_seedsigner_lvgl_screens, seedsigner_lvgl_user_cmodule);
+// Registered as the PRIVATE name `_seedsigner_lvgl_screens`. The public import
+// name `seedsigner_lvgl_screens` (what the shared app imports) is a thin frozen /
+// /lib Python façade that wraps this C module and hides the ESP32 SD-card I/O
+// behind the same dir-based locale API the Pi native module (seedsigner-raspi-lvgl)
+// exposes — so the app calls the same names on both platforms. The façade reads
+// pack bytes off the SD (machine.SDCard) and hands them to the byte-based C API
+// here (load_locale/register_pack_manifest/locale_picker_screen); the C side can't
+// open the SD directly (ESP-IDF fatfs vs MicroPython oofatfs link collision).
+MP_REGISTER_MODULE(MP_QSTR__seedsigner_lvgl_screens, seedsigner_lvgl_user_cmodule);

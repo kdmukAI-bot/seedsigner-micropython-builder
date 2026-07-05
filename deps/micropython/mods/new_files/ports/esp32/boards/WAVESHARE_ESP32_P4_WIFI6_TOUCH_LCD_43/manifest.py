@@ -24,3 +24,11 @@ package("urtypes", base_path="$(MPY_DIR)/../../../deps/third-party")
 # Required for BIP32 (HMAC-SHA512) and BIP39 (PBKDF2) — the built-in hashlib only
 # ships SHA-256. See deps/third-party/hashlib.py and bindings/modhashlibext.c.
 module("hashlib.py", base_path="$(MPY_DIR)/../../../deps/third-party")
+
+# seedsigner_lvgl_screens.py: the public Python facade the shared app imports. It wraps
+# the private C module `_seedsigner_lvgl_screens`, does the microSD language-pack I/O the
+# C side can't (ESP-IDF fatfs vs MicroPython oofatfs link collision), and exposes the same
+# dir-based locale API the Pi native module does — so the app calls one API on both
+# platforms. See deps/third-party/seedsigner_lvgl_screens.py + bindings/modseedsigner_bindings.c
+# (the module rename to `_seedsigner_lvgl_screens`).
+module("seedsigner_lvgl_screens.py", base_path="$(MPY_DIR)/../../../deps/third-party")
