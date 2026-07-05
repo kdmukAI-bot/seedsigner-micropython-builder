@@ -67,14 +67,15 @@ jobs:
           # submodules two levels down are absent -- and the build needs them:
           #   board_common -> esp-camera-pipeline -> k_quirc   (ESP-IDF component)
           #   seedsigner-lvgl-screens -> third_party/lvgl      (screenshot generator)
+          #   esp-secp256k1 -> secp256k1-zkp                   (libsecp256k1 amalgamation)
           # All submodule URLs in these subtrees are now public HTTPS GitHub, so they
-          # resolve anonymously with no URL rewrite. Scope recursion to these two
+          # resolve anonymously with no URL rewrite. Scope recursion to these
           # subtrees so MicroPython's own deep submodules are not pulled.
           # The workspace repo is owned by a different uid than this step's user and
           # checkout's safe.directory exception only lives under its temporary HOME,
           # so re-add it here or git aborts with "dubious ownership".
           git config --global --add safe.directory '*'
-          git submodule update --init --recursive ports/esp32/board_common deps/seedsigner-lvgl-screens
+          git submodule update --init --recursive ports/esp32/board_common deps/seedsigner-lvgl-screens deps/esp-secp256k1
 
       - name: Prepare sources workspace from prebaked image
         run: |

@@ -18,3 +18,9 @@ require("hmac")
 # Unlike embit, urtypes has no native-code (secp256k1) build step, so it can be
 # frozen on its own now rather than waiting for the embit/secp256k1 freeze pass.
 package("urtypes", base_path="$(MPY_DIR)/../../../deps/third-party")
+
+# hashlib.py: frozen shim that extends the extensible built-in `hashlib` with
+# mbedtls-backed SHA-512 + PBKDF2-HMAC (from the native `_hashlib_ext` C module).
+# Required for BIP32 (HMAC-SHA512) and BIP39 (PBKDF2) — the built-in hashlib only
+# ships SHA-256. See deps/third-party/hashlib.py and bindings/modhashlibext.c.
+module("hashlib.py", base_path="$(MPY_DIR)/../../../deps/third-party")

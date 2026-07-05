@@ -74,15 +74,11 @@ MPY_LIB_STDLIB = ("/home/kdmukai/dev/seedsigner-micropython-builder/deps/micropy
                   "upstream/lib/micropython-lib/python-stdlib")
 STDLIB_DEPS = []  # logging, hmac now frozen into firmware (was: ["logging", "hmac"])
 
-# Dev stopgap: a top-level `secp256k1` module. embit on MicroPython does a bare
-# `import secp256k1` (expecting the native C module); this re-exports embit's
-# pure-Python fallback so the app imports without that firmware module. Slow for
-# real signing — production builds the native secp256k1 C module into firmware.
-SECP256K1_SHIM = (
-    "# Dev stopgap (tools/deploy_app.py): top-level secp256k1 = embit's\n"
-    "# pure-Python EC fallback. Production = native secp256k1 C module in firmware.\n"
-    "from embit.util.py_secp256k1 import *  # noqa\n"
-)
+# NOTE: the former SECP256K1_SHIM (a /lib/secp256k1.py that re-exported embit's
+# pure-Python EC fallback) is RETIRED. The firmware now ships a native `secp256k1`
+# C module, which resolves before /lib and is ~65x faster for real keys. embit's
+# bare `import secp256k1` on MicroPython picks it up directly. See the
+# esp-secp256k1 submodule + docs/knowledge/native-secp256k1-static-ecmult-required.md.
 
 # Device-side helpers, defined once in the REPL global namespace and reused
 # across subsequent raw_exec calls (globals persist within one connection).
@@ -126,12 +122,11 @@ print('helpers ready')
 
 IMPORT_SMOKE = r"""
 import sys
-# Pop the app + its FS-vendored deps so an edited file recompiles. Must include
-# the secp256k1 dev shim: if only embit.* is popped, the cached shim keeps stale
-# function references to the previous py_secp256k1 and the re-import silently runs
-# old code. (logging + hmac are frozen into firmware now, so they need no popping.)
+# Pop the app + its FS-vendored deps so an edited file recompiles. Only seedsigner
+# + embit are FS-vendored/editable now; logging + hmac are frozen into firmware and
+# secp256k1 is a native C module, so none of those need popping.
 for _m in list(sys.modules):
-    if _m.split('.')[0] in ('seedsigner', 'embit', 'secp256k1'):
+    if _m.split('.')[0] in ('seedsigner', 'embit'):
         del sys.modules[_m]
 try:
     import seedsigner.controller
@@ -173,9 +168,9 @@ def push_bytes(ser, data, remote, batch_bytes=18000):
 
 
 def ensure_dev_deps(ser):
-    """Vendor any not-yet-frozen stdlib deps (STDLIB_DEPS, currently none) + the
-    secp256k1 dev shim to /lib. Cheap and idempotent; keeps import-smoke/run
-    self-contained without a reflash. logging + hmac are frozen into firmware."""
+    """Vendor any not-yet-frozen stdlib deps (STDLIB_DEPS, currently none) to /lib.
+    Cheap and idempotent; keeps import-smoke/run self-contained without a reflash.
+    logging + hmac are frozen into firmware; secp256k1 is a native C module."""
     for name in STDLIB_DEPS:
         src = os.path.join(MPY_LIB_STDLIB, name, name + ".py")
         if not os.path.exists(src):
@@ -183,8 +178,12 @@ def ensure_dev_deps(ser):
             continue
         push_bytes(ser, open(src, "rb").read(), "/lib/%s.py" % name)
         print("[vendor] /lib/%s.py" % name)
-    push_bytes(ser, SECP256K1_SHIM.encode(), "/lib/secp256k1.py")
-    print("[vendor] /lib/secp256k1.py (dev shim)")
+    # Retire any stale /lib/secp256k1.py dev shim left by an earlier deploy. The
+    # native `secp256k1` C module resolves before /lib so the shim is dead code,
+    # but remove it to avoid confusion — and so it can't silently mask a missing
+    # native module in a firmware built without it.
+    raw_exec(ser, "import os\ntry:\n os.remove('/lib/secp256k1.py')\nexcept OSError:\n pass\n",
+             timeout=10)
 
 
 def resolve_mpy_cross(explicit=None, allow_build=True):

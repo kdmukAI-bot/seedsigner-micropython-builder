@@ -68,6 +68,15 @@ MICROPY_EXTRA_DIRS="${MICROPY_EXTRA_DIRS}\;${SCREENS_DIR}/components"
 # The uUR.c MicroPython binding is compiled in usermod (bindings/micropython.cmake) and
 # links __idf_cUR — same plain-C-lib split as camera_scanner/k_quirc.
 MICROPY_EXTRA_DIRS="${MICROPY_EXTRA_DIRS}\;${WORKDIR}/cUR"
+# esp-secp256k1: native libsecp256k1 (ElementsProject/secp256k1-zkp) as a plain IDF
+# component (dir name -> component `esp-secp256k1`). The modsecp256k1.c MicroPython
+# binding is compiled in usermod (bindings/micropython.cmake) and links
+# __idf_esp-secp256k1 — same plain-C-lib split as cUR/camera_scanner.
+MICROPY_EXTRA_DIRS="${MICROPY_EXTRA_DIRS}\;${WORKDIR}/esp-secp256k1"
+# esp-hashlib-ext: mbedtls-backed SHA-512 + PBKDF2 for hashlib (dir name -> component
+# `esp-hashlib-ext`). The modhashlibext.c binding is compiled in usermod and links
+# __idf_esp-hashlib-ext; a frozen hashlib.py merges it into the built-in hashlib.
+MICROPY_EXTRA_DIRS="${MICROPY_EXTRA_DIRS}\;${WORKDIR}/esp-hashlib-ext"
 MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DMICROPY_EXTRA_COMPONENT_DIRS=${MICROPY_EXTRA_DIRS}"
 MICROPY_CMAKE_ARGS="$MICROPY_CMAKE_ARGS -DSEEDSIGNER_LVGL_SCREENS_DIR=$SCREENS_DIR"
 

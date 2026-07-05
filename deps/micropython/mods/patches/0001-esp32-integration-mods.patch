@@ -268,17 +268,20 @@ index e3b1b81ca..bc41c870e 100644
  # Collect all of the include directories and compile definitions for the IDF components,
  # including those added by the IDF Component Manager via idf_components.yaml.
 diff --git a/ports/esp32/main/CMakeLists.txt b/ports/esp32/main/CMakeLists.txt
-index 40188abff..e19673f41 100644
+index 40188abff..57a47b925 100644
 --- a/ports/esp32/main/CMakeLists.txt
 +++ b/ports/esp32/main/CMakeLists.txt
-@@ -8,4 +8,15 @@ if(NOT MICROPY_PORT_DIR)
+@@ -8,4 +8,18 @@ if(NOT MICROPY_PORT_DIR)
      get_filename_component(MICROPY_PORT_DIR ${MICROPY_DIR}/ports/esp32 ABSOLUTE)
  endif()
  
 +# Pull in external display stack + camera (scan + entropy) components from
 +# EXTRA_COMPONENT_DIRS. None is reached via the IDF requires graph (the usermod
 +# links them post-hoc), so all must be force-included here to be compiled.
-+list(APPEND IDF_COMPONENTS display_manager camera_scanner camera_entropy cUR)
++# esp-secp256k1 (native libsecp256k1) and esp-hashlib-ext (mbedtls SHA-512 +
++# PBKDF2) are the same case: the usermod links __idf_esp-secp256k1 /
++# __idf_esp-hashlib-ext post-hoc, so force-include them to get compiled.
++list(APPEND IDF_COMPONENTS display_manager camera_scanner camera_entropy cUR esp-secp256k1 esp-hashlib-ext)
 +
 +# Force-exclude network stack components when building offline firmware.
 +if(MICROPY_DISABLE_NETWORK)

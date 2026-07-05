@@ -11,3 +11,6 @@
 	path = deps/cUR
 	url = https://github.com/kdmukAI-bot/cUR.git
 	branch = seedsigner-dev
+[submodule "deps/esp-secp256k1"]
+	path = deps/esp-secp256k1
+	url = https://github.com/kdmukAI-bot/esp-secp256k1.git
