@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-05 17:48:19Z",
+  "generated_at": "2026-07-07 03:04:33Z",
   "resolutions": [
     {
       "width": 240,
@@ -165,6 +165,16 @@
           "name": "large_icon_status_screen__newline",
           "display_name": "large_icon_status_screen (_newline)",
           "path": "img/240x240/large_icon_status_screen__newline_240x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__custom_psbt_finalize",
+          "display_name": "large_icon_status_screen (_custom_psbt_finalize)",
+          "path": "img/240x240/large_icon_status_screen__custom_psbt_finalize_240x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__custom_microsd_notification",
+          "display_name": "large_icon_status_screen (_custom_microsd_notification)",
+          "path": "img/240x240/large_icon_status_screen__custom_microsd_notification_240x240.png"
         },
         {
           "name": "seed_add_passphrase_screen",
@@ -352,6 +362,66 @@
           "path": "img/240x240/psbt_overview_screen__testnet_240x240.gif"
         },
         {
+          "name": "psbt_address_details_screen",
+          "display_name": "psbt_address_details_screen",
+          "path": "img/240x240/psbt_address_details_screen_240x240.png"
+        },
+        {
+          "name": "psbt_address_details_screen__taproot",
+          "display_name": "psbt_address_details_screen (_taproot)",
+          "path": "img/240x240/psbt_address_details_screen__taproot_240x240.png"
+        },
+        {
+          "name": "psbt_address_details_screen__legacy_p2sh",
+          "display_name": "psbt_address_details_screen (_legacy_p2sh)",
+          "path": "img/240x240/psbt_address_details_screen__legacy_p2sh_240x240.png"
+        },
+        {
+          "name": "psbt_address_details_screen__testnet",
+          "display_name": "psbt_address_details_screen (_testnet)",
+          "path": "img/240x240/psbt_address_details_screen__testnet_240x240.png"
+        },
+        {
+          "name": "psbt_address_details_screen__regtest",
+          "display_name": "psbt_address_details_screen (_regtest)",
+          "path": "img/240x240/psbt_address_details_screen__regtest_240x240.png"
+        },
+        {
+          "name": "psbt_change_details_screen",
+          "display_name": "psbt_change_details_screen",
+          "path": "img/240x240/psbt_change_details_screen_240x240.png"
+        },
+        {
+          "name": "psbt_change_details_screen__unverified_multisig_change",
+          "display_name": "psbt_change_details_screen (_unverified_multisig_change)",
+          "path": "img/240x240/psbt_change_details_screen__unverified_multisig_change_240x240.png"
+        },
+        {
+          "name": "psbt_change_details_screen__self_transfer_verified",
+          "display_name": "psbt_change_details_screen (_self_transfer_verified)",
+          "path": "img/240x240/psbt_change_details_screen__self_transfer_verified_240x240.png"
+        },
+        {
+          "name": "psbt_change_details_screen__self_transfer_unverified_multisig",
+          "display_name": "psbt_change_details_screen (_self_transfer_unverified_multisig)",
+          "path": "img/240x240/psbt_change_details_screen__self_transfer_unverified_multisig_240x240.png"
+        },
+        {
+          "name": "psbt_math_screen",
+          "display_name": "psbt_math_screen",
+          "path": "img/240x240/psbt_math_screen_240x240.png"
+        },
+        {
+          "name": "psbt_math_screen__btc_denomination",
+          "display_name": "psbt_math_screen (_btc_denomination)",
+          "path": "img/240x240/psbt_math_screen__btc_denomination_240x240.png"
+        },
+        {
+          "name": "psbt_math_screen__self_transfer",
+          "display_name": "psbt_math_screen (_self_transfer)",
+          "path": "img/240x240/psbt_math_screen__self_transfer_240x240.png"
+        },
+        {
           "name": "locale_picker_screen",
           "display_name": "locale_picker_screen",
           "path": "img/240x240/locale_picker_screen_240x240.png"
@@ -522,6 +592,16 @@
           "name": "large_icon_status_screen__newline",
           "display_name": "large_icon_status_screen (_newline)",
           "path": "img/320x240/large_icon_status_screen__newline_320x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__custom_psbt_finalize",
+          "display_name": "large_icon_status_screen (_custom_psbt_finalize)",
+          "path": "img/320x240/large_icon_status_screen__custom_psbt_finalize_320x240.png"
+        },
+        {
+          "name": "large_icon_status_screen__custom_microsd_notification",
+          "display_name": "large_icon_status_screen (_custom_microsd_notification)",
+          "path": "img/320x240/large_icon_status_screen__custom_microsd_notification_320x240.png"
         },
         {
           "name": "seed_add_passphrase_screen",
@@ -709,6 +789,66 @@
           "path": "img/320x240/psbt_overview_screen__testnet_320x240.gif"
         },
         {
+          "name": "psbt_address_details_screen",
+          "display_name": "psbt_address_details_screen",
+          "path": "img/320x240/psbt_address_details_screen_320x240.png"
+        },
+        {
+          "name": "psbt_address_details_screen__taproot",
+          "display_name": "psbt_address_details_screen (_taproot)",
+          "path": "img/320x240/psbt_address_details_screen__taproot_320x240.png"
+        },
+        {
+          "name": "psbt_address_details_screen__legacy_p2sh",
+          "display_name": "psbt_address_details_screen (_legacy_p2sh)",
+          "path": "img/320x240/psbt_address_details_screen__legacy_p2sh_320x240.png"
+        },
+        {
+          "name": "psbt_address_details_screen__testnet",
+          "display_name": "psbt_address_details_screen (_testnet)",
+          "path": "img/320x240/psbt_address_details_screen__testnet_320x240.png"
+        },
+        {
+          "name": "psbt_address_details_screen__regtest",
+          "display_name": "psbt_address_details_screen (_regtest)",
+          "path": "img/320x240/psbt_address_details_screen__regtest_320x240.png"
+        },
+        {
+          "name": "psbt_change_details_screen",
+          "display_name": "psbt_change_details_screen",
+          "path": "img/320x240/psbt_change_details_screen_320x240.png"
+        },
+        {
+          "name": "psbt_change_details_screen__unverified_multisig_change",
+          "display_name": "psbt_change_details_screen (_unverified_multisig_change)",
+          "path": "img/320x240/psbt_change_details_screen__unverified_multisig_change_320x240.png"
+        },
+        {
+          "name": "psbt_change_details_screen__self_transfer_verified",
+          "display_name": "psbt_change_details_screen (_self_transfer_verified)",
+          "path": "img/320x240/psbt_change_details_screen__self_transfer_verified_320x240.png"
+        },
+        {
+          "name": "psbt_change_details_screen__self_transfer_unverified_multisig",
+          "display_name": "psbt_change_details_screen (_self_transfer_unverified_multisig)",
+          "path": "img/320x240/psbt_change_details_screen__self_transfer_unverified_multisig_320x240.png"
+        },
+        {
+          "name": "psbt_math_screen",
+          "display_name": "psbt_math_screen",
+          "path": "img/320x240/psbt_math_screen_320x240.png"
+        },
+        {
+          "name": "psbt_math_screen__btc_denomination",
+          "display_name": "psbt_math_screen (_btc_denomination)",
+          "path": "img/320x240/psbt_math_screen__btc_denomination_320x240.png"
+        },
+        {
+          "name": "psbt_math_screen__self_transfer",
+          "display_name": "psbt_math_screen (_self_transfer)",
+          "path": "img/320x240/psbt_math_screen__self_transfer_320x240.png"
+        },
+        {
           "name": "locale_picker_screen",
           "display_name": "locale_picker_screen",
           "path": "img/320x240/locale_picker_screen_320x240.png"
@@ -879,6 +1019,16 @@
           "name": "large_icon_status_screen__newline",
           "display_name": "large_icon_status_screen (_newline)",
           "path": "img/480x320/large_icon_status_screen__newline_480x320.png"
+        },
+        {
+          "name": "large_icon_status_screen__custom_psbt_finalize",
+          "display_name": "large_icon_status_screen (_custom_psbt_finalize)",
+          "path": "img/480x320/large_icon_status_screen__custom_psbt_finalize_480x320.png"
+        },
+        {
+          "name": "large_icon_status_screen__custom_microsd_notification",
+          "display_name": "large_icon_status_screen (_custom_microsd_notification)",
+          "path": "img/480x320/large_icon_status_screen__custom_microsd_notification_480x320.png"
         },
         {
           "name": "seed_add_passphrase_screen",
@@ -1061,6 +1211,66 @@
           "path": "img/480x320/psbt_overview_screen__testnet_480x320.gif"
         },
         {
+          "name": "psbt_address_details_screen",
+          "display_name": "psbt_address_details_screen",
+          "path": "img/480x320/psbt_address_details_screen_480x320.png"
+        },
+        {
+          "name": "psbt_address_details_screen__taproot",
+          "display_name": "psbt_address_details_screen (_taproot)",
+          "path": "img/480x320/psbt_address_details_screen__taproot_480x320.png"
+        },
+        {
+          "name": "psbt_address_details_screen__legacy_p2sh",
+          "display_name": "psbt_address_details_screen (_legacy_p2sh)",
+          "path": "img/480x320/psbt_address_details_screen__legacy_p2sh_480x320.png"
+        },
+        {
+          "name": "psbt_address_details_screen__testnet",
+          "display_name": "psbt_address_details_screen (_testnet)",
+          "path": "img/480x320/psbt_address_details_screen__testnet_480x320.png"
+        },
+        {
+          "name": "psbt_address_details_screen__regtest",
+          "display_name": "psbt_address_details_screen (_regtest)",
+          "path": "img/480x320/psbt_address_details_screen__regtest_480x320.png"
+        },
+        {
+          "name": "psbt_change_details_screen",
+          "display_name": "psbt_change_details_screen",
+          "path": "img/480x320/psbt_change_details_screen_480x320.png"
+        },
+        {
+          "name": "psbt_change_details_screen__unverified_multisig_change",
+          "display_name": "psbt_change_details_screen (_unverified_multisig_change)",
+          "path": "img/480x320/psbt_change_details_screen__unverified_multisig_change_480x320.png"
+        },
+        {
+          "name": "psbt_change_details_screen__self_transfer_verified",
+          "display_name": "psbt_change_details_screen (_self_transfer_verified)",
+          "path": "img/480x320/psbt_change_details_screen__self_transfer_verified_480x320.png"
+        },
+        {
+          "name": "psbt_change_details_screen__self_transfer_unverified_multisig",
+          "display_name": "psbt_change_details_screen (_self_transfer_unverified_multisig)",
+          "path": "img/480x320/psbt_change_details_screen__self_transfer_unverified_multisig_480x320.png"
+        },
+        {
+          "name": "psbt_math_screen",
+          "display_name": "psbt_math_screen",
+          "path": "img/480x320/psbt_math_screen_480x320.png"
+        },
+        {
+          "name": "psbt_math_screen__btc_denomination",
+          "display_name": "psbt_math_screen (_btc_denomination)",
+          "path": "img/480x320/psbt_math_screen__btc_denomination_480x320.png"
+        },
+        {
+          "name": "psbt_math_screen__self_transfer",
+          "display_name": "psbt_math_screen (_self_transfer)",
+          "path": "img/480x320/psbt_math_screen__self_transfer_480x320.png"
+        },
+        {
           "name": "locale_picker_screen",
           "display_name": "locale_picker_screen",
           "path": "img/480x320/locale_picker_screen_480x320.png"
@@ -1231,6 +1441,16 @@
           "name": "large_icon_status_screen__newline",
           "display_name": "large_icon_status_screen (_newline)",
           "path": "img/800x480/large_icon_status_screen__newline_800x480.png"
+        },
+        {
+          "name": "large_icon_status_screen__custom_psbt_finalize",
+          "display_name": "large_icon_status_screen (_custom_psbt_finalize)",
+          "path": "img/800x480/large_icon_status_screen__custom_psbt_finalize_800x480.png"
+        },
+        {
+          "name": "large_icon_status_screen__custom_microsd_notification",
+          "display_name": "large_icon_status_screen (_custom_microsd_notification)",
+          "path": "img/800x480/large_icon_status_screen__custom_microsd_notification_800x480.png"
         },
         {
           "name": "seed_add_passphrase_screen",
@@ -1411,6 +1631,66 @@
           "name": "psbt_overview_screen__testnet",
           "display_name": "psbt_overview_screen (_testnet) [animated]",
           "path": "img/800x480/psbt_overview_screen__testnet_800x480.gif"
+        },
+        {
+          "name": "psbt_address_details_screen",
+          "display_name": "psbt_address_details_screen",
+          "path": "img/800x480/psbt_address_details_screen_800x480.png"
+        },
+        {
+          "name": "psbt_address_details_screen__taproot",
+          "display_name": "psbt_address_details_screen (_taproot)",
+          "path": "img/800x480/psbt_address_details_screen__taproot_800x480.png"
+        },
+        {
+          "name": "psbt_address_details_screen__legacy_p2sh",
+          "display_name": "psbt_address_details_screen (_legacy_p2sh)",
+          "path": "img/800x480/psbt_address_details_screen__legacy_p2sh_800x480.png"
+        },
+        {
+          "name": "psbt_address_details_screen__testnet",
+          "display_name": "psbt_address_details_screen (_testnet)",
+          "path": "img/800x480/psbt_address_details_screen__testnet_800x480.png"
+        },
+        {
+          "name": "psbt_address_details_screen__regtest",
+          "display_name": "psbt_address_details_screen (_regtest)",
+          "path": "img/800x480/psbt_address_details_screen__regtest_800x480.png"
+        },
+        {
+          "name": "psbt_change_details_screen",
+          "display_name": "psbt_change_details_screen",
+          "path": "img/800x480/psbt_change_details_screen_800x480.png"
+        },
+        {
+          "name": "psbt_change_details_screen__unverified_multisig_change",
+          "display_name": "psbt_change_details_screen (_unverified_multisig_change)",
+          "path": "img/800x480/psbt_change_details_screen__unverified_multisig_change_800x480.png"
+        },
+        {
+          "name": "psbt_change_details_screen__self_transfer_verified",
+          "display_name": "psbt_change_details_screen (_self_transfer_verified)",
+          "path": "img/800x480/psbt_change_details_screen__self_transfer_verified_800x480.png"
+        },
+        {
+          "name": "psbt_change_details_screen__self_transfer_unverified_multisig",
+          "display_name": "psbt_change_details_screen (_self_transfer_unverified_multisig)",
+          "path": "img/800x480/psbt_change_details_screen__self_transfer_unverified_multisig_800x480.png"
+        },
+        {
+          "name": "psbt_math_screen",
+          "display_name": "psbt_math_screen",
+          "path": "img/800x480/psbt_math_screen_800x480.png"
+        },
+        {
+          "name": "psbt_math_screen__btc_denomination",
+          "display_name": "psbt_math_screen (_btc_denomination)",
+          "path": "img/800x480/psbt_math_screen__btc_denomination_800x480.png"
+        },
+        {
+          "name": "psbt_math_screen__self_transfer",
+          "display_name": "psbt_math_screen (_self_transfer)",
+          "path": "img/800x480/psbt_math_screen__self_transfer_800x480.png"
         },
         {
           "name": "locale_picker_screen",
