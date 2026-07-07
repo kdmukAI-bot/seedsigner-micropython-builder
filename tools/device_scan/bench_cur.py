@@ -20,11 +20,13 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, ".."))  # tools/ for deploy_app
+sys.path.insert(0, os.path.join(HERE, ".."))  # tools/ for deploy_app + _devenv
 import deploy_app as da  # noqa: E402
+import _devenv  # noqa: E402
 
-DEFAULT_FIXTURE = "/home/kdmukai/dev/btc-datagen/output/psbt_2of3_p2wsh_100in_normal_parts.txt"
-UR2_SRC = "/home/kdmukai/dev/seedsigner/src/seedsigner/helpers/ur2"
+DEFAULT_FIXTURE = os.path.join(_devenv.SS_BTC_DATAGEN_DIR, "output",
+                               "psbt_2of3_p2wsh_100in_normal_parts.txt")
+UR2_SRC = _devenv.UR2_SRC   # $SS_APP_DIR/src/seedsigner/helpers/ur2
 
 # Device-side benchmark. Runs in the raw REPL; DEVICE_HELPERS globals persist in
 # the same connection but this block is self-contained apart from /bench_parts.txt

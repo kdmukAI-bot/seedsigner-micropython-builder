@@ -18,7 +18,9 @@ import json
 import os
 import sys
 
-SS_SRC = os.environ.get("SS_SRC", "/home/kdmukai/dev/seedsigner/src")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # -> tools/
+import _devenv  # noqa: E402
+SS_SRC = _devenv.SS_SRC_ROOT   # $SS_APP_DIR/src (env-driven; see .env.example)
 sys.path.insert(0, SS_SRC)
 
 from seedsigner.helpers.ur2.ur import UR

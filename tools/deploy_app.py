@@ -38,11 +38,12 @@ import tempfile
 
 # Reuse the proven raw-REPL primitives from the SD pusher.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _devenv  # noqa: E402  (env-driven local-dev paths; no hard-coded /home/... in committed files)
 from sd_format_push import hard_reset_and_wait, raw_exec  # noqa: E402
 
 PORT = "/dev/ttyACM0"
-SS_SRC = "/home/kdmukai/dev/seedsigner/src/seedsigner"
-EMBIT_SRC = "/home/kdmukai/dev/embit/src/embit"
+SS_SRC = _devenv.SS_SRC        # $SS_APP_DIR/src/seedsigner  (override via --seedsigner-src / .env)
+EMBIT_SRC = _devenv.EMBIT_SRC  # $SS_EMBIT_DIR/src/embit     (override via --embit-src / .env)
 SS_DST = "/lib/seedsigner"
 EMBIT_DST = "/lib/embit"
 
@@ -70,8 +71,8 @@ PUSH_ATTEMPTS = 4
 # (ports/esp32/boards/.../manifest.py), so the harness no longer vendors them to
 # /lib. STDLIB_DEPS stays here (empty) as the seam for any future not-yet-frozen
 # stdlib dep; each would be a single-module package <name>/<name>.py under the root.
-MPY_LIB_STDLIB = ("/home/kdmukai/dev/seedsigner-micropython-builder/deps/micropython/"
-                  "upstream/lib/micropython-lib/python-stdlib")
+MPY_LIB_STDLIB = os.path.join(REPO_ROOT, "deps", "micropython", "upstream",
+                              "lib", "micropython-lib", "python-stdlib")
 STDLIB_DEPS = []  # logging, hmac now frozen into firmware (was: ["logging", "hmac"])
 
 # NOTE: the former SECP256K1_SHIM (a /lib/secp256k1.py that re-exported embit's

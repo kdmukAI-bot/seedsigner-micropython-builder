@@ -16,12 +16,13 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, ".."))  # tools/ for deploy_app
+sys.path.insert(0, os.path.join(HERE, ".."))  # tools/ for deploy_app + _devenv
 import deploy_app as da  # noqa: E402
+import _devenv  # noqa: E402
 
-SS_SRC = os.environ.get("SS_SRC", "/home/kdmukai/dev/seedsigner/src")
+SS_SRC = _devenv.SS_SRC_ROOT   # $SS_APP_DIR/src (env-driven; see .env.example)
 sys.path.insert(0, SS_SRC)
-UR2_SRC = os.path.join(SS_SRC, "seedsigner", "helpers", "ur2")
+UR2_SRC = _devenv.UR2_SRC
 
 from seedsigner.helpers.ur2.ur import UR  # noqa: E402
 from seedsigner.helpers.ur2.ur_encoder import UREncoder  # noqa: E402

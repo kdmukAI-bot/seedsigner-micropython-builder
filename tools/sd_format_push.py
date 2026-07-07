@@ -9,20 +9,42 @@ it must run on ONE connection, after ONE hard reset that actually frees the host
 
     python3 tools/sd_format_push.py [--packs DIR] [--port /dev/ttyACM0]
 
-The pack layout written to the card mirrors the source: /sd/<locale>/<file>,
-where <file> is the .ttf(s) + runs.bin that ss_locale_pack_files() asks for.
+The pack SOURCE points ONLY at the app (this repo copies the app's bundled bytes, it does
+NOT know the pack repo or build packs): `--packs DIR` overrides; otherwise
+`_devenv.resolve_packs()` = `$SS_APP_DIR/src/lang-packs` (or `SS_PACKS_DIR` — see
+.env.example). Empty/absent = a valid English-only deploy (clean card, no packs staged).
+The full self-contained pack is staged to /sd/<locale>/... — every runtime file at its
+subpath: the subset .ttf(s) + runs.bin + endonym_<h>.bin + manifest.json +
+LC_MESSAGES/messages.mo (the app reads .mo from that subpath and the picker fetches the
+endonym images). Debug artifacts (runs.json) are skipped.
 """
 import argparse
 import base64
-import glob
 import os
+import sys
 import time
 
 import serial  # pyserial
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _devenv  # env-driven local-dev paths (no hard-coded /home/... in committed files)
+
 PORT = "/dev/ttyACM0"
-DEFAULT_PACKS = "/home/kdmukai/dev/seedsigner-lvgl-screens/lang-packs"
-LOADABLE = ("*.ttf", "runs.bin")
+
+
+def _is_runtime_file(rel):
+    """True for a pack file the DEVICE loads, keyed by its path relative to the pack
+    root ("<locale>/..."). Stages the subset font(s), pre-shaped runs, endonym images,
+    the self-describing manifest, and the compiled catalog at its LC_MESSAGES subpath;
+    skips debug artifacts (runs.json)."""
+    base = rel.rsplit("/", 1)[-1]
+    if rel.endswith("/LC_MESSAGES/messages.mo"):
+        return True
+    if base in ("manifest.json", "runs.bin"):
+        return True
+    if base.endswith(".ttf"):
+        return True
+    return base.startswith("endonym_") and base.endswith(".bin")
 
 
 def _read_until(ser, token, deadline):
@@ -90,11 +112,65 @@ def hard_reset_and_wait(port, do_reset=True):
     raise SystemExit("device did not return to REPL after reset")
 
 
+def collect_pack_files(packs_dir):
+    """Every runtime file across all locale packs under `packs_dir`, as
+    (host_path, relpath) where relpath is "<locale>/..." (LC_MESSAGES/ preserved).
+    Debug artifacts (runs.json) are skipped by _is_runtime_file."""
+    rels = []
+    if os.path.isdir(packs_dir):
+        for loc in sorted(os.listdir(packs_dir)):
+            loc_dir = os.path.join(packs_dir, loc)
+            if loc.startswith(".") or not os.path.isdir(loc_dir):
+                continue
+            for root, _dirs, fnames in os.walk(loc_dir):
+                for fn in fnames:
+                    full = os.path.join(root, fn)
+                    rel = os.path.relpath(full, packs_dir).replace(os.sep, "/")
+                    if _is_runtime_file(rel):
+                        rels.append((full, rel))
+    rels.sort(key=lambda fr: fr[1])
+    return rels
+
+
+def _push_file(ser, remote, data, chunk=12000):
+    """Write `data` to `remote` on-device, chunking the base64 (in multiples of 4 chars,
+    so each fragment decodes standalone) — a large font sent as one USB-CDC write
+    truncates, surfacing on-device as an a2b_base64 'incorrect padding' error. Relies on
+    the on-device `_mkdirp` (defined once in main) to create the file's subdir. Returns
+    the device-reported size (str)."""
+    b64 = base64.b64encode(data).decode()  # chunk % 4 == 0 keeps every fragment valid base64
+    raw_exec(ser, "_mkdirp('%s')" % remote.rsplit("/", 1)[0])
+    for i in range(0, len(b64), chunk):
+        raw_exec(ser,
+            "import binascii\n"
+            "_f = open('%s', '%s'); _f.write(binascii.a2b_base64('%s')); _f.close()\n"
+            % (remote, "wb" if i == 0 else "ab", b64[i:i + chunk]),
+            timeout=90)
+    return raw_exec(ser, "import os; print(os.stat('%s')[6])" % remote)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--packs", default=DEFAULT_PACKS)
+    ap.add_argument("--packs", default=None,
+                    help="dir of built pack bytes (<locale>/...); default = the app's "
+                         "$SS_APP_DIR/src/lang-packs via _devenv.resolve_packs()")
     ap.add_argument("--port", default=PORT)
     args = ap.parse_args()
+
+    packs = args.packs or _devenv.resolve_packs()
+
+    # Enumerate the source BEFORE touching the card. Empty/absent is NOT an error: the app
+    # bundles no packs -> a valid English-only deploy (we format a clean card, stage nothing;
+    # the app renders its baked English floor). This repo only COPIES the app's bundled bytes.
+    rels = collect_pack_files(packs)
+    if rels:
+        n_locales = len({rel.split("/", 1)[0] for _f, rel in rels})
+        print("[sd] staging %d files across %d locales from %s" % (len(rels), n_locales, packs))
+    else:
+        print("[sd] no packs at %s -> English-only deploy: formatting a clean card, staging "
+              "nothing.\n"
+              "     (Point --packs / SS_PACKS_DIR at a built packs dir, or build packs into the\n"
+              "     app's src/lang-packs, to deploy non-English locales.)" % packs)
 
     print("[sd] hard-resetting board to free the SDMMC host ...")
     ser = hard_reset_and_wait(args.port)
@@ -108,34 +184,36 @@ def main():
             "print('formatted', os.listdir('/sd'))\n", timeout=30)
         print("[sd]", out)
 
-        locales = sorted(d for d in os.listdir(args.packs)
-                         if os.path.isdir(os.path.join(args.packs, d)))
-        for loc in locales:
-            raw_exec(ser, "import os\ntry:\n os.mkdir('/sd/%s')\nexcept OSError:\n pass" % loc)
-            files = []
-            for pat in LOADABLE:
-                files += glob.glob(os.path.join(args.packs, loc, pat))
-            for path in sorted(files):
-                name = os.path.basename(path)
-                data = open(path, "rb").read()
-                b64 = base64.b64encode(data).decode()
-                # One REPL round-trip per file: the bytes fly over USB-CDC fast; it's
-                # the per-call raw-REPL handshake that's slow, so minimize calls.
-                sz = raw_exec(ser,
-                    "import binascii, os\n"
-                    "_d = binascii.a2b_base64('%s')\n"
-                    "_f = open('/sd/%s/%s', 'wb'); _f.write(_d); _f.close()\n"
-                    "print(os.stat('/sd/%s/%s')[6])\n" % (b64, loc, name, loc, name),
-                    timeout=90)
-                status = "OK" if sz == str(len(data)) else "MISMATCH(dev=%s)" % sz
-                print("[sd] %-11s %-18s %7d bytes  %s" % (loc, name, len(data), status), flush=True)
+        # mkdir -p helper on-device, defined once (globals persist across raw_exec on
+        # this held-open connection); packs carry a LC_MESSAGES/ subdir to create.
+        raw_exec(ser,
+            "import os\n"
+            "def _mkdirp(p):\n"
+            " c=''\n"
+            " for x in p.strip('/').split('/'):\n"
+            "  c+='/'+x\n"
+            "  try:\n"
+            "   os.mkdir(c)\n"
+            "  except OSError:\n"
+            "   pass\n")
+
+        for full, rel in rels:
+            data = open(full, "rb").read()
+            sz = _push_file(ser, "/sd/" + rel, data)
+            status = "OK" if sz == str(len(data)) else "MISMATCH(dev=%s)" % sz
+            print("[sd] %-30s %8d bytes  %s" % (rel, len(data), status), flush=True)
 
         print("[sd] --- final card contents ---")
         print(raw_exec(ser,
             "import os\n"
-            "for d in sorted(os.listdir('/sd')):\n"
-            " for f in sorted(os.listdir('/sd/'+d)):\n"
-            "  print('/sd/'+d+'/'+f, os.stat('/sd/'+d+'/'+f)[6])\n", timeout=20))
+            "def _walk(p):\n"
+            " for e in sorted(os.listdir(p)):\n"
+            "  f = p + '/' + e\n"
+            "  try:\n"
+            "   os.listdir(f); _walk(f)\n"       # a dir -> recurse
+            "  except OSError:\n"
+            "   print(f, os.stat(f)[6])\n"       # a file -> path + size
+            "_walk('/sd')\n", timeout=30))
     finally:
         ser.close()
     print("[sd] done.")
