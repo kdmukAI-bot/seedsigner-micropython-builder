@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-07 14:14:42Z",
+  "generated_at": "2026-07-07 23:37:10Z",
   "resolutions": [
     {
       "width": 240,
@@ -425,6 +425,46 @@
           "name": "locale_picker_screen",
           "display_name": "locale_picker_screen",
           "path": "img/240x240/locale_picker_screen_240x240.png"
+        },
+        {
+          "name": "seed_export_xpub_details_screen",
+          "display_name": "seed_export_xpub_details_screen",
+          "path": "img/240x240/seed_export_xpub_details_screen_240x240.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen",
+          "display_name": "seed_review_passphrase_screen",
+          "path": "img/240x240/seed_review_passphrase_screen_240x240.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__long_wraps",
+          "display_name": "seed_review_passphrase_screen (_long_wraps)",
+          "path": "img/240x240/seed_review_passphrase_screen__long_wraps_240x240.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__random_complex",
+          "display_name": "seed_review_passphrase_screen (_random_complex)",
+          "path": "img/240x240/seed_review_passphrase_screen__random_complex_240x240.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__long_alpha",
+          "display_name": "seed_review_passphrase_screen (_long_alpha)",
+          "path": "img/240x240/seed_review_passphrase_screen__long_alpha_240x240.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__edge_spaces",
+          "display_name": "seed_review_passphrase_screen (_edge_spaces)",
+          "path": "img/240x240/seed_review_passphrase_screen__edge_spaces_240x240.png"
+        },
+        {
+          "name": "seed_words_screen",
+          "display_name": "seed_words_screen",
+          "path": "img/240x240/seed_words_screen_240x240.png"
+        },
+        {
+          "name": "seed_words_screen__last_page",
+          "display_name": "seed_words_screen (_last_page)",
+          "path": "img/240x240/seed_words_screen__last_page_240x240.png"
         }
       ]
     },
@@ -852,6 +892,46 @@
           "name": "locale_picker_screen",
           "display_name": "locale_picker_screen",
           "path": "img/320x240/locale_picker_screen_320x240.png"
+        },
+        {
+          "name": "seed_export_xpub_details_screen",
+          "display_name": "seed_export_xpub_details_screen",
+          "path": "img/320x240/seed_export_xpub_details_screen_320x240.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen",
+          "display_name": "seed_review_passphrase_screen",
+          "path": "img/320x240/seed_review_passphrase_screen_320x240.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__long_wraps",
+          "display_name": "seed_review_passphrase_screen (_long_wraps)",
+          "path": "img/320x240/seed_review_passphrase_screen__long_wraps_320x240.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__random_complex",
+          "display_name": "seed_review_passphrase_screen (_random_complex)",
+          "path": "img/320x240/seed_review_passphrase_screen__random_complex_320x240.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__long_alpha",
+          "display_name": "seed_review_passphrase_screen (_long_alpha)",
+          "path": "img/320x240/seed_review_passphrase_screen__long_alpha_320x240.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__edge_spaces",
+          "display_name": "seed_review_passphrase_screen (_edge_spaces)",
+          "path": "img/320x240/seed_review_passphrase_screen__edge_spaces_320x240.png"
+        },
+        {
+          "name": "seed_words_screen",
+          "display_name": "seed_words_screen",
+          "path": "img/320x240/seed_words_screen_320x240.png"
+        },
+        {
+          "name": "seed_words_screen__last_page",
+          "display_name": "seed_words_screen (_last_page)",
+          "path": "img/320x240/seed_words_screen__last_page_320x240.png"
         }
       ]
     },
@@ -1274,6 +1354,46 @@
           "name": "locale_picker_screen",
           "display_name": "locale_picker_screen",
           "path": "img/480x320/locale_picker_screen_480x320.png"
+        },
+        {
+          "name": "seed_export_xpub_details_screen",
+          "display_name": "seed_export_xpub_details_screen",
+          "path": "img/480x320/seed_export_xpub_details_screen_480x320.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen",
+          "display_name": "seed_review_passphrase_screen",
+          "path": "img/480x320/seed_review_passphrase_screen_480x320.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__long_wraps",
+          "display_name": "seed_review_passphrase_screen (_long_wraps)",
+          "path": "img/480x320/seed_review_passphrase_screen__long_wraps_480x320.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__random_complex",
+          "display_name": "seed_review_passphrase_screen (_random_complex)",
+          "path": "img/480x320/seed_review_passphrase_screen__random_complex_480x320.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__long_alpha",
+          "display_name": "seed_review_passphrase_screen (_long_alpha)",
+          "path": "img/480x320/seed_review_passphrase_screen__long_alpha_480x320.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__edge_spaces",
+          "display_name": "seed_review_passphrase_screen (_edge_spaces)",
+          "path": "img/480x320/seed_review_passphrase_screen__edge_spaces_480x320.png"
+        },
+        {
+          "name": "seed_words_screen",
+          "display_name": "seed_words_screen",
+          "path": "img/480x320/seed_words_screen_480x320.png"
+        },
+        {
+          "name": "seed_words_screen__last_page",
+          "display_name": "seed_words_screen (_last_page)",
+          "path": "img/480x320/seed_words_screen__last_page_480x320.png"
         }
       ]
     },
@@ -1696,6 +1816,46 @@
           "name": "locale_picker_screen",
           "display_name": "locale_picker_screen",
           "path": "img/800x480/locale_picker_screen_800x480.png"
+        },
+        {
+          "name": "seed_export_xpub_details_screen",
+          "display_name": "seed_export_xpub_details_screen",
+          "path": "img/800x480/seed_export_xpub_details_screen_800x480.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen",
+          "display_name": "seed_review_passphrase_screen",
+          "path": "img/800x480/seed_review_passphrase_screen_800x480.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__long_wraps",
+          "display_name": "seed_review_passphrase_screen (_long_wraps)",
+          "path": "img/800x480/seed_review_passphrase_screen__long_wraps_800x480.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__random_complex",
+          "display_name": "seed_review_passphrase_screen (_random_complex)",
+          "path": "img/800x480/seed_review_passphrase_screen__random_complex_800x480.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__long_alpha",
+          "display_name": "seed_review_passphrase_screen (_long_alpha)",
+          "path": "img/800x480/seed_review_passphrase_screen__long_alpha_800x480.png"
+        },
+        {
+          "name": "seed_review_passphrase_screen__edge_spaces",
+          "display_name": "seed_review_passphrase_screen (_edge_spaces)",
+          "path": "img/800x480/seed_review_passphrase_screen__edge_spaces_800x480.png"
+        },
+        {
+          "name": "seed_words_screen",
+          "display_name": "seed_words_screen",
+          "path": "img/800x480/seed_words_screen_800x480.png"
+        },
+        {
+          "name": "seed_words_screen__last_page",
+          "display_name": "seed_words_screen (_last_page)",
+          "path": "img/800x480/seed_words_screen__last_page_800x480.png"
         }
       ]
     }
