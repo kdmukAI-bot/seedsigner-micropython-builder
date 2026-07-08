@@ -31,6 +31,11 @@ CONFIG_FREERTOS_TIMER_TASK_STACK_DEPTH=4096
 CONFIG_BOARD_CSI_AE_TARGET=0
 # k_quirc contrast stretch (decode tuning, matches scan_coord_test).
 CONFIG_K_QUIRC_CONTRAST_STRETCH=y
+# Route k_quirc decoder context + flood-fill scratch to PSRAM: keeps their ~80 KB
+# internal-RAM footprint off the fragmented internal heap so the camera QR-decode task
+# stack can reserve its contiguous block (defense-in-depth for the QR-task internal-RAM
+# starvation fix; opt-in flag, default off upstream).
+CONFIG_K_QUIRC_SCRATCH_IN_PSRAM=y
 
 # ── Orientation ────────────────────────────────────────────────────────────
 # The firmware runs the display in LANDSCAPE at runtime (display_manager.cpp
