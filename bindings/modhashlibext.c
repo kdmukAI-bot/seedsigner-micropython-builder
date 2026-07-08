@@ -96,6 +96,97 @@ static MP_DEFINE_CONST_OBJ_TYPE(
     );
 
 // ---------------------------------------------------------------------------
+// ripemd160 hash object. Same inline-opaque-ctx pattern as sha512 (the mbedtls
+// ripemd160 context holds no heap-owned internals, so no finaliser). Consumed by
+// the frozen hashlib.py `new("ripemd160", data)` factory, which embit's hash160
+// auto-selects — making ripemd160(sha256(x)) fully native with no embit patch.
+// ---------------------------------------------------------------------------
+typedef struct {
+    mp_obj_base_t base;
+    uint8_t ctx[];
+} mp_obj_ripemd160_t;
+
+static const mp_obj_type_t hashlib_ext_ripemd160_type;
+
+static mp_obj_t ripemd160_update(mp_obj_t self_in, mp_obj_t arg);
+
+static mp_obj_t ripemd160_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
+                                   const mp_obj_t *args) {
+    mp_arg_check_num(n_args, n_kw, 0, 1, false);
+    mp_obj_ripemd160_t *o = mp_obj_malloc_var(mp_obj_ripemd160_t, ctx, uint8_t,
+                                              hlx_ripemd160_ctx_size(), type);
+    hlx_ripemd160_init(o->ctx);
+    if (n_args == 1) {
+        ripemd160_update(MP_OBJ_FROM_PTR(o), args[0]);
+    }
+    return MP_OBJ_FROM_PTR(o);
+}
+
+static mp_obj_t ripemd160_update(mp_obj_t self_in, mp_obj_t arg) {
+    mp_obj_ripemd160_t *self = MP_OBJ_TO_PTR(self_in);
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(arg, &bufinfo, MP_BUFFER_READ);
+    hlx_ripemd160_update(self->ctx, bufinfo.buf, bufinfo.len);
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_2(ripemd160_update_obj, ripemd160_update);
+
+static mp_obj_t ripemd160_digest(mp_obj_t self_in) {
+    mp_obj_ripemd160_t *self = MP_OBJ_TO_PTR(self_in);
+    vstr_t vstr;
+    vstr_init_len(&vstr, 20);
+    hlx_ripemd160_digest(self->ctx, (uint8_t *)vstr.buf);
+    return mp_obj_new_bytes_from_vstr(&vstr);
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(ripemd160_digest_obj, ripemd160_digest);
+
+static mp_obj_t ripemd160_copy(mp_obj_t self_in) {
+    mp_obj_ripemd160_t *self = MP_OBJ_TO_PTR(self_in);
+    mp_obj_ripemd160_t *o = mp_obj_malloc_var(mp_obj_ripemd160_t, ctx, uint8_t,
+                                              hlx_ripemd160_ctx_size(), &hashlib_ext_ripemd160_type);
+    hlx_ripemd160_clone(o->ctx, self->ctx);
+    return MP_OBJ_FROM_PTR(o);
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(ripemd160_copy_obj, ripemd160_copy);
+
+static const mp_rom_map_elem_t ripemd160_locals_dict_table[] = {
+    {MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&ripemd160_update_obj)},
+    {MP_ROM_QSTR(MP_QSTR_digest), MP_ROM_PTR(&ripemd160_digest_obj)},
+    {MP_ROM_QSTR(MP_QSTR_copy), MP_ROM_PTR(&ripemd160_copy_obj)},
+    {MP_ROM_QSTR(MP_QSTR_digest_size), MP_ROM_INT(20)},
+    {MP_ROM_QSTR(MP_QSTR_block_size), MP_ROM_INT(64)},
+};
+static MP_DEFINE_CONST_DICT(ripemd160_locals_dict, ripemd160_locals_dict_table);
+
+static MP_DEFINE_CONST_OBJ_TYPE(
+    hashlib_ext_ripemd160_type,
+    MP_QSTR_ripemd160,
+    MP_TYPE_FLAG_NONE,
+    make_new, ripemd160_make_new,
+    locals_dict, &ripemd160_locals_dict
+    );
+
+// ---------------------------------------------------------------------------
+// hmac_sha512(key, msg) -> bytes : one-shot HMAC-SHA512 (mbedtls). The frozen
+// hmac.py routes digestmod="sha512" here — that's embit's BIP32 CKD hot path.
+// ---------------------------------------------------------------------------
+static mp_obj_t mod_hmac_sha512(mp_obj_t key_in, mp_obj_t msg_in) {
+    mp_buffer_info_t key, msg;
+    mp_get_buffer_raise(key_in, &key, MP_BUFFER_READ);
+    mp_get_buffer_raise(msg_in, &msg, MP_BUFFER_READ);
+    vstr_t vstr;
+    vstr_init_len(&vstr, 64);
+    int rc = hlx_hmac_sha512((const uint8_t *)key.buf, key.len,
+                             (const uint8_t *)msg.buf, msg.len, (uint8_t *)vstr.buf);
+    if (rc != 0) {
+        vstr_clear(&vstr);
+        mp_raise_msg(&mp_type_ValueError, MP_ERROR_TEXT("hmac_sha512 failed"));
+    }
+    return mp_obj_new_bytes_from_vstr(&vstr);
+}
+static MP_DEFINE_CONST_FUN_OBJ_2(mod_hmac_sha512_obj, mod_hmac_sha512);
+
+// ---------------------------------------------------------------------------
 // pbkdf2_hmac(hash_name, password, salt, iterations, dklen=None) -> bytes
 // Only 'sha512' is supported (all SeedSigner/embit callers use it).
 // ---------------------------------------------------------------------------
@@ -137,7 +228,9 @@ static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(mod_pbkdf2_hmac_obj, 4, 5, mod_pbkdf2
 static const mp_rom_map_elem_t hashlib_ext_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR__hashlib_ext)},
     {MP_ROM_QSTR(MP_QSTR_sha512), MP_ROM_PTR(&hashlib_ext_sha512_type)},
+    {MP_ROM_QSTR(MP_QSTR_ripemd160), MP_ROM_PTR(&hashlib_ext_ripemd160_type)},
     {MP_ROM_QSTR(MP_QSTR_pbkdf2_hmac), MP_ROM_PTR(&mod_pbkdf2_hmac_obj)},
+    {MP_ROM_QSTR(MP_QSTR_hmac_sha512), MP_ROM_PTR(&mod_hmac_sha512_obj)},
 };
 static MP_DEFINE_CONST_DICT(hashlib_ext_globals, hashlib_ext_globals_table);
 

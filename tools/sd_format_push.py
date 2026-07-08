@@ -95,7 +95,11 @@ def hard_reset_and_wait(port, do_reset=True):
     deadline = time.monotonic() + 50
     while time.monotonic() < deadline:
         try:
-            s = serial.Serial(port, 115200, timeout=0.3)
+            # write_timeout bounds ser.write(): the P4 USB-CDC can stall its RX
+            # buffer mid-push (byte-drop / re-enumeration), and without a write
+            # timeout pyserial blocks forever at 0% CPU. A timeout turns that into
+            # a raised SerialTimeoutException the caller can retry on a fresh fd.
+            s = serial.Serial(port, 115200, timeout=0.3, write_timeout=20)
         except Exception:
             time.sleep(0.5)
             continue

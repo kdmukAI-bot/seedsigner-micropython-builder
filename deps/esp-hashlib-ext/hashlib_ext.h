@@ -27,6 +27,22 @@ int hlx_pbkdf2_sha512(const uint8_t *password, size_t plen,
                       const uint8_t *salt, size_t slen,
                       unsigned int iterations, uint8_t *out, size_t dklen);
 
+// One-shot HMAC-SHA512. Returns 0 on success; writes 64 bytes to out. This is the
+// hot path — embit's BIP32 CKD calls hmac.new(key, data, digestmod="sha512").digest()
+// (one-shot), rerouted here via the frozen hmac.py shim.
+int hlx_hmac_sha512(const uint8_t *key, size_t klen,
+                    const uint8_t *msg, size_t mlen, uint8_t out[64]);
+
+// RIPEMD-160 as an incremental type, mirroring the SHA-512 type above (mbedtls
+// ripemd160 context holds no heap-owned internals, so no finaliser is needed).
+// Makes embit's hash160 = ripemd160(sha256(x)) fully native via hashlib.new().
+size_t hlx_ripemd160_ctx_size(void);
+void hlx_ripemd160_init(void *ctx);
+void hlx_ripemd160_update(void *ctx, const uint8_t *data, size_t len);
+void hlx_ripemd160_digest(const void *ctx, uint8_t out[20]);   // non-destructive
+void hlx_ripemd160_clone(void *dst, const void *src);
+void hlx_ripemd160_free(void *ctx);
+
 #ifdef __cplusplus
 }
 #endif

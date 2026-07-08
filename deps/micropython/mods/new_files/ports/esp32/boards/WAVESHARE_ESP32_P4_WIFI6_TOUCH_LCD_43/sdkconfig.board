@@ -189,3 +189,10 @@ CONFIG_PARTITION_TABLE_FILENAME="partitions-32MiB-waveshare.csv"
 
 # P4 has no built-in Bluetooth.
 CONFIG_BT_ENABLED=n
+
+# Native RIPEMD-160 (mbedtls) for the _hashlib_ext component. Disabled by default
+# in ESP-IDF's mbedtls; embit's hash160 = ripemd160(sha256(x)) is on the BIP32
+# derivation + address-verification hot paths, so we build it native and route
+# hashlib.new("ripemd160") to it. Required to link bindings/modhashlibext.c's
+# ripemd160 type (mbedtls_ripemd160_*).
+CONFIG_MBEDTLS_RIPEMD160_C=y

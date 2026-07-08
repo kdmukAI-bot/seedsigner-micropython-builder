@@ -29,3 +29,8 @@ CONFIG_LWIP_ENABLE=y
 CONFIG_ESP_NETIF_TCPIP_LWIP=y
 CONFIG_ESP_NETIF_USES_TCPIP_WITH_BSD_API=y
 CONFIG_ESP_ERR_TO_NAME_LOOKUP=n
+
+# Native RIPEMD-160 (mbedtls) — required to LINK the shared bindings/modhashlibext.c
+# ripemd160 type (mbedtls_ripemd160_*), which is compiled into every board via
+# bindings/micropython.cmake. Disabled by default in ESP-IDF's mbedtls.
+CONFIG_MBEDTLS_RIPEMD160_C=y

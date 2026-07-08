@@ -7,7 +7,14 @@
 include("$(PORT_DIR)/boards/manifest.py")
 
 require("logging")
-require("hmac")
+
+# hmac.py: frozen shim that routes hmac.new(..., digestmod="sha512") — embit's
+# BIP32 CKD hot path — to the native mbedtls one-shot in `_hashlib_ext`, and falls
+# back to the reference pure-Python HMAC (micropython-lib's body) for every other
+# digestmod. Replaces `require("hmac")` (which pulled the pure-Python lib); freezing
+# our own shadowing copy avoids a duplicate-`hmac` name clash. See
+# deps/third-party/hmac.py + bindings/modhashlibext.c (hmac_sha512).
+module("hmac.py", base_path="$(MPY_DIR)/../../../deps/third-party")
 
 # urtypes==1.0.1: third-party PyPI package (NOT micropython-lib), so it can't be
 # resolved via require(); freeze it from the pinned in-repo copy instead. It pulls
