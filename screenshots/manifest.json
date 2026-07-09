@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-08 19:04:16Z",
+  "generated_at": "2026-07-09 16:40:45Z",
   "resolutions": [
     {
       "width": 240,
@@ -102,29 +102,29 @@
           "path": "img/240x240/screensaver_screen_240x240.png"
         },
         {
-          "name": "splash_screen",
-          "display_name": "splash_screen",
-          "path": "img/240x240/splash_screen_240x240.png"
+          "name": "opening_splash_screen",
+          "display_name": "opening_splash_screen",
+          "path": "img/240x240/opening_splash_screen_240x240.png"
         },
         {
-          "name": "splash_screen__boot_logo",
-          "display_name": "splash_screen (_boot_logo)",
-          "path": "img/240x240/splash_screen__boot_logo_240x240.png"
+          "name": "opening_splash_screen__boot_logo",
+          "display_name": "opening_splash_screen (_boot_logo)",
+          "path": "img/240x240/opening_splash_screen__boot_logo_240x240.png"
         },
         {
-          "name": "splash_screen__cpython_no_partners",
-          "display_name": "splash_screen (_cpython_no_partners)",
-          "path": "img/240x240/splash_screen__cpython_no_partners_240x240.png"
+          "name": "opening_splash_screen__cpython_no_partners",
+          "display_name": "opening_splash_screen (_cpython_no_partners)",
+          "path": "img/240x240/opening_splash_screen__cpython_no_partners_240x240.png"
         },
         {
-          "name": "splash_screen__micropython_partners",
-          "display_name": "splash_screen (_micropython_partners)",
-          "path": "img/240x240/splash_screen__micropython_partners_240x240.png"
+          "name": "opening_splash_screen__micropython_partners",
+          "display_name": "opening_splash_screen (_micropython_partners)",
+          "path": "img/240x240/opening_splash_screen__micropython_partners_240x240.png"
         },
         {
-          "name": "splash_screen__micropython_no_partners",
-          "display_name": "splash_screen (_micropython_no_partners)",
-          "path": "img/240x240/splash_screen__micropython_no_partners_240x240.png"
+          "name": "opening_splash_screen__micropython_no_partners",
+          "display_name": "opening_splash_screen (_micropython_no_partners)",
+          "path": "img/240x240/opening_splash_screen__micropython_no_partners_240x240.png"
         },
         {
           "name": "large_icon_status_screen",
@@ -312,6 +312,31 @@
           "path": "img/240x240/qr_display_screen__animated_bbqr_240x240.png"
         },
         {
+          "name": "seed_transcribe_zoomed_qr_screen",
+          "display_name": "seed_transcribe_zoomed_qr_screen",
+          "path": "img/240x240/seed_transcribe_zoomed_qr_screen_240x240.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__24word",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_24word)",
+          "path": "img/240x240/seed_transcribe_zoomed_qr_screen__24word_240x240.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__compactseedqr",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_compactseedqr)",
+          "path": "img/240x240/seed_transcribe_zoomed_qr_screen__compactseedqr_240x240.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__finder_pattern",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_finder_pattern)",
+          "path": "img/240x240/seed_transcribe_zoomed_qr_screen__finder_pattern_240x240.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__alignment_pattern",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_alignment_pattern)",
+          "path": "img/240x240/seed_transcribe_zoomed_qr_screen__alignment_pattern_240x240.png"
+        },
+        {
           "name": "seed_finalize_screen",
           "display_name": "seed_finalize_screen",
           "path": "img/240x240/seed_finalize_screen_240x240.png"
@@ -322,14 +347,14 @@
           "path": "img/240x240/seed_finalize_screen__no_passphrase_240x240.png"
         },
         {
-          "name": "loading_screen",
-          "display_name": "loading_screen [animated]",
-          "path": "img/240x240/loading_screen_240x240.gif"
+          "name": "loading_spinner_screen",
+          "display_name": "loading_spinner_screen [animated]",
+          "path": "img/240x240/loading_spinner_screen_240x240.gif"
         },
         {
-          "name": "loading_screen__no_text",
-          "display_name": "loading_screen (_no_text) [animated]",
-          "path": "img/240x240/loading_screen__no_text_240x240.gif"
+          "name": "loading_spinner_screen__no_text",
+          "display_name": "loading_spinner_screen (_no_text) [animated]",
+          "path": "img/240x240/loading_spinner_screen__no_text_240x240.gif"
         },
         {
           "name": "psbt_overview_screen",
@@ -422,9 +447,9 @@
           "path": "img/240x240/psbt_math_screen__self_transfer_240x240.png"
         },
         {
-          "name": "locale_picker_screen",
-          "display_name": "locale_picker_screen",
-          "path": "img/240x240/locale_picker_screen_240x240.png"
+          "name": "settings_locale_picker_screen",
+          "display_name": "settings_locale_picker_screen",
+          "path": "img/240x240/settings_locale_picker_screen_240x240.png"
         },
         {
           "name": "seed_export_xpub_details_screen",
@@ -465,6 +490,106 @@
           "name": "seed_words_screen__last_page",
           "display_name": "seed_words_screen (_last_page)",
           "path": "img/240x240/seed_words_screen__last_page_240x240.png"
+        },
+        {
+          "name": "multisig_wallet_descriptor_screen",
+          "display_name": "multisig_wallet_descriptor_screen",
+          "path": "img/240x240/multisig_wallet_descriptor_screen_240x240.png"
+        },
+        {
+          "name": "multisig_wallet_descriptor_screen__3_of_5",
+          "display_name": "multisig_wallet_descriptor_screen (_3_of_5)",
+          "path": "img/240x240/multisig_wallet_descriptor_screen__3_of_5_240x240.png"
+        },
+        {
+          "name": "seed_sign_message_confirm_address_screen",
+          "display_name": "seed_sign_message_confirm_address_screen",
+          "path": "img/240x240/seed_sign_message_confirm_address_screen_240x240.png"
+        },
+        {
+          "name": "settings_qr_confirmation_screen",
+          "display_name": "settings_qr_confirmation_screen",
+          "path": "img/240x240/settings_qr_confirmation_screen_240x240.png"
+        },
+        {
+          "name": "settings_qr_confirmation_screen__not_persistent",
+          "display_name": "settings_qr_confirmation_screen (_not_persistent)",
+          "path": "img/240x240/settings_qr_confirmation_screen__not_persistent_240x240.png"
+        },
+        {
+          "name": "seed_sign_message_confirm_message_screen",
+          "display_name": "seed_sign_message_confirm_message_screen",
+          "path": "img/240x240/seed_sign_message_confirm_message_screen_240x240.png"
+        },
+        {
+          "name": "seed_sign_message_confirm_message_screen__short",
+          "display_name": "seed_sign_message_confirm_message_screen (_short)",
+          "path": "img/240x240/seed_sign_message_confirm_message_screen__short_240x240.png"
+        },
+        {
+          "name": "seed_address_verification_screen",
+          "display_name": "seed_address_verification_screen",
+          "path": "img/240x240/seed_address_verification_screen_240x240.png"
+        },
+        {
+          "name": "seed_address_verification_screen__nested_segwit",
+          "display_name": "seed_address_verification_screen (_nested_segwit)",
+          "path": "img/240x240/seed_address_verification_screen__nested_segwit_240x240.png"
+        },
+        {
+          "name": "seed_address_verification_screen__taproot",
+          "display_name": "seed_address_verification_screen (_taproot)",
+          "path": "img/240x240/seed_address_verification_screen__taproot_240x240.png"
+        },
+        {
+          "name": "seed_address_verification_screen__testnet",
+          "display_name": "seed_address_verification_screen (_testnet)",
+          "path": "img/240x240/seed_address_verification_screen__testnet_240x240.png"
+        },
+        {
+          "name": "seed_address_verification_screen__regtest",
+          "display_name": "seed_address_verification_screen (_regtest)",
+          "path": "img/240x240/seed_address_verification_screen__regtest_240x240.png"
+        },
+        {
+          "name": "tools_calc_final_word_screen",
+          "display_name": "tools_calc_final_word_screen",
+          "path": "img/240x240/tools_calc_final_word_screen_240x240.png"
+        },
+        {
+          "name": "tools_calc_final_word_screen__coin_flips",
+          "display_name": "tools_calc_final_word_screen (_coin_flips)",
+          "path": "img/240x240/tools_calc_final_word_screen__coin_flips_240x240.png"
+        },
+        {
+          "name": "tools_calc_final_word_done_screen",
+          "display_name": "tools_calc_final_word_done_screen",
+          "path": "img/240x240/tools_calc_final_word_done_screen_240x240.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen",
+          "display_name": "seed_transcribe_whole_qr_screen",
+          "path": "img/240x240/seed_transcribe_whole_qr_screen_240x240.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen__12_standard",
+          "display_name": "seed_transcribe_whole_qr_screen (_12_standard)",
+          "path": "img/240x240/seed_transcribe_whole_qr_screen__12_standard_240x240.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen__24_compact",
+          "display_name": "seed_transcribe_whole_qr_screen (_24_compact)",
+          "path": "img/240x240/seed_transcribe_whole_qr_screen__24_compact_240x240.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen__24_standard",
+          "display_name": "seed_transcribe_whole_qr_screen (_24_standard)",
+          "path": "img/240x240/seed_transcribe_whole_qr_screen__24_standard_240x240.png"
+        },
+        {
+          "name": "tools_address_explorer_address_list_screen",
+          "display_name": "tools_address_explorer_address_list_screen",
+          "path": "img/240x240/tools_address_explorer_address_list_screen_240x240.png"
         }
       ]
     },
@@ -569,29 +694,29 @@
           "path": "img/320x240/screensaver_screen_320x240.png"
         },
         {
-          "name": "splash_screen",
-          "display_name": "splash_screen",
-          "path": "img/320x240/splash_screen_320x240.png"
+          "name": "opening_splash_screen",
+          "display_name": "opening_splash_screen",
+          "path": "img/320x240/opening_splash_screen_320x240.png"
         },
         {
-          "name": "splash_screen__boot_logo",
-          "display_name": "splash_screen (_boot_logo)",
-          "path": "img/320x240/splash_screen__boot_logo_320x240.png"
+          "name": "opening_splash_screen__boot_logo",
+          "display_name": "opening_splash_screen (_boot_logo)",
+          "path": "img/320x240/opening_splash_screen__boot_logo_320x240.png"
         },
         {
-          "name": "splash_screen__cpython_no_partners",
-          "display_name": "splash_screen (_cpython_no_partners)",
-          "path": "img/320x240/splash_screen__cpython_no_partners_320x240.png"
+          "name": "opening_splash_screen__cpython_no_partners",
+          "display_name": "opening_splash_screen (_cpython_no_partners)",
+          "path": "img/320x240/opening_splash_screen__cpython_no_partners_320x240.png"
         },
         {
-          "name": "splash_screen__micropython_partners",
-          "display_name": "splash_screen (_micropython_partners)",
-          "path": "img/320x240/splash_screen__micropython_partners_320x240.png"
+          "name": "opening_splash_screen__micropython_partners",
+          "display_name": "opening_splash_screen (_micropython_partners)",
+          "path": "img/320x240/opening_splash_screen__micropython_partners_320x240.png"
         },
         {
-          "name": "splash_screen__micropython_no_partners",
-          "display_name": "splash_screen (_micropython_no_partners)",
-          "path": "img/320x240/splash_screen__micropython_no_partners_320x240.png"
+          "name": "opening_splash_screen__micropython_no_partners",
+          "display_name": "opening_splash_screen (_micropython_no_partners)",
+          "path": "img/320x240/opening_splash_screen__micropython_no_partners_320x240.png"
         },
         {
           "name": "large_icon_status_screen",
@@ -779,6 +904,31 @@
           "path": "img/320x240/qr_display_screen__animated_bbqr_320x240.png"
         },
         {
+          "name": "seed_transcribe_zoomed_qr_screen",
+          "display_name": "seed_transcribe_zoomed_qr_screen",
+          "path": "img/320x240/seed_transcribe_zoomed_qr_screen_320x240.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__24word",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_24word)",
+          "path": "img/320x240/seed_transcribe_zoomed_qr_screen__24word_320x240.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__compactseedqr",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_compactseedqr)",
+          "path": "img/320x240/seed_transcribe_zoomed_qr_screen__compactseedqr_320x240.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__finder_pattern",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_finder_pattern)",
+          "path": "img/320x240/seed_transcribe_zoomed_qr_screen__finder_pattern_320x240.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__alignment_pattern",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_alignment_pattern)",
+          "path": "img/320x240/seed_transcribe_zoomed_qr_screen__alignment_pattern_320x240.png"
+        },
+        {
           "name": "seed_finalize_screen",
           "display_name": "seed_finalize_screen",
           "path": "img/320x240/seed_finalize_screen_320x240.png"
@@ -789,14 +939,14 @@
           "path": "img/320x240/seed_finalize_screen__no_passphrase_320x240.png"
         },
         {
-          "name": "loading_screen",
-          "display_name": "loading_screen [animated]",
-          "path": "img/320x240/loading_screen_320x240.gif"
+          "name": "loading_spinner_screen",
+          "display_name": "loading_spinner_screen [animated]",
+          "path": "img/320x240/loading_spinner_screen_320x240.gif"
         },
         {
-          "name": "loading_screen__no_text",
-          "display_name": "loading_screen (_no_text) [animated]",
-          "path": "img/320x240/loading_screen__no_text_320x240.gif"
+          "name": "loading_spinner_screen__no_text",
+          "display_name": "loading_spinner_screen (_no_text) [animated]",
+          "path": "img/320x240/loading_spinner_screen__no_text_320x240.gif"
         },
         {
           "name": "psbt_overview_screen",
@@ -889,9 +1039,9 @@
           "path": "img/320x240/psbt_math_screen__self_transfer_320x240.png"
         },
         {
-          "name": "locale_picker_screen",
-          "display_name": "locale_picker_screen",
-          "path": "img/320x240/locale_picker_screen_320x240.png"
+          "name": "settings_locale_picker_screen",
+          "display_name": "settings_locale_picker_screen",
+          "path": "img/320x240/settings_locale_picker_screen_320x240.png"
         },
         {
           "name": "seed_export_xpub_details_screen",
@@ -932,6 +1082,106 @@
           "name": "seed_words_screen__last_page",
           "display_name": "seed_words_screen (_last_page)",
           "path": "img/320x240/seed_words_screen__last_page_320x240.png"
+        },
+        {
+          "name": "multisig_wallet_descriptor_screen",
+          "display_name": "multisig_wallet_descriptor_screen",
+          "path": "img/320x240/multisig_wallet_descriptor_screen_320x240.png"
+        },
+        {
+          "name": "multisig_wallet_descriptor_screen__3_of_5",
+          "display_name": "multisig_wallet_descriptor_screen (_3_of_5)",
+          "path": "img/320x240/multisig_wallet_descriptor_screen__3_of_5_320x240.png"
+        },
+        {
+          "name": "seed_sign_message_confirm_address_screen",
+          "display_name": "seed_sign_message_confirm_address_screen",
+          "path": "img/320x240/seed_sign_message_confirm_address_screen_320x240.png"
+        },
+        {
+          "name": "settings_qr_confirmation_screen",
+          "display_name": "settings_qr_confirmation_screen",
+          "path": "img/320x240/settings_qr_confirmation_screen_320x240.png"
+        },
+        {
+          "name": "settings_qr_confirmation_screen__not_persistent",
+          "display_name": "settings_qr_confirmation_screen (_not_persistent)",
+          "path": "img/320x240/settings_qr_confirmation_screen__not_persistent_320x240.png"
+        },
+        {
+          "name": "seed_sign_message_confirm_message_screen",
+          "display_name": "seed_sign_message_confirm_message_screen",
+          "path": "img/320x240/seed_sign_message_confirm_message_screen_320x240.png"
+        },
+        {
+          "name": "seed_sign_message_confirm_message_screen__short",
+          "display_name": "seed_sign_message_confirm_message_screen (_short)",
+          "path": "img/320x240/seed_sign_message_confirm_message_screen__short_320x240.png"
+        },
+        {
+          "name": "seed_address_verification_screen",
+          "display_name": "seed_address_verification_screen",
+          "path": "img/320x240/seed_address_verification_screen_320x240.png"
+        },
+        {
+          "name": "seed_address_verification_screen__nested_segwit",
+          "display_name": "seed_address_verification_screen (_nested_segwit)",
+          "path": "img/320x240/seed_address_verification_screen__nested_segwit_320x240.png"
+        },
+        {
+          "name": "seed_address_verification_screen__taproot",
+          "display_name": "seed_address_verification_screen (_taproot)",
+          "path": "img/320x240/seed_address_verification_screen__taproot_320x240.png"
+        },
+        {
+          "name": "seed_address_verification_screen__testnet",
+          "display_name": "seed_address_verification_screen (_testnet)",
+          "path": "img/320x240/seed_address_verification_screen__testnet_320x240.png"
+        },
+        {
+          "name": "seed_address_verification_screen__regtest",
+          "display_name": "seed_address_verification_screen (_regtest)",
+          "path": "img/320x240/seed_address_verification_screen__regtest_320x240.png"
+        },
+        {
+          "name": "tools_calc_final_word_screen",
+          "display_name": "tools_calc_final_word_screen",
+          "path": "img/320x240/tools_calc_final_word_screen_320x240.png"
+        },
+        {
+          "name": "tools_calc_final_word_screen__coin_flips",
+          "display_name": "tools_calc_final_word_screen (_coin_flips)",
+          "path": "img/320x240/tools_calc_final_word_screen__coin_flips_320x240.png"
+        },
+        {
+          "name": "tools_calc_final_word_done_screen",
+          "display_name": "tools_calc_final_word_done_screen",
+          "path": "img/320x240/tools_calc_final_word_done_screen_320x240.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen",
+          "display_name": "seed_transcribe_whole_qr_screen",
+          "path": "img/320x240/seed_transcribe_whole_qr_screen_320x240.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen__12_standard",
+          "display_name": "seed_transcribe_whole_qr_screen (_12_standard)",
+          "path": "img/320x240/seed_transcribe_whole_qr_screen__12_standard_320x240.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen__24_compact",
+          "display_name": "seed_transcribe_whole_qr_screen (_24_compact)",
+          "path": "img/320x240/seed_transcribe_whole_qr_screen__24_compact_320x240.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen__24_standard",
+          "display_name": "seed_transcribe_whole_qr_screen (_24_standard)",
+          "path": "img/320x240/seed_transcribe_whole_qr_screen__24_standard_320x240.png"
+        },
+        {
+          "name": "tools_address_explorer_address_list_screen",
+          "display_name": "tools_address_explorer_address_list_screen",
+          "path": "img/320x240/tools_address_explorer_address_list_screen_320x240.png"
         }
       ]
     },
@@ -1036,29 +1286,29 @@
           "path": "img/480x320/screensaver_screen_480x320.png"
         },
         {
-          "name": "splash_screen",
-          "display_name": "splash_screen",
-          "path": "img/480x320/splash_screen_480x320.png"
+          "name": "opening_splash_screen",
+          "display_name": "opening_splash_screen",
+          "path": "img/480x320/opening_splash_screen_480x320.png"
         },
         {
-          "name": "splash_screen__boot_logo",
-          "display_name": "splash_screen (_boot_logo)",
-          "path": "img/480x320/splash_screen__boot_logo_480x320.png"
+          "name": "opening_splash_screen__boot_logo",
+          "display_name": "opening_splash_screen (_boot_logo)",
+          "path": "img/480x320/opening_splash_screen__boot_logo_480x320.png"
         },
         {
-          "name": "splash_screen__cpython_no_partners",
-          "display_name": "splash_screen (_cpython_no_partners)",
-          "path": "img/480x320/splash_screen__cpython_no_partners_480x320.png"
+          "name": "opening_splash_screen__cpython_no_partners",
+          "display_name": "opening_splash_screen (_cpython_no_partners)",
+          "path": "img/480x320/opening_splash_screen__cpython_no_partners_480x320.png"
         },
         {
-          "name": "splash_screen__micropython_partners",
-          "display_name": "splash_screen (_micropython_partners)",
-          "path": "img/480x320/splash_screen__micropython_partners_480x320.png"
+          "name": "opening_splash_screen__micropython_partners",
+          "display_name": "opening_splash_screen (_micropython_partners)",
+          "path": "img/480x320/opening_splash_screen__micropython_partners_480x320.png"
         },
         {
-          "name": "splash_screen__micropython_no_partners",
-          "display_name": "splash_screen (_micropython_no_partners)",
-          "path": "img/480x320/splash_screen__micropython_no_partners_480x320.png"
+          "name": "opening_splash_screen__micropython_no_partners",
+          "display_name": "opening_splash_screen (_micropython_no_partners)",
+          "path": "img/480x320/opening_splash_screen__micropython_no_partners_480x320.png"
         },
         {
           "name": "large_icon_status_screen",
@@ -1241,6 +1491,31 @@
           "path": "img/480x320/qr_display_screen__animated_bbqr_480x320.png"
         },
         {
+          "name": "seed_transcribe_zoomed_qr_screen",
+          "display_name": "seed_transcribe_zoomed_qr_screen",
+          "path": "img/480x320/seed_transcribe_zoomed_qr_screen_480x320.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__24word",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_24word)",
+          "path": "img/480x320/seed_transcribe_zoomed_qr_screen__24word_480x320.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__compactseedqr",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_compactseedqr)",
+          "path": "img/480x320/seed_transcribe_zoomed_qr_screen__compactseedqr_480x320.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__finder_pattern",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_finder_pattern)",
+          "path": "img/480x320/seed_transcribe_zoomed_qr_screen__finder_pattern_480x320.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__alignment_pattern",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_alignment_pattern)",
+          "path": "img/480x320/seed_transcribe_zoomed_qr_screen__alignment_pattern_480x320.png"
+        },
+        {
           "name": "seed_finalize_screen",
           "display_name": "seed_finalize_screen",
           "path": "img/480x320/seed_finalize_screen_480x320.png"
@@ -1251,14 +1526,14 @@
           "path": "img/480x320/seed_finalize_screen__no_passphrase_480x320.png"
         },
         {
-          "name": "loading_screen",
-          "display_name": "loading_screen [animated]",
-          "path": "img/480x320/loading_screen_480x320.gif"
+          "name": "loading_spinner_screen",
+          "display_name": "loading_spinner_screen [animated]",
+          "path": "img/480x320/loading_spinner_screen_480x320.gif"
         },
         {
-          "name": "loading_screen__no_text",
-          "display_name": "loading_screen (_no_text) [animated]",
-          "path": "img/480x320/loading_screen__no_text_480x320.gif"
+          "name": "loading_spinner_screen__no_text",
+          "display_name": "loading_spinner_screen (_no_text) [animated]",
+          "path": "img/480x320/loading_spinner_screen__no_text_480x320.gif"
         },
         {
           "name": "psbt_overview_screen",
@@ -1351,9 +1626,9 @@
           "path": "img/480x320/psbt_math_screen__self_transfer_480x320.png"
         },
         {
-          "name": "locale_picker_screen",
-          "display_name": "locale_picker_screen",
-          "path": "img/480x320/locale_picker_screen_480x320.png"
+          "name": "settings_locale_picker_screen",
+          "display_name": "settings_locale_picker_screen",
+          "path": "img/480x320/settings_locale_picker_screen_480x320.png"
         },
         {
           "name": "seed_export_xpub_details_screen",
@@ -1394,6 +1669,106 @@
           "name": "seed_words_screen__last_page",
           "display_name": "seed_words_screen (_last_page)",
           "path": "img/480x320/seed_words_screen__last_page_480x320.png"
+        },
+        {
+          "name": "multisig_wallet_descriptor_screen",
+          "display_name": "multisig_wallet_descriptor_screen",
+          "path": "img/480x320/multisig_wallet_descriptor_screen_480x320.png"
+        },
+        {
+          "name": "multisig_wallet_descriptor_screen__3_of_5",
+          "display_name": "multisig_wallet_descriptor_screen (_3_of_5)",
+          "path": "img/480x320/multisig_wallet_descriptor_screen__3_of_5_480x320.png"
+        },
+        {
+          "name": "seed_sign_message_confirm_address_screen",
+          "display_name": "seed_sign_message_confirm_address_screen",
+          "path": "img/480x320/seed_sign_message_confirm_address_screen_480x320.png"
+        },
+        {
+          "name": "settings_qr_confirmation_screen",
+          "display_name": "settings_qr_confirmation_screen",
+          "path": "img/480x320/settings_qr_confirmation_screen_480x320.png"
+        },
+        {
+          "name": "settings_qr_confirmation_screen__not_persistent",
+          "display_name": "settings_qr_confirmation_screen (_not_persistent)",
+          "path": "img/480x320/settings_qr_confirmation_screen__not_persistent_480x320.png"
+        },
+        {
+          "name": "seed_sign_message_confirm_message_screen",
+          "display_name": "seed_sign_message_confirm_message_screen",
+          "path": "img/480x320/seed_sign_message_confirm_message_screen_480x320.png"
+        },
+        {
+          "name": "seed_sign_message_confirm_message_screen__short",
+          "display_name": "seed_sign_message_confirm_message_screen (_short)",
+          "path": "img/480x320/seed_sign_message_confirm_message_screen__short_480x320.png"
+        },
+        {
+          "name": "seed_address_verification_screen",
+          "display_name": "seed_address_verification_screen",
+          "path": "img/480x320/seed_address_verification_screen_480x320.png"
+        },
+        {
+          "name": "seed_address_verification_screen__nested_segwit",
+          "display_name": "seed_address_verification_screen (_nested_segwit)",
+          "path": "img/480x320/seed_address_verification_screen__nested_segwit_480x320.png"
+        },
+        {
+          "name": "seed_address_verification_screen__taproot",
+          "display_name": "seed_address_verification_screen (_taproot)",
+          "path": "img/480x320/seed_address_verification_screen__taproot_480x320.png"
+        },
+        {
+          "name": "seed_address_verification_screen__testnet",
+          "display_name": "seed_address_verification_screen (_testnet)",
+          "path": "img/480x320/seed_address_verification_screen__testnet_480x320.png"
+        },
+        {
+          "name": "seed_address_verification_screen__regtest",
+          "display_name": "seed_address_verification_screen (_regtest)",
+          "path": "img/480x320/seed_address_verification_screen__regtest_480x320.png"
+        },
+        {
+          "name": "tools_calc_final_word_screen",
+          "display_name": "tools_calc_final_word_screen",
+          "path": "img/480x320/tools_calc_final_word_screen_480x320.png"
+        },
+        {
+          "name": "tools_calc_final_word_screen__coin_flips",
+          "display_name": "tools_calc_final_word_screen (_coin_flips)",
+          "path": "img/480x320/tools_calc_final_word_screen__coin_flips_480x320.png"
+        },
+        {
+          "name": "tools_calc_final_word_done_screen",
+          "display_name": "tools_calc_final_word_done_screen",
+          "path": "img/480x320/tools_calc_final_word_done_screen_480x320.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen",
+          "display_name": "seed_transcribe_whole_qr_screen",
+          "path": "img/480x320/seed_transcribe_whole_qr_screen_480x320.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen__12_standard",
+          "display_name": "seed_transcribe_whole_qr_screen (_12_standard)",
+          "path": "img/480x320/seed_transcribe_whole_qr_screen__12_standard_480x320.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen__24_compact",
+          "display_name": "seed_transcribe_whole_qr_screen (_24_compact)",
+          "path": "img/480x320/seed_transcribe_whole_qr_screen__24_compact_480x320.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen__24_standard",
+          "display_name": "seed_transcribe_whole_qr_screen (_24_standard)",
+          "path": "img/480x320/seed_transcribe_whole_qr_screen__24_standard_480x320.png"
+        },
+        {
+          "name": "tools_address_explorer_address_list_screen",
+          "display_name": "tools_address_explorer_address_list_screen",
+          "path": "img/480x320/tools_address_explorer_address_list_screen_480x320.png"
         }
       ]
     },
@@ -1498,29 +1873,29 @@
           "path": "img/800x480/screensaver_screen_800x480.png"
         },
         {
-          "name": "splash_screen",
-          "display_name": "splash_screen",
-          "path": "img/800x480/splash_screen_800x480.png"
+          "name": "opening_splash_screen",
+          "display_name": "opening_splash_screen",
+          "path": "img/800x480/opening_splash_screen_800x480.png"
         },
         {
-          "name": "splash_screen__boot_logo",
-          "display_name": "splash_screen (_boot_logo)",
-          "path": "img/800x480/splash_screen__boot_logo_800x480.png"
+          "name": "opening_splash_screen__boot_logo",
+          "display_name": "opening_splash_screen (_boot_logo)",
+          "path": "img/800x480/opening_splash_screen__boot_logo_800x480.png"
         },
         {
-          "name": "splash_screen__cpython_no_partners",
-          "display_name": "splash_screen (_cpython_no_partners)",
-          "path": "img/800x480/splash_screen__cpython_no_partners_800x480.png"
+          "name": "opening_splash_screen__cpython_no_partners",
+          "display_name": "opening_splash_screen (_cpython_no_partners)",
+          "path": "img/800x480/opening_splash_screen__cpython_no_partners_800x480.png"
         },
         {
-          "name": "splash_screen__micropython_partners",
-          "display_name": "splash_screen (_micropython_partners)",
-          "path": "img/800x480/splash_screen__micropython_partners_800x480.png"
+          "name": "opening_splash_screen__micropython_partners",
+          "display_name": "opening_splash_screen (_micropython_partners)",
+          "path": "img/800x480/opening_splash_screen__micropython_partners_800x480.png"
         },
         {
-          "name": "splash_screen__micropython_no_partners",
-          "display_name": "splash_screen (_micropython_no_partners)",
-          "path": "img/800x480/splash_screen__micropython_no_partners_800x480.png"
+          "name": "opening_splash_screen__micropython_no_partners",
+          "display_name": "opening_splash_screen (_micropython_no_partners)",
+          "path": "img/800x480/opening_splash_screen__micropython_no_partners_800x480.png"
         },
         {
           "name": "large_icon_status_screen",
@@ -1703,6 +2078,31 @@
           "path": "img/800x480/qr_display_screen__animated_bbqr_800x480.png"
         },
         {
+          "name": "seed_transcribe_zoomed_qr_screen",
+          "display_name": "seed_transcribe_zoomed_qr_screen",
+          "path": "img/800x480/seed_transcribe_zoomed_qr_screen_800x480.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__24word",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_24word)",
+          "path": "img/800x480/seed_transcribe_zoomed_qr_screen__24word_800x480.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__compactseedqr",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_compactseedqr)",
+          "path": "img/800x480/seed_transcribe_zoomed_qr_screen__compactseedqr_800x480.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__finder_pattern",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_finder_pattern)",
+          "path": "img/800x480/seed_transcribe_zoomed_qr_screen__finder_pattern_800x480.png"
+        },
+        {
+          "name": "seed_transcribe_zoomed_qr_screen__alignment_pattern",
+          "display_name": "seed_transcribe_zoomed_qr_screen (_alignment_pattern)",
+          "path": "img/800x480/seed_transcribe_zoomed_qr_screen__alignment_pattern_800x480.png"
+        },
+        {
           "name": "seed_finalize_screen",
           "display_name": "seed_finalize_screen",
           "path": "img/800x480/seed_finalize_screen_800x480.png"
@@ -1713,14 +2113,14 @@
           "path": "img/800x480/seed_finalize_screen__no_passphrase_800x480.png"
         },
         {
-          "name": "loading_screen",
-          "display_name": "loading_screen [animated]",
-          "path": "img/800x480/loading_screen_800x480.gif"
+          "name": "loading_spinner_screen",
+          "display_name": "loading_spinner_screen [animated]",
+          "path": "img/800x480/loading_spinner_screen_800x480.gif"
         },
         {
-          "name": "loading_screen__no_text",
-          "display_name": "loading_screen (_no_text) [animated]",
-          "path": "img/800x480/loading_screen__no_text_800x480.gif"
+          "name": "loading_spinner_screen__no_text",
+          "display_name": "loading_spinner_screen (_no_text) [animated]",
+          "path": "img/800x480/loading_spinner_screen__no_text_800x480.gif"
         },
         {
           "name": "psbt_overview_screen",
@@ -1813,9 +2213,9 @@
           "path": "img/800x480/psbt_math_screen__self_transfer_800x480.png"
         },
         {
-          "name": "locale_picker_screen",
-          "display_name": "locale_picker_screen",
-          "path": "img/800x480/locale_picker_screen_800x480.png"
+          "name": "settings_locale_picker_screen",
+          "display_name": "settings_locale_picker_screen",
+          "path": "img/800x480/settings_locale_picker_screen_800x480.png"
         },
         {
           "name": "seed_export_xpub_details_screen",
@@ -1856,6 +2256,106 @@
           "name": "seed_words_screen__last_page",
           "display_name": "seed_words_screen (_last_page)",
           "path": "img/800x480/seed_words_screen__last_page_800x480.png"
+        },
+        {
+          "name": "multisig_wallet_descriptor_screen",
+          "display_name": "multisig_wallet_descriptor_screen",
+          "path": "img/800x480/multisig_wallet_descriptor_screen_800x480.png"
+        },
+        {
+          "name": "multisig_wallet_descriptor_screen__3_of_5",
+          "display_name": "multisig_wallet_descriptor_screen (_3_of_5)",
+          "path": "img/800x480/multisig_wallet_descriptor_screen__3_of_5_800x480.png"
+        },
+        {
+          "name": "seed_sign_message_confirm_address_screen",
+          "display_name": "seed_sign_message_confirm_address_screen",
+          "path": "img/800x480/seed_sign_message_confirm_address_screen_800x480.png"
+        },
+        {
+          "name": "settings_qr_confirmation_screen",
+          "display_name": "settings_qr_confirmation_screen",
+          "path": "img/800x480/settings_qr_confirmation_screen_800x480.png"
+        },
+        {
+          "name": "settings_qr_confirmation_screen__not_persistent",
+          "display_name": "settings_qr_confirmation_screen (_not_persistent)",
+          "path": "img/800x480/settings_qr_confirmation_screen__not_persistent_800x480.png"
+        },
+        {
+          "name": "seed_sign_message_confirm_message_screen",
+          "display_name": "seed_sign_message_confirm_message_screen",
+          "path": "img/800x480/seed_sign_message_confirm_message_screen_800x480.png"
+        },
+        {
+          "name": "seed_sign_message_confirm_message_screen__short",
+          "display_name": "seed_sign_message_confirm_message_screen (_short)",
+          "path": "img/800x480/seed_sign_message_confirm_message_screen__short_800x480.png"
+        },
+        {
+          "name": "seed_address_verification_screen",
+          "display_name": "seed_address_verification_screen",
+          "path": "img/800x480/seed_address_verification_screen_800x480.png"
+        },
+        {
+          "name": "seed_address_verification_screen__nested_segwit",
+          "display_name": "seed_address_verification_screen (_nested_segwit)",
+          "path": "img/800x480/seed_address_verification_screen__nested_segwit_800x480.png"
+        },
+        {
+          "name": "seed_address_verification_screen__taproot",
+          "display_name": "seed_address_verification_screen (_taproot)",
+          "path": "img/800x480/seed_address_verification_screen__taproot_800x480.png"
+        },
+        {
+          "name": "seed_address_verification_screen__testnet",
+          "display_name": "seed_address_verification_screen (_testnet)",
+          "path": "img/800x480/seed_address_verification_screen__testnet_800x480.png"
+        },
+        {
+          "name": "seed_address_verification_screen__regtest",
+          "display_name": "seed_address_verification_screen (_regtest)",
+          "path": "img/800x480/seed_address_verification_screen__regtest_800x480.png"
+        },
+        {
+          "name": "tools_calc_final_word_screen",
+          "display_name": "tools_calc_final_word_screen",
+          "path": "img/800x480/tools_calc_final_word_screen_800x480.png"
+        },
+        {
+          "name": "tools_calc_final_word_screen__coin_flips",
+          "display_name": "tools_calc_final_word_screen (_coin_flips)",
+          "path": "img/800x480/tools_calc_final_word_screen__coin_flips_800x480.png"
+        },
+        {
+          "name": "tools_calc_final_word_done_screen",
+          "display_name": "tools_calc_final_word_done_screen",
+          "path": "img/800x480/tools_calc_final_word_done_screen_800x480.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen",
+          "display_name": "seed_transcribe_whole_qr_screen",
+          "path": "img/800x480/seed_transcribe_whole_qr_screen_800x480.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen__12_standard",
+          "display_name": "seed_transcribe_whole_qr_screen (_12_standard)",
+          "path": "img/800x480/seed_transcribe_whole_qr_screen__12_standard_800x480.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen__24_compact",
+          "display_name": "seed_transcribe_whole_qr_screen (_24_compact)",
+          "path": "img/800x480/seed_transcribe_whole_qr_screen__24_compact_800x480.png"
+        },
+        {
+          "name": "seed_transcribe_whole_qr_screen__24_standard",
+          "display_name": "seed_transcribe_whole_qr_screen (_24_standard)",
+          "path": "img/800x480/seed_transcribe_whole_qr_screen__24_standard_800x480.png"
+        },
+        {
+          "name": "tools_address_explorer_address_list_screen",
+          "display_name": "tools_address_explorer_address_list_screen",
+          "path": "img/800x480/tools_address_explorer_address_list_screen_800x480.png"
         }
       ]
     }
