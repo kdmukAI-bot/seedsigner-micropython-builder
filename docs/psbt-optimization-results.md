@@ -81,11 +81,11 @@ inflated 13→24. `set_root` is the built-in device-speed sanity check; compare 
 runs with comparable `set_root`. The harness now hard-resets before measuring
 (`--reset`), and medians (not mins) are reported.
 
-## Phase 3 — embit base58 / child-cache / tx-cache (upstream PR, NOT on device) — PREPARED
+## Phase 3 — embit base58 / child-cache / tx-cache (upstream PR, NOT on device) — COMMITTED, PR NOT OPENED
 
-Prepared on worktree branch `perf/psbt-parse-speedups` (base `master` == upstream);
-**not committed/pushed/opened** (awaits authorization; no Claude trailer). Durable
-patch: `docs/embit-phase3-psbt-parse-speedups.patch`; full write-up + commit plan:
+Committed (`cdc8be5`) + pushed to the bot fork `kdmukAI-bot/embit` branch
+`perf/psbt-parse-speedups` (base `master` == upstream); **PR not opened** (human opens
+it to `diybitcoinhardware/embit`; no Claude trailer). Write-up + commit plan:
 `docs/embit-phase3-pr-draft.md`.
 - **3.1** base58-per-node version check → version-set membership (the no-workaround win).
 - **3.2** memoize `HDKey.child`.
@@ -113,3 +113,14 @@ patch: `docs/embit-phase3-psbt-parse-speedups.patch`; full write-up + commit pla
 sdkconfigs (not just P4-43) to keep them link-clean. Only P4-43 has a `manifest.py`
 freezing `hmac.py`/`hashlib.py`, so only P4-43 actually routes embit → native from
 Python; the other three are bare dev boards (build-clean, no app).
+
+## Landed state (2026-07-08)
+
+- **builder** (this repo): branch `perf/psbt-parse-native-primitives` (native primitives
+  firmware + this harness/docs), pushed origin/gitlab/codeberg, **PR #25 → kdmukai open**.
+- **seedsigner**: the 2a/2b/2c change rides the mpy stack as the next contribution on the
+  integration tip — `integration/lvgl-mpy == feat/language-selection == 4f59d5e` on all
+  three mirrors (perf + the langpack session's work). No separate PR (the stack PRs later).
+- **embit**: `cdc8be5` on `kdmukAI-bot/embit` `perf/psbt-parse-speedups` (bot fork); PR not opened.
+- **Device**: P4 deployed with the tip app + pinned embit 0.8.0 (`import-smoke` PASS) and
+  booted (`--mode run`) — SeedSigner UI live on the display.

@@ -1,9 +1,9 @@
 # embit Phase-3 PR — PREPARED, DO NOT OPEN (draft for human review)
 
-> **Status (2026-07-08):** changes implemented + validated on a worktree branch;
-> **not committed, not pushed, PR not opened** (per the PSBT-optimization plan and
-> repo git discipline). The human opens the PR when ready. **No Claude co-author
-> trailer** (diybitcoinhardware ecosystem rule).
+> **Status (2026-07-08):** changes implemented + validated; **committed (`cdc8be5`) and
+> pushed to the bot fork `kdmukAI-bot/embit` branch `perf/psbt-parse-speedups`. PR NOT
+> opened** — the human opens it to `diybitcoinhardware/embit` when ready. **No Claude
+> co-author trailer** (diybitcoinhardware ecosystem rule).
 
 ## What & where
 - **Target upstream:** `diybitcoinhardware/embit`.
