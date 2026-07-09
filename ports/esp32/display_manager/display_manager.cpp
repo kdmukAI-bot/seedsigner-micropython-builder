@@ -30,7 +30,7 @@
 #include "locale_loader.h"    // ss_load_locale / ss_unload_locale (i18n font packs)
 #include "locale_picker.h"    // locale_picker_set_image_provider (endonym images)
 #include "overlay_manager.h"  // overlay_manager_init / _set_screensaver_timeout
-#include "seedsigner.h"       // splash_screen (boot_logo_only) for the C-boot logo
+#include "seedsigner.h"       // opening_splash_screen (boot_logo_only) for the C-boot logo
 
 static const char *TAG = "display_manager";
 
@@ -182,13 +182,13 @@ extern "C" void seedsigner_board_startup(void)
     /* First visible frame: the centered SeedSigner boot logo on black, rendered
      * BEFORE the backlight comes on so power-up feels instant (no flash of LVGL's
      * default white, no waiting on MicroPython/app startup). Reuses the canonical
-     * splash_screen in boot_logo_only mode, so the logo lands exactly where the
-     * app's OpeningSplash later animates from — a seamless boot->splash handoff
-     * (splash_screen relies on "the held C-boot logo is already there"). This
+     * opening_splash_screen in boot_logo_only mode, so the logo lands exactly where
+     * the app's OpeningSplash later animates from — a seamless boot->splash handoff
+     * (opening_splash_screen relies on "the held C-boot logo is already there"). This
      * fully replaces the earlier black / "device ready" frame. run_screen takes
      * the LVGL lock and swallows exceptions. */
     if (lvgl_disp) {
-        run_screen(splash_screen, (void *)"{\"boot_logo_only\": true}");
+        run_screen(opening_splash_screen, (void *)"{\"boot_logo_only\": true}");
     }
     /* Give LVGL time to flush the boot-logo frame before the backlight turns on. */
     vTaskDelay(pdMS_TO_TICKS(100));

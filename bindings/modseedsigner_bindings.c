@@ -60,7 +60,7 @@ void seedsigner_lvgl_on_button_selected(uint32_t index, const char *label) {
     seedsigner_result_enqueue(SEEDSIGNER_EVENT_BUTTON_SELECTED, index, label);
 }
 
-// Override the weak default in seedsigner.cpp: a text-entry screen (e.g.
+// Override the weak default in components.cpp: a text-entry screen (e.g.
 // seed_add_passphrase_screen) calls this on confirm with the entered text.
 // Route it through the same queue so one poll loop sees both the confirmed
 // text and a top-nav back-button press.
@@ -68,7 +68,7 @@ void seedsigner_lvgl_on_text_entered(const char *text) {
     seedsigner_result_enqueue(SEEDSIGNER_EVENT_TEXT_ENTERED, 0, text);
 }
 
-// Override the weak default in seedsigner.cpp: qr_display_screen calls this on exit
+// Override the weak default in components.cpp: qr_display_screen calls this on exit
 // with its final brightness (31..255). Route it through the same queue as a
 // 'qr_brightness' event (brightness carried in the index field) so one poll loop
 // sees the QR screen's exit and its brightness, letting the host persist
@@ -229,10 +229,12 @@ static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_main_menu_screen_obj,
 // showed the centered boot logo (boot_logo_only) at C boot, so the app typically
 // passes logo_already_shown=true and the animation continues from that position —
 // a seamless boot->splash handoff. Reports completion via the poll queue.
-static mp_obj_t mp_seedsigner_lvgl_splash_screen(size_t n_args, const mp_obj_t *args) {
-    return run_cfg_screen(splash_screen, "splash_screen", n_args, args);
+static mp_obj_t mp_seedsigner_lvgl_opening_splash_screen(size_t n_args, const mp_obj_t *args) {
+    // Canonical name after the split-seedsigner-screens reorg (was splash_screen); the
+    // shared app calls it by this name (see seedsigner controller.py/view.py).
+    return run_cfg_screen(opening_splash_screen, "opening_splash_screen", n_args, args);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_splash_screen_obj, 0, 1, mp_seedsigner_lvgl_splash_screen);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_opening_splash_screen_obj, 0, 1, mp_seedsigner_lvgl_opening_splash_screen);
 
 static mp_obj_t mp_seedsigner_lvgl_screensaver_screen(void) {
     const char *err = run_screen(screensaver_screen, NULL);
@@ -289,7 +291,7 @@ static mp_obj_t mp_seedsigner_lvgl_seed_finalize_screen(size_t n_args, const mp_
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_finalize_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_finalize_screen);
 
-// loading_screen(cfg={"text": "..."}) -> None. The animated "processing" spinner
+// loading_spinner_screen(cfg={"text": "..."}) -> None. The animated "processing" spinner
 // shown while the host runs a long, blocking task (PSBT parse/verify, seed gen).
 //
 // BEHAVIOR IS DIFFERENT from every other screen binding above — read before use:
@@ -320,10 +322,12 @@ static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_finalize_screen_
 //     never yields the FreeRTOS scheduler (a tight, lock-free C loop) can starve it;
 //     the self-driven timer is wall-clock clamped, so under load it visibly SLOWS
 //     rather than jumping. Ordinary Python-level long tasks yield and animate fine.
-static mp_obj_t mp_seedsigner_lvgl_loading_screen(size_t n_args, const mp_obj_t *args) {
-    return run_cfg_screen(loading_screen, "loading_screen", n_args, args);
+static mp_obj_t mp_seedsigner_lvgl_loading_spinner_screen(size_t n_args, const mp_obj_t *args) {
+    // Canonical name after the reorg (was loading_screen); the app calls
+    // _lv.loading_spinner_screen (see seedsigner gui/lvgl_screen_runner.py).
+    return run_cfg_screen(loading_spinner_screen, "loading_spinner_screen", n_args, args);
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_loading_screen_obj, 0, 1, mp_seedsigner_lvgl_loading_screen);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_loading_spinner_screen_obj, 0, 1, mp_seedsigner_lvgl_loading_spinner_screen);
 
 static mp_obj_t mp_seedsigner_lvgl_qr_display_screen(size_t n_args, const mp_obj_t *args) {
     // Static or animated QR. A static QR is fully described by the cfg; an animated
@@ -363,7 +367,7 @@ static MP_DEFINE_CONST_FUN_OBJ_0(seedsigner_lvgl_qr_display_is_tip_active_obj, m
 // seed_finalize_screen. The host owns all i18n (localized title + labels) and all
 // amount formatting (btc_amount is a pure renderer -- the two platforms can never
 // disagree on how an amount rounds). Per-screen cfg contracts are documented at each
-// function in seedsigner.cpp.
+// screen's own translation unit (screens/<name>_screen.cpp after the split reorg).
 
 static mp_obj_t mp_seedsigner_lvgl_psbt_overview_screen(size_t n_args, const mp_obj_t *args) {
     // "Review Transaction": the transaction-flow pictogram (every input -> a shared
@@ -395,6 +399,132 @@ static mp_obj_t mp_seedsigner_lvgl_psbt_math_screen(size_t n_args, const mp_obj_
     return run_cfg_screen(psbt_math_screen, "psbt_math_screen", n_args, args);
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_psbt_math_screen_obj, 0, 1, mp_seedsigner_lvgl_psbt_math_screen);
+
+// --- Remaining custom-body screens (batched native-screen bindings) ------------
+// LVGL ports of the last of SeedSigner's custom-body screens (multisig descriptor,
+// sign-message confirm, address verification, SeedQR transcribe overview, SettingsQR
+// import, calc-final-word, address-explorer list). All use the same dict-config shape
+// as button_list_screen: the Python runner passes a cfg dict, run_cfg_screen forwards
+// it as JSON, and the screen-side C++ validates + fills per-key defaults. Each is a
+// standard polled screen with a bottom-pinned button list, so button selection comes
+// back on the shared poll queue (on_button_selected), exactly like seed_finalize_screen.
+// The host owns all i18n (localized title + labels) and all string formatting. Per-screen
+// cfg contracts are documented in each screen's own translation unit
+// (screens/<name>_screen.cpp) and its seedsigner.h declaration.
+
+static mp_obj_t mp_seedsigner_lvgl_multisig_wallet_descriptor_screen(size_t n_args, const mp_obj_t *args) {
+    // Multisig wallet-descriptor review: the policy (m-of-n), the signing-key xpubs,
+    // and the space-joined cosigner fingerprints, over a bottom-pinned button list.
+    return run_cfg_screen(multisig_wallet_descriptor_screen, "multisig_wallet_descriptor_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_multisig_wallet_descriptor_screen_obj, 0, 1, mp_seedsigner_lvgl_multisig_wallet_descriptor_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_seed_address_verification_screen(size_t n_args, const mp_obj_t *args) {
+    // Brute-force address verification: the target address + its network, with an
+    // in-place "Checking address N..." progress line the host updates live via
+    // seed_address_verification_set_progress() while its background worker scans
+    // derivation indexes. Standard polled bottom list (host owns the worker + match).
+    return run_cfg_screen(seed_address_verification_screen, "seed_address_verification_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_address_verification_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_address_verification_screen);
+
+// seed_address_verification_set_progress(text: str) -> None. Push the host's already-
+// localized "Checking address N" text into the live seed_address_verification_screen's
+// progress line (the library holds no strings). Fire-and-forget, NOT polled; safe no-op
+// when no such screen is active -- the same host-driven live-push contract as
+// qr_display_set_frame(). See seedsigner.h.
+static mp_obj_t mp_seedsigner_lvgl_seed_address_verification_set_progress(mp_obj_t text_obj) {
+    seed_address_verification_set_progress(mp_obj_str_get_str(text_obj));
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(seedsigner_lvgl_seed_address_verification_set_progress_obj, mp_seedsigner_lvgl_seed_address_verification_set_progress);
+
+static mp_obj_t mp_seedsigner_lvgl_seed_sign_message_confirm_message_screen(size_t n_args, const mp_obj_t *args) {
+    // Sign-message flow: confirm the message text to be signed. cfg carries "message".
+    return run_cfg_screen(seed_sign_message_confirm_message_screen, "seed_sign_message_confirm_message_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_sign_message_confirm_message_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_sign_message_confirm_message_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_seed_sign_message_confirm_address_screen(size_t n_args, const mp_obj_t *args) {
+    // Sign-message flow: confirm the address (+ its derivation path) the message is
+    // signed for, over a bottom-pinned button list.
+    return run_cfg_screen(seed_sign_message_confirm_address_screen, "seed_sign_message_confirm_address_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_sign_message_confirm_address_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_sign_message_confirm_address_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_seed_transcribe_whole_qr_screen(size_t n_args, const mp_obj_t *args) {
+    // The "whole QR" overview step of the SeedQR hand-transcription flow: direct-draws
+    // the full SeedQR/CompactSeedQR grid (python-qrcode mask parity) with a pulsing
+    // orange WarningEdges border. cfg carries qr_data / qr_mode / data_encoding / border.
+    return run_cfg_screen(seed_transcribe_whole_qr_screen, "seed_transcribe_whole_qr_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_transcribe_whole_qr_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_transcribe_whole_qr_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_settings_qr_confirmation_screen(size_t n_args, const mp_obj_t *args) {
+    // SettingsQR import confirmation: the imported config_name + a status_message.
+    return run_cfg_screen(settings_qr_confirmation_screen, "settings_qr_confirmation_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_settings_qr_confirmation_screen_obj, 0, 1, mp_seedsigner_lvgl_settings_qr_confirmation_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_tools_calc_final_word_screen(size_t n_args, const mp_obj_t *args) {
+    // Tools > Calc final word: the "final word math" breakdown -- the user's entered
+    // entropy bits, the checksum bits (orange), and the merged final word over three
+    // centered monospace bit rows.
+    return run_cfg_screen(tools_calc_final_word_screen, "tools_calc_final_word_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_tools_calc_final_word_screen_obj, 0, 1, mp_seedsigner_lvgl_tools_calc_final_word_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_tools_calc_final_word_done_screen(size_t n_args, const mp_obj_t *args) {
+    // Tools > Calc final word: the done screen -- the computed final word, the resulting
+    // fingerprint, and the mnemonic word length, over a bottom-pinned button list.
+    return run_cfg_screen(tools_calc_final_word_done_screen, "tools_calc_final_word_done_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_tools_calc_final_word_done_screen_obj, 0, 1, mp_seedsigner_lvgl_tools_calc_final_word_done_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_tools_address_explorer_address_list_screen(size_t n_args, const mp_obj_t *args) {
+    // Address Explorer address list: a bottom-pinned, fixed-width (monospace) button
+    // list of derived addresses, each "{index}:{head}...{tail}" (the focused row reveals
+    // its full address); a trailing "Next N" button pages forward. cfg carries addresses
+    // / start_index / initial_selected_index.
+    return run_cfg_screen(tools_address_explorer_address_list_screen, "tools_address_explorer_address_list_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_tools_address_explorer_address_list_screen_obj, 0, 1, mp_seedsigner_lvgl_tools_address_explorer_address_list_screen);
+
+// --- Seed view-detail screens (batched native-screen bindings) -----------------
+// Implemented earlier (screens PR #56 seed words / xpub details / review passphrase,
+// PR #60 zoomed transcribe) but not yet bound. Same dict-config shape as
+// button_list_screen; standard polled screens returning on_button_selected. The app
+// calls each by its canonical name (see seedsigner views/seed_views.py).
+
+static mp_obj_t mp_seedsigner_lvgl_seed_words_screen(size_t n_args, const mp_obj_t *args) {
+    // The mnemonic word list (parity with Python SeedWordsScreen): a paged grid of the
+    // seed's BIP39 words with a bottom-pinned button list.
+    return run_cfg_screen(seed_words_screen, "seed_words_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_words_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_words_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_seed_export_xpub_details_screen(size_t n_args, const mp_obj_t *args) {
+    // Xpub export details (parity with Python SeedExportXpubDetailsScreen): the
+    // fingerprint, derivation path, and xpub over icon_text_line rows, bottom button list.
+    return run_cfg_screen(seed_export_xpub_details_screen, "seed_export_xpub_details_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_export_xpub_details_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_export_xpub_details_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_seed_review_passphrase_screen(size_t n_args, const mp_obj_t *args) {
+    // Review passphrase (parity with Python SeedReviewPassphraseScreen): the entered
+    // passphrase + resulting fingerprint, over a bottom-pinned button list.
+    return run_cfg_screen(seed_review_passphrase_screen, "seed_review_passphrase_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_review_passphrase_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_review_passphrase_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_seed_transcribe_zoomed_qr_screen(size_t n_args, const mp_obj_t *args) {
+    // Zoomed, pannable SeedQR transcription view (parity with Python
+    // SeedTranscribeSeedQRZoomedInScreen): renders the QR oversized and steps one A-F/1-6
+    // zone per joystick press / touch swipe (pan handled screen-side); exits via click / X
+    // -> on_button_selected. cfg: qr_data / qr_mode / num_modules / initial_zone_x/y / exit_text.
+    return run_cfg_screen(seed_transcribe_zoomed_qr_screen, "seed_transcribe_zoomed_qr_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_transcribe_zoomed_qr_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_transcribe_zoomed_qr_screen);
 
 static mp_obj_t mp_seedsigner_lvgl_poll_for_result(void) {
     if (s_result_count == 0) {
@@ -616,7 +746,7 @@ static bool mp_endonym_provider(const char *locale, const char *file,
 //
 // Selection comes back on the shared poll queue as a button_selected event whose
 // index is the row position — the host maps index -> the locale it placed there.
-static mp_obj_t mp_seedsigner_lvgl_locale_picker_screen(size_t n_args, const mp_obj_t *args) {
+static mp_obj_t mp_seedsigner_lvgl_settings_locale_picker_screen(size_t n_args, const mp_obj_t *args) {
     // Wire the endonym image provider to the staging dict (if any) BEFORE building
     // the screen, and tear it down after so the C side never keeps a dangling
     // pointer to this call's stack ctx / the Python dict.
@@ -624,7 +754,7 @@ static mp_obj_t mp_seedsigner_lvgl_locale_picker_screen(size_t n_args, const mp_
     bool provider_set = false;
     if (n_args >= 2 && args[1] != mp_const_none) {
         if (!mp_obj_is_type(args[1], &mp_type_dict)) {
-            mp_raise_TypeError(MP_ERROR_TEXT("locale_picker_screen endonym_images must be a dict"));
+            mp_raise_TypeError(MP_ERROR_TEXT("settings_locale_picker_screen endonym_images must be a dict"));
         }
         endonym_ctx.packs = args[1];
         dm_set_endonym_image_provider(mp_endonym_provider, &endonym_ctx);
@@ -639,13 +769,15 @@ static mp_obj_t mp_seedsigner_lvgl_locale_picker_screen(size_t n_args, const mp_
         if (!mp_obj_is_type(args[0], &mp_type_dict)) {
             vstr_clear(&json);
             if (provider_set) dm_set_endonym_image_provider(NULL, NULL);
-            mp_raise_msg(&mp_type_TypeError, MP_ERROR_TEXT("locale_picker_screen expects a dict"));
+            mp_raise_msg(&mp_type_TypeError, MP_ERROR_TEXT("settings_locale_picker_screen expects a dict"));
         }
         vstr_add_json_from_obj(&json, args[0]);
     } else {
         vstr_add_str(&json, "{}");
     }
-    const char *err = run_screen(locale_picker_screen, (void *)json.buf);
+    // Canonical name after the reorg (was locale_picker_screen); the app calls it by
+    // this name (see seedsigner views/view.py).
+    const char *err = run_screen(settings_locale_picker_screen, (void *)json.buf);
     vstr_clear(&json);
 
     // The picker fetched + copied every endonym during the build above, so the
@@ -658,7 +790,7 @@ static mp_obj_t mp_seedsigner_lvgl_locale_picker_screen(size_t n_args, const mp_
     }
     return mp_const_none;
 }
-static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_locale_picker_screen_obj, 0, 2, mp_seedsigner_lvgl_locale_picker_screen);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_settings_locale_picker_screen_obj, 0, 2, mp_seedsigner_lvgl_settings_locale_picker_screen);
 
 // --- Instrumentation ------------------------------------------------------
 // mem_stats() / get_memory_stats() -> dict. Reports the small internal LVGL
@@ -733,14 +865,14 @@ static const mp_rom_map_elem_t seedsigner_lvgl_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_list_available_locales), MP_ROM_PTR(&seedsigner_lvgl_list_available_locales_obj) },
     { MP_ROM_QSTR(MP_QSTR_register_pack_manifest), MP_ROM_PTR(&seedsigner_lvgl_register_pack_manifest_obj) },
     { MP_ROM_QSTR(MP_QSTR_clear_pack_manifests), MP_ROM_PTR(&seedsigner_lvgl_clear_pack_manifests_obj) },
-    { MP_ROM_QSTR(MP_QSTR_locale_picker_screen), MP_ROM_PTR(&seedsigner_lvgl_locale_picker_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_settings_locale_picker_screen), MP_ROM_PTR(&seedsigner_lvgl_settings_locale_picker_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_button_list_screen), MP_ROM_PTR(&seedsigner_lvgl_button_list_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_large_icon_status_screen), MP_ROM_PTR(&seedsigner_lvgl_large_icon_status_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_seed_add_passphrase_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_add_passphrase_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_keyboard_screen), MP_ROM_PTR(&seedsigner_lvgl_keyboard_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_seed_mnemonic_entry_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_mnemonic_entry_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_seed_finalize_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_finalize_screen_obj) },
-    { MP_ROM_QSTR(MP_QSTR_loading_screen), MP_ROM_PTR(&seedsigner_lvgl_loading_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_loading_spinner_screen), MP_ROM_PTR(&seedsigner_lvgl_loading_spinner_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_qr_display_screen), MP_ROM_PTR(&seedsigner_lvgl_qr_display_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_qr_display_set_frame), MP_ROM_PTR(&seedsigner_lvgl_qr_display_set_frame_obj) },
     { MP_ROM_QSTR(MP_QSTR_qr_display_is_tip_active), MP_ROM_PTR(&seedsigner_lvgl_qr_display_is_tip_active_obj) },
@@ -748,8 +880,22 @@ static const mp_rom_map_elem_t seedsigner_lvgl_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_psbt_address_details_screen), MP_ROM_PTR(&seedsigner_lvgl_psbt_address_details_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_psbt_change_details_screen), MP_ROM_PTR(&seedsigner_lvgl_psbt_change_details_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_psbt_math_screen), MP_ROM_PTR(&seedsigner_lvgl_psbt_math_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_multisig_wallet_descriptor_screen), MP_ROM_PTR(&seedsigner_lvgl_multisig_wallet_descriptor_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_seed_address_verification_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_address_verification_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_seed_address_verification_set_progress), MP_ROM_PTR(&seedsigner_lvgl_seed_address_verification_set_progress_obj) },
+    { MP_ROM_QSTR(MP_QSTR_seed_sign_message_confirm_message_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_sign_message_confirm_message_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_seed_sign_message_confirm_address_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_sign_message_confirm_address_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_seed_transcribe_whole_qr_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_transcribe_whole_qr_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_settings_qr_confirmation_screen), MP_ROM_PTR(&seedsigner_lvgl_settings_qr_confirmation_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_tools_calc_final_word_screen), MP_ROM_PTR(&seedsigner_lvgl_tools_calc_final_word_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_tools_calc_final_word_done_screen), MP_ROM_PTR(&seedsigner_lvgl_tools_calc_final_word_done_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_tools_address_explorer_address_list_screen), MP_ROM_PTR(&seedsigner_lvgl_tools_address_explorer_address_list_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_seed_words_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_words_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_seed_export_xpub_details_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_export_xpub_details_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_seed_review_passphrase_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_review_passphrase_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_seed_transcribe_zoomed_qr_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_transcribe_zoomed_qr_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_main_menu_screen), MP_ROM_PTR(&seedsigner_lvgl_main_menu_screen_obj) },
-    { MP_ROM_QSTR(MP_QSTR_splash_screen), MP_ROM_PTR(&seedsigner_lvgl_splash_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_opening_splash_screen), MP_ROM_PTR(&seedsigner_lvgl_opening_splash_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_screensaver_screen), MP_ROM_PTR(&seedsigner_lvgl_screensaver_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_poll_for_result), MP_ROM_PTR(&seedsigner_lvgl_poll_for_result_obj) },
     { MP_ROM_QSTR(MP_QSTR_clear_result_queue), MP_ROM_PTR(&seedsigner_lvgl_clear_result_queue_obj) },
