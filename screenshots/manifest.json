@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-09 16:40:45Z",
+  "generated_at": "2026-07-10 11:34:53Z",
   "resolutions": [
     {
       "width": 240,
@@ -590,6 +590,36 @@
           "name": "tools_address_explorer_address_list_screen",
           "display_name": "tools_address_explorer_address_list_screen",
           "path": "img/240x240/tools_address_explorer_address_list_screen_240x240.png"
+        },
+        {
+          "name": "reset_screen",
+          "display_name": "reset_screen",
+          "path": "img/240x240/reset_screen_240x240.png"
+        },
+        {
+          "name": "power_off_not_required_screen",
+          "display_name": "power_off_not_required_screen",
+          "path": "img/240x240/power_off_not_required_screen_240x240.png"
+        },
+        {
+          "name": "donate_screen",
+          "display_name": "donate_screen",
+          "path": "img/240x240/donate_screen_240x240.png"
+        },
+        {
+          "name": "psbt_op_return_screen",
+          "display_name": "psbt_op_return_screen",
+          "path": "img/240x240/psbt_op_return_screen_240x240.png"
+        },
+        {
+          "name": "psbt_op_return_screen__raw_hex",
+          "display_name": "psbt_op_return_screen (_raw_hex)",
+          "path": "img/240x240/psbt_op_return_screen__raw_hex_240x240.png"
+        },
+        {
+          "name": "io_test_screen",
+          "display_name": "io_test_screen",
+          "path": "img/240x240/io_test_screen_240x240.png"
         }
       ]
     },
@@ -1182,6 +1212,36 @@
           "name": "tools_address_explorer_address_list_screen",
           "display_name": "tools_address_explorer_address_list_screen",
           "path": "img/320x240/tools_address_explorer_address_list_screen_320x240.png"
+        },
+        {
+          "name": "reset_screen",
+          "display_name": "reset_screen",
+          "path": "img/320x240/reset_screen_320x240.png"
+        },
+        {
+          "name": "power_off_not_required_screen",
+          "display_name": "power_off_not_required_screen",
+          "path": "img/320x240/power_off_not_required_screen_320x240.png"
+        },
+        {
+          "name": "donate_screen",
+          "display_name": "donate_screen",
+          "path": "img/320x240/donate_screen_320x240.png"
+        },
+        {
+          "name": "psbt_op_return_screen",
+          "display_name": "psbt_op_return_screen",
+          "path": "img/320x240/psbt_op_return_screen_320x240.png"
+        },
+        {
+          "name": "psbt_op_return_screen__raw_hex",
+          "display_name": "psbt_op_return_screen (_raw_hex)",
+          "path": "img/320x240/psbt_op_return_screen__raw_hex_320x240.png"
+        },
+        {
+          "name": "io_test_screen",
+          "display_name": "io_test_screen",
+          "path": "img/320x240/io_test_screen_320x240.png"
         }
       ]
     },
@@ -1769,6 +1829,36 @@
           "name": "tools_address_explorer_address_list_screen",
           "display_name": "tools_address_explorer_address_list_screen",
           "path": "img/480x320/tools_address_explorer_address_list_screen_480x320.png"
+        },
+        {
+          "name": "reset_screen",
+          "display_name": "reset_screen",
+          "path": "img/480x320/reset_screen_480x320.png"
+        },
+        {
+          "name": "power_off_not_required_screen",
+          "display_name": "power_off_not_required_screen",
+          "path": "img/480x320/power_off_not_required_screen_480x320.png"
+        },
+        {
+          "name": "donate_screen",
+          "display_name": "donate_screen",
+          "path": "img/480x320/donate_screen_480x320.png"
+        },
+        {
+          "name": "psbt_op_return_screen",
+          "display_name": "psbt_op_return_screen",
+          "path": "img/480x320/psbt_op_return_screen_480x320.png"
+        },
+        {
+          "name": "psbt_op_return_screen__raw_hex",
+          "display_name": "psbt_op_return_screen (_raw_hex)",
+          "path": "img/480x320/psbt_op_return_screen__raw_hex_480x320.png"
+        },
+        {
+          "name": "io_test_screen",
+          "display_name": "io_test_screen",
+          "path": "img/480x320/io_test_screen_480x320.png"
         }
       ]
     },
@@ -2356,6 +2446,36 @@
           "name": "tools_address_explorer_address_list_screen",
           "display_name": "tools_address_explorer_address_list_screen",
           "path": "img/800x480/tools_address_explorer_address_list_screen_800x480.png"
+        },
+        {
+          "name": "reset_screen",
+          "display_name": "reset_screen",
+          "path": "img/800x480/reset_screen_800x480.png"
+        },
+        {
+          "name": "power_off_not_required_screen",
+          "display_name": "power_off_not_required_screen",
+          "path": "img/800x480/power_off_not_required_screen_800x480.png"
+        },
+        {
+          "name": "donate_screen",
+          "display_name": "donate_screen",
+          "path": "img/800x480/donate_screen_800x480.png"
+        },
+        {
+          "name": "psbt_op_return_screen",
+          "display_name": "psbt_op_return_screen",
+          "path": "img/800x480/psbt_op_return_screen_800x480.png"
+        },
+        {
+          "name": "psbt_op_return_screen__raw_hex",
+          "display_name": "psbt_op_return_screen (_raw_hex)",
+          "path": "img/800x480/psbt_op_return_screen__raw_hex_800x480.png"
+        },
+        {
+          "name": "io_test_screen",
+          "display_name": "io_test_screen",
+          "path": "img/800x480/io_test_screen_800x480.png"
         }
       ]
     }
