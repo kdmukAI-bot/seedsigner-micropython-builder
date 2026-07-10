@@ -124,6 +124,35 @@ real guarantee is component absence + zero placed members + boot-log proof.
 `MICROPY_PY_NETWORK || MICROPY_PY_SOCKET_EVENTS`) → #3 clean → #4 (running) project-level
 exclusion + tinyusb patch + C6 hold-in-reset.
 
+### P1 runtime validation — PASSED on device (2026-07-10)
+
+**Boot-log proof (timestamped serial capture, stripped firmware):**
+- `I (1873) board: Radio co-processor held in reset (GPIO54 low)` — C6 hold active, board init unaffected.
+- **Zero** wifi/phy/netif/lwip/BT/SDIO-slave/esp-hosted init lines anywhere in the boot.
+- Healthy bring-up end-to-end: PSRAM 32MB@200MHz memtest OK (1.72 s), ST7701 display, GT911 touch, LVGL task, SD VDD, locale set, app renders.
+
+**Launch timing (same video/luma method as baseline): 10.95 s → 10.08 s (−0.9 s from P1 alone).**
+Serial cross-check: first LVGL flush stats at device-clock 9.73 s (baseline 10.54 s).
+
+**Device regression sweep (all PASS):**
+| Test | Method | Result |
+|---|---|---|
+| Boot → Home | webcam | PASS |
+| Network absent (Python) | `import network/socket/espnow/bluetooth/ssl` | all ImportError (PASS) |
+| SD card | `/sd` listing (22 lang-pack dirs) + file read | PASS |
+| Native crypto | ripemd160+sha512 KATs, native `secp256k1`, bip32 root fp `73c5da0a`, sign/verify | PASS |
+| PSBT parse | `PSBTParser` on regtest 2-of-3 p2wsh 3-input fixture (policy/amounts correct, 1.20 s) | PASS |
+| PSBT sign | `psbt.sign_with(root)` → 3 sigs added, 652 ms | PASS |
+| Camera | `camera_scanner` start → 8 s live preview session (scan UI renders, webcam-verified) → stop | PASS |
+| i18n | `ru` pack staged from SD → `load_locale` → Cyrillic screen rendered (webcam-verified: "Настройки/Подпись/Кошелёк/Сид-фраза") | PASS |
+| Touch | GT911 detected + initialized in boot log | PASS (init-level) |
+
+Caveats: camera QR *decode* not exercised (nothing QR-like in the P4 camera's view — dark room; pipeline
+start/stream/UI/stop all verified). Physical touch *taps* can't be automated — GT911 init + config verified.
+
+**P1 status: COMPLETE** — static proof + runtime proof + regression on device. Commits `a85ffc0`
+(strip), `b39c7e2` (board_common bump; submodule commit `2dc1f44` on `feat/radio-coproc-hold-in-reset`).
+
 ## Decisions made
 
 1. **Screens submodule bumped to upstream main 267cc64** as branch's first commit (user merged screens PRs; keeps regression surface current). Build-verified.
