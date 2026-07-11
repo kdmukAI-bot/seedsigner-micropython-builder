@@ -219,3 +219,13 @@ CONFIG_ETH_USE_SPI_ETHERNET=n
 # hashlib.new("ripemd160") to it. Required to link bindings/modhashlibext.c's
 # ripemd160 type (mbedtls_ripemd160_*).
 CONFIG_MBEDTLS_RIPEMD160_C=y
+
+# ── cUR fountain XOR: ESP32-P4 128-bit SIMD ────────────────────────────────
+# Route the BC-UR fountain-code XOR reduction through the ESP32-P4 PIE (xesppie)
+# 128-bit vector unit (~16x over the byte loop, ~4x over the portable word-wise
+# path on aligned runs; unaligned data falls back transparently). cUR 16-byte-
+# aligns its buffer allocations when this is set so the vector path engages,
+# including on the PSRAM-routed fountain buffers (UR_ALLOC_PSRAM stays default-on).
+# ESP32-P4 only (Kconfig depends on IDF_TARGET_ESP32P4, default n). Tip from
+# odudex (cUR upstream); needs a cUR pin carrying the SIMD path (>= main 0ed276b).
+CONFIG_UR_XOR_ESP32P4_SIMD=y

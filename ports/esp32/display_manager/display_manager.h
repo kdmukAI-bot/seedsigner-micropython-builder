@@ -110,6 +110,15 @@ void dm_mem_stats(dm_mem_stats_t *out);
  * stay valid and free correctly). Wraps lv_rb_psram_set_enabled(). */
 void dm_set_cache_psram(bool enabled);
 
+/* Active display-profile size in pixels: writes active_profile().width to *width and
+ * active_profile().height to *height.
+ * A plain-C getter over the render layer's active_profile() so the MicroPython binding
+ * can report the real panel dimensions without pulling gui_constants.h (C++) into its
+ * QSTR-scan include set — the same header-hiding split as dm_mem_stats. The profile is
+ * fixed at boot and immutable after, so no LVGL-port lock is needed. Each pointer is
+ * written only when non-NULL (safe to pass NULL for a dimension you don't want). */
+void dm_display_size(int *width, int *height);
+
 #ifdef __cplusplus
 }
 #endif

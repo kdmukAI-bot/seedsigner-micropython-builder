@@ -39,3 +39,29 @@ module("hashlib.py", base_path="$(MPY_DIR)/../../../deps/third-party")
 # platforms. See deps/third-party/seedsigner_lvgl_screens.py + bindings/modseedsigner_bindings.c
 # (the module rename to `_seedsigner_lvgl_screens`).
 module("seedsigner_lvgl_screens.py", base_path="$(MPY_DIR)/../../../deps/third-party")
+
+# ---- Frozen app tree (default for all dev boards) ----
+# Freeze the full SeedSigner app + embit into the firmware. On this VFS a
+# successful stat costs ~60-70 ms and a trivial import ~130 ms, so a ~40-module
+# boot import chain is ~5-6 s of pure VFS overhead; frozen imports skip the VFS
+# entirely (measured on P4-43: import seedsigner.controller 5921 ms -> ~194 ms).
+# `.frozen` precedes `/lib` in sys.path, so this shadows any /lib copy with no
+# boot.py change — the deploy harness need only write /main.py. Package
+# resolution is ATOMIC per top-level name, so a dev override of a frozen
+# `seedsigner` must overlay the WHOLE package, not single files.
+# `seedsigner/resources` is data (never imported) and stays off the freeze / on
+# the microSD. The sources are staged into <repo>/frozen_app by hand (the build
+# container only mounts this repo). seedsigner_frozen_build is the on-device
+# proof marker. See docs/knowledge/esp32-p4-vfs-import-overhead.md.
+#
+# frozen_app/ is gitignored and staged before a dev/deploy build, so a clean
+# checkout that does NOT stage it -- e.g. CI, which only verifies the firmware
+# compiles -- has nothing to freeze. Guard the freeze: package() chdirs into
+# base_path and raises FileNotFoundError when frozen_app is absent, so catch it
+# and build without the frozen tree (the app is VFS-deployed there instead).
+try:
+    package("seedsigner", base_path="$(MPY_DIR)/../../../frozen_app")
+    package("embit", base_path="$(MPY_DIR)/../../../frozen_app")
+    module("seedsigner_frozen_build.py", base_path="$(MPY_DIR)/../../../frozen_app")
+except OSError:
+    pass  # frozen_app not staged (e.g. CI) -> build without the frozen app tree

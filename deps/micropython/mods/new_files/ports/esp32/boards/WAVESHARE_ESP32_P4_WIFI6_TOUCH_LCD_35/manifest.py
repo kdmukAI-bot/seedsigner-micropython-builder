@@ -53,6 +53,15 @@ module("seedsigner_lvgl_screens.py", base_path="$(MPY_DIR)/../../../deps/third-p
 # the microSD. The sources are staged into <repo>/frozen_app by hand (the build
 # container only mounts this repo). seedsigner_frozen_build is the on-device
 # proof marker. See docs/knowledge/esp32-p4-vfs-import-overhead.md.
-package("seedsigner", base_path="$(MPY_DIR)/../../../frozen_app")
-package("embit", base_path="$(MPY_DIR)/../../../frozen_app")
-module("seedsigner_frozen_build.py", base_path="$(MPY_DIR)/../../../frozen_app")
+#
+# frozen_app/ is gitignored and staged before a dev/deploy build, so a clean
+# checkout that does NOT stage it -- e.g. CI, which only verifies the firmware
+# compiles -- has nothing to freeze. Guard the freeze: package() chdirs into
+# base_path and raises FileNotFoundError when frozen_app is absent, so catch it
+# and build without the frozen tree (the app is VFS-deployed there instead).
+try:
+    package("seedsigner", base_path="$(MPY_DIR)/../../../frozen_app")
+    package("embit", base_path="$(MPY_DIR)/../../../frozen_app")
+    module("seedsigner_frozen_build.py", base_path="$(MPY_DIR)/../../../frozen_app")
+except OSError:
+    pass  # frozen_app not staged (e.g. CI) -> build without the frozen app tree

@@ -95,10 +95,12 @@ def _listdir(path):
 
 
 def _active_height():
-    """Active display-profile height (240/320/480), for choosing the endonym image.
-    Read from the C module's own profile report -- no extra native binding needed."""
+    """Active display-profile height (240/320/480), for choosing the endonym image
+    and for the animated-QR density lookup. Read straight from the C display profile
+    via display_size(), so it resolves the real panel BEFORE any locale load (the
+    older list_available_locales() path needs the locale table to be populated)."""
     try:
-        return json.loads(_c.list_available_locales())["profile"]["height"]
+        return _c.display_size()[1]
     except Exception:
         return 480
 

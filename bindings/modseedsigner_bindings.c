@@ -21,6 +21,7 @@ typedef enum {
     SEEDSIGNER_EVENT_BUTTON_SELECTED,
     SEEDSIGNER_EVENT_TEXT_ENTERED,
     SEEDSIGNER_EVENT_QR_BRIGHTNESS,
+    SEEDSIGNER_EVENT_QR_DENSITY,
 } seedsigner_result_kind_t;
 
 typedef struct {
@@ -75,6 +76,24 @@ void seedsigner_lvgl_on_text_entered(const char *text) {
 // SETTING__QR_BRIGHTNESS.
 void seedsigner_lvgl_on_qr_brightness(uint8_t brightness) {
     seedsigner_result_enqueue(SEEDSIGNER_EVENT_QR_BRIGHTNESS, brightness, NULL);
+}
+
+// Override the weak default in qr_display_screen.cpp: the animated-QR density slider
+// reports its selected pixels-per-module (3..6) here whenever the user changes it.
+// Route it through the same queue as a 'qr_density' event (px/module carried in the
+// index field, the same slot brightness uses) so one poll loop sees the QR screen's
+// exit, its final brightness, AND each density change. The binding just marshals the
+// int through: the host maps (vertical_resolution, px_per_module) -> max_fragment_len
+// via its own density table (seedsigner/tools/qr_density_worksheet.py), rebuilds the
+// UR encoder, and restarts the fountain (re-pushing frames via qr_display_set_frame).
+// The C side never needs the table.
+//
+// NB: the screens library adds the weak seedsigner_lvgl_on_qr_density() decl + fire
+// site as part of the QR density UI redesign; until that submodule bump lands this
+// strong override is simply never called (harmless dead code). Signature is locked by
+// the cross-repo spec: uint8_t px/module in {3,4,5,6}.
+void seedsigner_lvgl_on_qr_density(uint8_t px_per_module) {
+    seedsigner_result_enqueue(SEEDSIGNER_EVENT_QR_DENSITY, px_per_module, NULL);
 }
 
 static void vstr_add_json_escaped(vstr_t *v, const char *src, size_t len) {
@@ -542,6 +561,7 @@ static mp_obj_t mp_seedsigner_lvgl_poll_for_result(void) {
     switch (ev.kind) {
         case SEEDSIGNER_EVENT_TEXT_ENTERED:  kind = MP_QSTR_text_entered; break;
         case SEEDSIGNER_EVENT_QR_BRIGHTNESS: kind = MP_QSTR_qr_brightness; break;
+        case SEEDSIGNER_EVENT_QR_DENSITY:    kind = MP_QSTR_qr_density; break;
         default:                             kind = MP_QSTR_button_selected; break;
     }
 
@@ -858,6 +878,24 @@ static mp_obj_t mp_seedsigner_lvgl_set_cache_psram(mp_obj_t enabled_obj) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_1(seedsigner_lvgl_set_cache_psram_obj, mp_seedsigner_lvgl_set_cache_psram);
 
+// display_size() -> (width, height). The active display profile's pixel dimensions
+// (e.g. (480, 480) on the P4 4.3", (320, 480) on a 3.5"). Available before any locale
+// load. The animated-QR density lookup keys on the REAL panel height, but the app's
+// LvglRenderer.canvas_height otherwise falls back to a static 240 default on this path;
+// this getter lets the host resolve the true panel so the density table picks the right
+// row. The C++ active_profile() lives behind dm_display_size() (display_manager.cpp) so
+// gui_constants.h (C++) stays out of this file's QSTR-scan include set -- same split as
+// dm_mem_stats.
+static mp_obj_t mp_seedsigner_lvgl_display_size(void) {
+    int w = 0, h = 0;
+    dm_display_size(&w, &h);
+    mp_obj_t out[2];
+    out[0] = mp_obj_new_int(w);
+    out[1] = mp_obj_new_int(h);
+    return mp_obj_new_tuple(2, out);
+}
+static MP_DEFINE_CONST_FUN_OBJ_0(seedsigner_lvgl_display_size_obj, mp_seedsigner_lvgl_display_size);
+
 static const mp_rom_map_elem_t seedsigner_lvgl_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR__seedsigner_lvgl_screens) },
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&seedsigner_lvgl_init_obj) },
@@ -905,6 +943,7 @@ static const mp_rom_map_elem_t seedsigner_lvgl_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_mem_stats), MP_ROM_PTR(&seedsigner_lvgl_mem_stats_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_memory_stats), MP_ROM_PTR(&seedsigner_lvgl_mem_stats_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_cache_psram), MP_ROM_PTR(&seedsigner_lvgl_set_cache_psram_obj) },
+    { MP_ROM_QSTR(MP_QSTR_display_size), MP_ROM_PTR(&seedsigner_lvgl_display_size_obj) },
 };
 static MP_DEFINE_CONST_DICT(seedsigner_lvgl_module_globals, seedsigner_lvgl_module_globals_table);
 
