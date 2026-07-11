@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11 17:07:28Z",
+  "generated_at": "2026-07-11 23:12:26Z",
   "resolutions": [
     {
       "width": 240,
@@ -295,6 +295,11 @@
           "name": "qr_display_screen",
           "display_name": "qr_display_screen",
           "path": "img/240x240/qr_display_screen_240x240.png"
+        },
+        {
+          "name": "qr_display_screen__animated_psbt_density",
+          "display_name": "qr_display_screen (_animated_psbt_density)",
+          "path": "img/240x240/qr_display_screen__animated_psbt_density_240x240.png"
         },
         {
           "name": "qr_display_screen__compactseedqr",
@@ -919,6 +924,11 @@
           "path": "img/320x240/qr_display_screen_320x240.png"
         },
         {
+          "name": "qr_display_screen__animated_psbt_density",
+          "display_name": "qr_display_screen (_animated_psbt_density)",
+          "path": "img/320x240/qr_display_screen__animated_psbt_density_320x240.png"
+        },
+        {
           "name": "qr_display_screen__compactseedqr",
           "display_name": "qr_display_screen (_compactseedqr)",
           "path": "img/320x240/qr_display_screen__compactseedqr_320x240.png"
@@ -1536,6 +1546,11 @@
           "path": "img/480x320/qr_display_screen_480x320.png"
         },
         {
+          "name": "qr_display_screen__animated_psbt_density",
+          "display_name": "qr_display_screen (_animated_psbt_density)",
+          "path": "img/480x320/qr_display_screen__animated_psbt_density_480x320.png"
+        },
+        {
           "name": "qr_display_screen__compactseedqr",
           "display_name": "qr_display_screen (_compactseedqr)",
           "path": "img/480x320/qr_display_screen__compactseedqr_480x320.png"
@@ -2151,6 +2166,11 @@
           "name": "qr_display_screen",
           "display_name": "qr_display_screen",
           "path": "img/800x480/qr_display_screen_800x480.png"
+        },
+        {
+          "name": "qr_display_screen__animated_psbt_density",
+          "display_name": "qr_display_screen (_animated_psbt_density)",
+          "path": "img/800x480/qr_display_screen__animated_psbt_density_800x480.png"
         },
         {
           "name": "qr_display_screen__compactseedqr",
