@@ -391,3 +391,19 @@ extern "C" void dm_set_cache_psram(bool enabled)
     ESP_LOGI(TAG, "rb-cache PSRAM routing %s via dm_set_cache_psram",
              enabled ? "ENABLED" : "DISABLED");
 }
+
+/* Active display-profile pixel size, straight from active_profile() (gui_constants.h).
+ * The profile is chosen once at init and immutable after, so this needs no LVGL-port
+ * lock — unlike the locale-table-reading dm_* wrappers above. Keeping the C++
+ * active_profile() dependency here lets the MicroPython binding expose display_size()
+ * without gui_constants.h leaking into its QSTR-scan include set. */
+extern "C" void dm_display_size(int *width, int *height)
+{
+    const DisplayProfile &profile = active_profile();
+    if (width) {
+        *width = profile.width;
+    }
+    if (height) {
+        *height = profile.height;
+    }
+}
