@@ -41,8 +41,9 @@ extern "C" {
 #include "esp_lvgl_port.h"
 #include "lvgl.h"
 
-#include "camera_preview_overlay.h"  /* seedsigner-lvgl-screens overlay (LVGL) */
-#include "components.h"              /* seedsigner-lvgl-screens back_button() */
+#include "camera_preview_overlay.h"     /* seedsigner-lvgl-screens landscape overlay (LVGL) */
+#include "camera_preview_pillarboxed.h" /* seedsigner-lvgl-screens portrait-mount pillarboxed chrome */
+#include "components.h"                 /* seedsigner-lvgl-screens back_button() */
 
 /* Portrait scan display (Phase 1): on the ST7701/DSI 4.3, a QR-scan session
  * renders the SCAN SCREEN in native portrait (no per-frame 90° rotate) so the
@@ -63,27 +64,17 @@ static lv_obj_t                  *s_screen   = NULL;
 static bool                       s_running  = false;
 
 #if SCAN_USES_PORTRAIT
-/* Portrait scan session state + a minimal C-side letterbox overlay (progress bar
- * + percent + a touch back button). Interim: text/chevron are NOT pre-rotated, so
- * they read sideways in the landscape-mounted view — the real pre-rotated letterbox
- * overlay is Phase 4 (screens repo). The back button's WIRING is production-final,
- * though: it reuses the screens back_button() factory, so a tap posts the same
- * SEEDSIGNER_RET_BACK_BUTTON the landscape overlay does, which the app's scan-cancel
- * path already drains. */
+/* Portrait scan session state + the pillarboxed camera-preview chrome (progress bar,
+ * status dot, percent, back button) drawn in the letterbox strips beside the camera
+ * square. The chrome is the portable seedsigner-lvgl-screens camera_preview_pillarboxed
+ * module: authored in native portrait so the physical mount presents it as landscape
+ * (pre-rotated percent; a CHEVRON_DOWN back button that reads "left"). The back button
+ * reuses the screens factory, so a tap posts the same SEEDSIGNER_RET_BACK_BUTTON the
+ * app's scan-cancel path drains. */
 #define PV_SQ       (BOARD_LCD_H_RES)                 /* 480 square side       */
 #define PV_SY       ((BOARD_LCD_V_RES - PV_SQ) / 2)   /* 160 square top row    */
-/* Progress bar lives in the TOP letterbox (portrait y<160), which presents as
- * the RIGHT side gutter in the landscape-mounted view. Portrait x maps to the
- * landscape vertical (x=0→top, x=480→bottom), so the fill is anchored at the
- * high-x end (landscape bottom) and grows toward x=0 → UPWARD in landscape. */
-#define PV_BAR_LO   60      /* portrait x, landscape TOP                  */
-#define PV_BAR_HI   420     /* portrait x, landscape BOTTOM (fill anchor) */
-#define PV_BAR_LEN  (PV_BAR_HI - PV_BAR_LO)  /* 360 */
-#define PV_BAR_Y    66      /* portrait y within the top letterbox        */
-#define PV_BAR_H    30
-static bool      s_scan_portrait = false;
-static lv_obj_t *s_pv_ind = NULL;   /* progress indicator (grows with %) */
-static lv_obj_t *s_pv_pct = NULL;   /* percent label                    */
+static bool                          s_scan_portrait = false;
+static camera_preview_pillarboxed_t *s_pv_chrome     = NULL;
 
 /* One-time black-square clear: the FB holds the stale rotated landscape frame
  * until the first camera frame (~500 ms warmup); the reserved-rect keeps LVGL
@@ -100,72 +91,45 @@ static void cam_portrait_black_clear(void)
     }
 }
 
-/* Letterbox chrome on s_screen (already resized to the portrait panel). Each
- * letterbox strip gets an opaque bg obj that self-invalidates (so it paints
- * despite the reserved-rect clipping a full-screen invalidation to one side).
- * Caller holds the LVGL port lock. */
-static void cam_portrait_overlay_create(lv_obj_t *scr)
+/* Build the pillarboxed chrome on s_screen (already resized to the portrait panel). The
+ * module paints the letterbox strips, the vertical progress bar, the status dot, the
+ * pre-rotated percent, and the CHEVRON_DOWN back button — all authored in portrait, sized
+ * from the camera square + the live display resolution. Caller holds the LVGL port lock. */
+static void cam_portrait_chrome_create(lv_obj_t *scr)
 {
-    for (int i = 0; i < 2; i++) {
-        lv_obj_t *bg = lv_obj_create(scr);
-        lv_obj_remove_style_all(bg);
-        lv_obj_set_size(bg, PV_SQ, PV_SY);
-        lv_obj_set_pos(bg, 0, i ? (PV_SY + PV_SQ) : 0);
-        lv_obj_set_style_bg_color(bg, lv_color_black(), 0);
-        lv_obj_set_style_bg_opa(bg, LV_OPA_COVER, 0);
-    }
-    /* TOP letterbox → landscape RIGHT gutter: progress track + fill + percent. */
-    lv_obj_t *track = lv_obj_create(scr);
-    lv_obj_remove_style_all(track);
-    lv_obj_set_size(track, PV_BAR_LEN, PV_BAR_H);
-    lv_obj_set_pos(track, PV_BAR_LO, PV_BAR_Y);
-    lv_obj_set_style_bg_color(track, lv_color_hex(0x303840), 0);
-    lv_obj_set_style_bg_opa(track, LV_OPA_COVER, 0);
-    lv_obj_set_style_radius(track, 6, 0);
-
-    s_pv_ind = lv_obj_create(scr);
-    lv_obj_remove_style_all(s_pv_ind);
-    lv_obj_set_size(s_pv_ind, 1, PV_BAR_H);
-    lv_obj_set_pos(s_pv_ind, PV_BAR_HI - 1, PV_BAR_Y);  /* anchored at landscape bottom */
-    lv_obj_set_style_bg_color(s_pv_ind, lv_color_hex(0x00E676), 0);
-    lv_obj_set_style_bg_opa(s_pv_ind, LV_OPA_COVER, 0);
-    lv_obj_set_style_radius(s_pv_ind, 6, 0);
-
-    s_pv_pct = lv_label_create(scr);
-    lv_label_set_text(s_pv_pct, "0%");
-    lv_obj_set_style_text_color(s_pv_pct, lv_color_white(), 0);
-    lv_obj_set_pos(s_pv_pct, PV_BAR_LO, PV_BAR_Y + PV_BAR_H + 12);
-
-    /* BOTTOM letterbox → landscape LEFT gutter: back button only.
-     * Portrait (x,y) maps to landscape (lx=800-y, ly=x), so the landscape top-left
-     * corner is portrait (~0, ~800): the back button sits at portrait (8, 740) →
-     * landscape (top, left). It reuses the screens back_button() so a tap emits the
-     * same SEEDSIGNER_RET_BACK_BUTTON the app's scan-cancel path drains. The chevron
-     * is not pre-rotated (Phase 4 will use a down-pointing glyph so it reads as "left"
-     * in landscape); the touch target and event wiring are correct. Child of scr →
-     * reaped when the host reaps the screen. */
-    back_button(scr, LV_ALIGN_TOP_LEFT, 8, 740);
+    camera_preview_pillarboxed_spec_t spec = {};
+    spec.square_x = 0;
+    spec.square_y = PV_SY;
+    spec.square_w = PV_SQ;
+    spec.square_h = PV_SQ;
+    spec.scanning_active  = true;
+    spec.progress_percent = 0;
+    spec.frame_status     = CAMERA_OVERLAY_FRAME_NONE;
+    s_pv_chrome = camera_preview_pillarboxed_create(scr, &spec);
 }
 
-/* Caller holds the LVGL port lock. Fill grows from the anchor (landscape bottom)
- * toward x=0 (landscape top) as % rises. */
-static void cam_portrait_overlay_set_progress(int percent)
+/* Free the chrome handle. The widgets are children of s_screen and reaped when the host
+ * reaps the screen (the rot_text buffers free themselves via the image delete cb); this
+ * frees the handle struct and drops the pointer so a late present() can't touch it. */
+static void cam_portrait_chrome_forget(void)
 {
-    if (percent < 0) percent = 0; else if (percent > 100) percent = 100;
-    int w = 1 + (PV_BAR_LEN - 1) * percent / 100;
-    if (s_pv_ind) {
-        lv_obj_set_width(s_pv_ind, w);
-        lv_obj_set_x(s_pv_ind, PV_BAR_HI - w);
-    }
-    if (s_pv_pct) lv_label_set_text_fmt(s_pv_pct, "%d%%", percent);
+    camera_preview_pillarboxed_destroy(s_pv_chrome);
+    s_pv_chrome = NULL;
 }
 
-/* Widgets are children of s_screen and reaped when the host reaps the screen;
- * just drop our pointers so a late present() can't touch them. */
-static void cam_portrait_overlay_forget(void)
+/* Teardown before board_display_exit_portrait_scan(): forget the handle AND strip the
+ * portrait-authored chrome off s_screen. exit_portrait_scan() restores landscape mode and
+ * invalidates the active screen, re-rendering it through the landscape 90° rotate path — the
+ * chrome would otherwise flash rotated 90° CCW for a frame (brief on animated QRs; lingers on
+ * static ones, since nothing navigates away as quickly) until the app loads the next screen.
+ * Cleaning s_screen first leaves a plain black transient. Caller must NOT hold the LVGL lock. */
+static void cam_portrait_chrome_teardown(void)
 {
-    s_pv_ind = NULL;
-    s_pv_pct = NULL;
+    cam_portrait_chrome_forget();
+    if (s_screen && lvgl_port_lock(0)) {
+        lv_obj_clean(s_screen);
+        lvgl_port_unlock();
+    }
 }
 #endif /* SCAN_USES_PORTRAIT */
 
@@ -229,7 +193,7 @@ static void cam_rollback_screen(lv_obj_t *prev_screen)
 #if SCAN_USES_PORTRAIT
     /* Restore landscape before loading the pre-camera (landscape) screen. */
     if (s_scan_portrait) {
-        cam_portrait_overlay_forget();
+        cam_portrait_chrome_teardown();
         board_display_exit_portrait_scan();
         s_scan_portrait = false;
     }
@@ -259,11 +223,22 @@ static void cam_rollback_screen(lv_obj_t *prev_screen)
  * the ring, so a brief wait for the LVGL flush is lossless and correct. ── */
 static void cam_present(void *ctx, int percent, scan_frame_status_t status)
 {
+    /* Map the neutral scan status to the overlay dot enum (shared by both presenters).
+     * NONE/MISS: the pillarboxed chrome shows an EMPTY ring; the landscape overlay hides
+     * the dot. Sustained-MISS warning is Python's concern (§6). */
+    camera_overlay_frame_status_t dot;
+    switch (status) {
+    case SCAN_FRAME_NEW:    dot = CAMERA_OVERLAY_FRAME_ADDED;    break;  /* green */
+    case SCAN_FRAME_REPEAT: dot = CAMERA_OVERLAY_FRAME_REPEATED; break;  /* gray  */
+    case SCAN_FRAME_MISS:
+    case SCAN_FRAME_NONE:
+    default:                dot = CAMERA_OVERLAY_FRAME_NONE;     break;  /* empty / hidden */
+    }
+
 #if SCAN_USES_PORTRAIT
     if (s_scan_portrait) {
-        (void)status;  /* interim overlay shows progress only (no dot/back yet) */
         if (lvgl_port_lock(0)) {
-            cam_portrait_overlay_set_progress(percent);
+            camera_preview_pillarboxed_set_progress(s_pv_chrome, percent, dot);
             lvgl_port_unlock();
         }
         return;
@@ -272,15 +247,6 @@ static void cam_present(void *ctx, int percent, scan_frame_status_t status)
     camera_preview_overlay_t *ov = (camera_preview_overlay_t *)ctx;
     if (!ov) {
         return;
-    }
-
-    camera_overlay_frame_status_t dot;
-    switch (status) {
-    case SCAN_FRAME_NEW:    dot = CAMERA_OVERLAY_FRAME_ADDED;    break;  /* green  */
-    case SCAN_FRAME_REPEAT: dot = CAMERA_OVERLAY_FRAME_REPEATED; break;  /* gray   */
-    case SCAN_FRAME_MISS:   /* hidden for now — sustained-MISS warning is Python's (§6) */
-    case SCAN_FRAME_NONE:
-    default:                dot = CAMERA_OVERLAY_FRAME_NONE;     break;  /* hidden */
     }
 
     if (lvgl_port_lock(0)) {
@@ -603,7 +569,7 @@ const char *cam_scanner_start(bool focus_assist)
          * overlay (no screens-repo overlay — that's landscape image-widget). */
         cam_portrait_black_clear();
         if (lvgl_port_lock(0)) {
-            cam_portrait_overlay_create(s_screen);
+            cam_portrait_chrome_create(s_screen);
             lvgl_port_unlock();
         }
     } else
@@ -658,7 +624,7 @@ const char *cam_scanner_start(bool focus_assist)
         }
         s_overlay = NULL;
 #if SCAN_USES_PORTRAIT
-        cam_portrait_overlay_forget();  /* widgets reaped with s_screen in rollback */
+        cam_portrait_chrome_forget();  /* widgets reaped with s_screen in rollback */
 #endif
         cam_pipeline_destroy(s_pipeline);
         s_pipeline = NULL;
@@ -762,7 +728,7 @@ void cam_scanner_stop(void)
     /* Restore landscape before the next screen render (also covers the Python-
      * exception teardown path, which routes through cam_scanner_stop). */
     if (s_scan_portrait) {
-        cam_portrait_overlay_forget();
+        cam_portrait_chrome_teardown();
         board_display_exit_portrait_scan();
         s_scan_portrait = false;
     }
