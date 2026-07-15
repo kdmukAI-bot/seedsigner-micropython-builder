@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11 23:12:26Z",
+  "generated_at": "2026-07-15 00:44:47Z",
   "resolutions": [
     {
       "width": 240,
@@ -232,6 +232,26 @@
           "path": "img/240x240/camera_preview_overlay_screen__fill_landscape_240x240.png"
         },
         {
+          "name": "camera_preview_pillarboxed_screen",
+          "display_name": "camera_preview_pillarboxed_screen",
+          "path": "img/240x240/camera_preview_pillarboxed_screen_240x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__no_frame_yet",
+          "display_name": "camera_preview_pillarboxed_screen (_no_frame_yet)",
+          "path": "img/240x240/camera_preview_pillarboxed_screen__no_frame_yet_240x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__frame_repeated",
+          "display_name": "camera_preview_pillarboxed_screen (_frame_repeated)",
+          "path": "img/240x240/camera_preview_pillarboxed_screen__frame_repeated_240x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__complete",
+          "display_name": "camera_preview_pillarboxed_screen (_complete)",
+          "path": "img/240x240/camera_preview_pillarboxed_screen__complete_240x240.png"
+        },
+        {
           "name": "camera_entropy_overlay_screen",
           "display_name": "camera_entropy_overlay_screen",
           "path": "img/240x240/camera_entropy_overlay_screen_240x240.png"
@@ -245,6 +265,41 @@
           "name": "camera_entropy_overlay_screen__confirm",
           "display_name": "camera_entropy_overlay_screen (_confirm)",
           "path": "img/240x240/camera_entropy_overlay_screen__confirm_240x240.png"
+        },
+        {
+          "name": "toast_overlay_screen",
+          "display_name": "toast_overlay_screen",
+          "path": "img/240x240/toast_overlay_screen_240x240.png"
+        },
+        {
+          "name": "toast_overlay_screen__info",
+          "display_name": "toast_overlay_screen (_info)",
+          "path": "img/240x240/toast_overlay_screen__info_240x240.png"
+        },
+        {
+          "name": "toast_overlay_screen__success",
+          "display_name": "toast_overlay_screen (_success)",
+          "path": "img/240x240/toast_overlay_screen__success_240x240.png"
+        },
+        {
+          "name": "toast_overlay_screen__warning",
+          "display_name": "toast_overlay_screen (_warning)",
+          "path": "img/240x240/toast_overlay_screen__warning_240x240.png"
+        },
+        {
+          "name": "toast_overlay_screen__dire_warning",
+          "display_name": "toast_overlay_screen (_dire_warning)",
+          "path": "img/240x240/toast_overlay_screen__dire_warning_240x240.png"
+        },
+        {
+          "name": "toast_overlay_screen__error",
+          "display_name": "toast_overlay_screen (_error)",
+          "path": "img/240x240/toast_overlay_screen__error_240x240.png"
+        },
+        {
+          "name": "toast_overlay_screen__sd_card_removed",
+          "display_name": "toast_overlay_screen (_sd_card_removed)",
+          "path": "img/240x240/toast_overlay_screen__sd_card_removed_240x240.png"
         },
         {
           "name": "keyboard_screen",
@@ -557,6 +612,21 @@
           "path": "img/240x240/seed_address_verification_screen__regtest_240x240.png"
         },
         {
+          "name": "seed_address_verification_success_screen",
+          "display_name": "seed_address_verification_success_screen",
+          "path": "img/240x240/seed_address_verification_success_screen_240x240.png"
+        },
+        {
+          "name": "seed_address_verification_success_screen__change_address",
+          "display_name": "seed_address_verification_success_screen (_change_address)",
+          "path": "img/240x240/seed_address_verification_success_screen__change_address_240x240.png"
+        },
+        {
+          "name": "seed_address_verification_success_screen__taproot",
+          "display_name": "seed_address_verification_success_screen (_taproot)",
+          "path": "img/240x240/seed_address_verification_success_screen__taproot_240x240.png"
+        },
+        {
           "name": "tools_calc_final_word_screen",
           "display_name": "tools_calc_final_word_screen",
           "path": "img/240x240/tools_calc_final_word_screen_240x240.png"
@@ -595,6 +665,36 @@
           "name": "tools_address_explorer_address_list_screen",
           "display_name": "tools_address_explorer_address_list_screen",
           "path": "img/240x240/tools_address_explorer_address_list_screen_240x240.png"
+        },
+        {
+          "name": "tools_address_explorer_address_type_screen",
+          "display_name": "tools_address_explorer_address_type_screen",
+          "path": "img/240x240/tools_address_explorer_address_type_screen_240x240.png"
+        },
+        {
+          "name": "tools_address_explorer_address_type_screen__custom_derivation",
+          "display_name": "tools_address_explorer_address_type_screen (_custom_derivation)",
+          "path": "img/240x240/tools_address_explorer_address_type_screen__custom_derivation_240x240.png"
+        },
+        {
+          "name": "tools_address_explorer_address_type_screen__wallet_descriptor",
+          "display_name": "tools_address_explorer_address_type_screen (_wallet_descriptor)",
+          "path": "img/240x240/tools_address_explorer_address_type_screen__wallet_descriptor_240x240.png"
+        },
+        {
+          "name": "power_options_screen",
+          "display_name": "power_options_screen",
+          "path": "img/240x240/power_options_screen_240x240.png"
+        },
+        {
+          "name": "seed_transcribe_seedqr_format_screen",
+          "display_name": "seed_transcribe_seedqr_format_screen",
+          "path": "img/240x240/seed_transcribe_seedqr_format_screen_240x240.png"
+        },
+        {
+          "name": "seed_transcribe_seedqr_format_screen__24_word",
+          "display_name": "seed_transcribe_seedqr_format_screen (_24_word)",
+          "path": "img/240x240/seed_transcribe_seedqr_format_screen__24_word_240x240.png"
         },
         {
           "name": "reset_screen",
@@ -859,6 +959,26 @@
           "path": "img/320x240/camera_preview_overlay_screen__fill_landscape_320x240.png"
         },
         {
+          "name": "camera_preview_pillarboxed_screen",
+          "display_name": "camera_preview_pillarboxed_screen",
+          "path": "img/320x240/camera_preview_pillarboxed_screen_320x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__no_frame_yet",
+          "display_name": "camera_preview_pillarboxed_screen (_no_frame_yet)",
+          "path": "img/320x240/camera_preview_pillarboxed_screen__no_frame_yet_320x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__frame_repeated",
+          "display_name": "camera_preview_pillarboxed_screen (_frame_repeated)",
+          "path": "img/320x240/camera_preview_pillarboxed_screen__frame_repeated_320x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__complete",
+          "display_name": "camera_preview_pillarboxed_screen (_complete)",
+          "path": "img/320x240/camera_preview_pillarboxed_screen__complete_320x240.png"
+        },
+        {
           "name": "camera_entropy_overlay_screen",
           "display_name": "camera_entropy_overlay_screen",
           "path": "img/320x240/camera_entropy_overlay_screen_320x240.png"
@@ -872,6 +992,41 @@
           "name": "camera_entropy_overlay_screen__confirm",
           "display_name": "camera_entropy_overlay_screen (_confirm)",
           "path": "img/320x240/camera_entropy_overlay_screen__confirm_320x240.png"
+        },
+        {
+          "name": "toast_overlay_screen",
+          "display_name": "toast_overlay_screen",
+          "path": "img/320x240/toast_overlay_screen_320x240.png"
+        },
+        {
+          "name": "toast_overlay_screen__info",
+          "display_name": "toast_overlay_screen (_info)",
+          "path": "img/320x240/toast_overlay_screen__info_320x240.png"
+        },
+        {
+          "name": "toast_overlay_screen__success",
+          "display_name": "toast_overlay_screen (_success)",
+          "path": "img/320x240/toast_overlay_screen__success_320x240.png"
+        },
+        {
+          "name": "toast_overlay_screen__warning",
+          "display_name": "toast_overlay_screen (_warning)",
+          "path": "img/320x240/toast_overlay_screen__warning_320x240.png"
+        },
+        {
+          "name": "toast_overlay_screen__dire_warning",
+          "display_name": "toast_overlay_screen (_dire_warning)",
+          "path": "img/320x240/toast_overlay_screen__dire_warning_320x240.png"
+        },
+        {
+          "name": "toast_overlay_screen__error",
+          "display_name": "toast_overlay_screen (_error)",
+          "path": "img/320x240/toast_overlay_screen__error_320x240.png"
+        },
+        {
+          "name": "toast_overlay_screen__sd_card_removed",
+          "display_name": "toast_overlay_screen (_sd_card_removed)",
+          "path": "img/320x240/toast_overlay_screen__sd_card_removed_320x240.png"
         },
         {
           "name": "keyboard_screen",
@@ -1184,6 +1339,21 @@
           "path": "img/320x240/seed_address_verification_screen__regtest_320x240.png"
         },
         {
+          "name": "seed_address_verification_success_screen",
+          "display_name": "seed_address_verification_success_screen",
+          "path": "img/320x240/seed_address_verification_success_screen_320x240.png"
+        },
+        {
+          "name": "seed_address_verification_success_screen__change_address",
+          "display_name": "seed_address_verification_success_screen (_change_address)",
+          "path": "img/320x240/seed_address_verification_success_screen__change_address_320x240.png"
+        },
+        {
+          "name": "seed_address_verification_success_screen__taproot",
+          "display_name": "seed_address_verification_success_screen (_taproot)",
+          "path": "img/320x240/seed_address_verification_success_screen__taproot_320x240.png"
+        },
+        {
           "name": "tools_calc_final_word_screen",
           "display_name": "tools_calc_final_word_screen",
           "path": "img/320x240/tools_calc_final_word_screen_320x240.png"
@@ -1222,6 +1392,36 @@
           "name": "tools_address_explorer_address_list_screen",
           "display_name": "tools_address_explorer_address_list_screen",
           "path": "img/320x240/tools_address_explorer_address_list_screen_320x240.png"
+        },
+        {
+          "name": "tools_address_explorer_address_type_screen",
+          "display_name": "tools_address_explorer_address_type_screen",
+          "path": "img/320x240/tools_address_explorer_address_type_screen_320x240.png"
+        },
+        {
+          "name": "tools_address_explorer_address_type_screen__custom_derivation",
+          "display_name": "tools_address_explorer_address_type_screen (_custom_derivation)",
+          "path": "img/320x240/tools_address_explorer_address_type_screen__custom_derivation_320x240.png"
+        },
+        {
+          "name": "tools_address_explorer_address_type_screen__wallet_descriptor",
+          "display_name": "tools_address_explorer_address_type_screen (_wallet_descriptor)",
+          "path": "img/320x240/tools_address_explorer_address_type_screen__wallet_descriptor_320x240.png"
+        },
+        {
+          "name": "power_options_screen",
+          "display_name": "power_options_screen",
+          "path": "img/320x240/power_options_screen_320x240.png"
+        },
+        {
+          "name": "seed_transcribe_seedqr_format_screen",
+          "display_name": "seed_transcribe_seedqr_format_screen",
+          "path": "img/320x240/seed_transcribe_seedqr_format_screen_320x240.png"
+        },
+        {
+          "name": "seed_transcribe_seedqr_format_screen__24_word",
+          "display_name": "seed_transcribe_seedqr_format_screen (_24_word)",
+          "path": "img/320x240/seed_transcribe_seedqr_format_screen__24_word_320x240.png"
         },
         {
           "name": "reset_screen",
@@ -1481,6 +1681,26 @@
           "path": "img/480x320/camera_preview_overlay_screen__fill_landscape_480x320.png"
         },
         {
+          "name": "camera_preview_pillarboxed_screen",
+          "display_name": "camera_preview_pillarboxed_screen",
+          "path": "img/480x320/camera_preview_pillarboxed_screen_480x320.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__no_frame_yet",
+          "display_name": "camera_preview_pillarboxed_screen (_no_frame_yet)",
+          "path": "img/480x320/camera_preview_pillarboxed_screen__no_frame_yet_480x320.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__frame_repeated",
+          "display_name": "camera_preview_pillarboxed_screen (_frame_repeated)",
+          "path": "img/480x320/camera_preview_pillarboxed_screen__frame_repeated_480x320.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__complete",
+          "display_name": "camera_preview_pillarboxed_screen (_complete)",
+          "path": "img/480x320/camera_preview_pillarboxed_screen__complete_480x320.png"
+        },
+        {
           "name": "camera_entropy_overlay_screen",
           "display_name": "camera_entropy_overlay_screen",
           "path": "img/480x320/camera_entropy_overlay_screen_480x320.png"
@@ -1494,6 +1714,41 @@
           "name": "camera_entropy_overlay_screen__confirm",
           "display_name": "camera_entropy_overlay_screen (_confirm)",
           "path": "img/480x320/camera_entropy_overlay_screen__confirm_480x320.png"
+        },
+        {
+          "name": "toast_overlay_screen",
+          "display_name": "toast_overlay_screen",
+          "path": "img/480x320/toast_overlay_screen_480x320.png"
+        },
+        {
+          "name": "toast_overlay_screen__info",
+          "display_name": "toast_overlay_screen (_info)",
+          "path": "img/480x320/toast_overlay_screen__info_480x320.png"
+        },
+        {
+          "name": "toast_overlay_screen__success",
+          "display_name": "toast_overlay_screen (_success)",
+          "path": "img/480x320/toast_overlay_screen__success_480x320.png"
+        },
+        {
+          "name": "toast_overlay_screen__warning",
+          "display_name": "toast_overlay_screen (_warning)",
+          "path": "img/480x320/toast_overlay_screen__warning_480x320.png"
+        },
+        {
+          "name": "toast_overlay_screen__dire_warning",
+          "display_name": "toast_overlay_screen (_dire_warning)",
+          "path": "img/480x320/toast_overlay_screen__dire_warning_480x320.png"
+        },
+        {
+          "name": "toast_overlay_screen__error",
+          "display_name": "toast_overlay_screen (_error)",
+          "path": "img/480x320/toast_overlay_screen__error_480x320.png"
+        },
+        {
+          "name": "toast_overlay_screen__sd_card_removed",
+          "display_name": "toast_overlay_screen (_sd_card_removed)",
+          "path": "img/480x320/toast_overlay_screen__sd_card_removed_480x320.png"
         },
         {
           "name": "keyboard_screen",
@@ -1806,6 +2061,21 @@
           "path": "img/480x320/seed_address_verification_screen__regtest_480x320.png"
         },
         {
+          "name": "seed_address_verification_success_screen",
+          "display_name": "seed_address_verification_success_screen",
+          "path": "img/480x320/seed_address_verification_success_screen_480x320.png"
+        },
+        {
+          "name": "seed_address_verification_success_screen__change_address",
+          "display_name": "seed_address_verification_success_screen (_change_address)",
+          "path": "img/480x320/seed_address_verification_success_screen__change_address_480x320.png"
+        },
+        {
+          "name": "seed_address_verification_success_screen__taproot",
+          "display_name": "seed_address_verification_success_screen (_taproot)",
+          "path": "img/480x320/seed_address_verification_success_screen__taproot_480x320.png"
+        },
+        {
           "name": "tools_calc_final_word_screen",
           "display_name": "tools_calc_final_word_screen",
           "path": "img/480x320/tools_calc_final_word_screen_480x320.png"
@@ -1844,6 +2114,36 @@
           "name": "tools_address_explorer_address_list_screen",
           "display_name": "tools_address_explorer_address_list_screen",
           "path": "img/480x320/tools_address_explorer_address_list_screen_480x320.png"
+        },
+        {
+          "name": "tools_address_explorer_address_type_screen",
+          "display_name": "tools_address_explorer_address_type_screen",
+          "path": "img/480x320/tools_address_explorer_address_type_screen_480x320.png"
+        },
+        {
+          "name": "tools_address_explorer_address_type_screen__custom_derivation",
+          "display_name": "tools_address_explorer_address_type_screen (_custom_derivation)",
+          "path": "img/480x320/tools_address_explorer_address_type_screen__custom_derivation_480x320.png"
+        },
+        {
+          "name": "tools_address_explorer_address_type_screen__wallet_descriptor",
+          "display_name": "tools_address_explorer_address_type_screen (_wallet_descriptor)",
+          "path": "img/480x320/tools_address_explorer_address_type_screen__wallet_descriptor_480x320.png"
+        },
+        {
+          "name": "power_options_screen",
+          "display_name": "power_options_screen",
+          "path": "img/480x320/power_options_screen_480x320.png"
+        },
+        {
+          "name": "seed_transcribe_seedqr_format_screen",
+          "display_name": "seed_transcribe_seedqr_format_screen",
+          "path": "img/480x320/seed_transcribe_seedqr_format_screen_480x320.png"
+        },
+        {
+          "name": "seed_transcribe_seedqr_format_screen__24_word",
+          "display_name": "seed_transcribe_seedqr_format_screen (_24_word)",
+          "path": "img/480x320/seed_transcribe_seedqr_format_screen__24_word_480x320.png"
         },
         {
           "name": "reset_screen",
@@ -2103,6 +2403,26 @@
           "path": "img/800x480/camera_preview_overlay_screen__fill_landscape_800x480.png"
         },
         {
+          "name": "camera_preview_pillarboxed_screen",
+          "display_name": "camera_preview_pillarboxed_screen",
+          "path": "img/800x480/camera_preview_pillarboxed_screen_800x480.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__no_frame_yet",
+          "display_name": "camera_preview_pillarboxed_screen (_no_frame_yet)",
+          "path": "img/800x480/camera_preview_pillarboxed_screen__no_frame_yet_800x480.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__frame_repeated",
+          "display_name": "camera_preview_pillarboxed_screen (_frame_repeated)",
+          "path": "img/800x480/camera_preview_pillarboxed_screen__frame_repeated_800x480.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__complete",
+          "display_name": "camera_preview_pillarboxed_screen (_complete)",
+          "path": "img/800x480/camera_preview_pillarboxed_screen__complete_800x480.png"
+        },
+        {
           "name": "camera_entropy_overlay_screen",
           "display_name": "camera_entropy_overlay_screen",
           "path": "img/800x480/camera_entropy_overlay_screen_800x480.png"
@@ -2116,6 +2436,41 @@
           "name": "camera_entropy_overlay_screen__confirm",
           "display_name": "camera_entropy_overlay_screen (_confirm)",
           "path": "img/800x480/camera_entropy_overlay_screen__confirm_800x480.png"
+        },
+        {
+          "name": "toast_overlay_screen",
+          "display_name": "toast_overlay_screen",
+          "path": "img/800x480/toast_overlay_screen_800x480.png"
+        },
+        {
+          "name": "toast_overlay_screen__info",
+          "display_name": "toast_overlay_screen (_info)",
+          "path": "img/800x480/toast_overlay_screen__info_800x480.png"
+        },
+        {
+          "name": "toast_overlay_screen__success",
+          "display_name": "toast_overlay_screen (_success)",
+          "path": "img/800x480/toast_overlay_screen__success_800x480.png"
+        },
+        {
+          "name": "toast_overlay_screen__warning",
+          "display_name": "toast_overlay_screen (_warning)",
+          "path": "img/800x480/toast_overlay_screen__warning_800x480.png"
+        },
+        {
+          "name": "toast_overlay_screen__dire_warning",
+          "display_name": "toast_overlay_screen (_dire_warning)",
+          "path": "img/800x480/toast_overlay_screen__dire_warning_800x480.png"
+        },
+        {
+          "name": "toast_overlay_screen__error",
+          "display_name": "toast_overlay_screen (_error)",
+          "path": "img/800x480/toast_overlay_screen__error_800x480.png"
+        },
+        {
+          "name": "toast_overlay_screen__sd_card_removed",
+          "display_name": "toast_overlay_screen (_sd_card_removed)",
+          "path": "img/800x480/toast_overlay_screen__sd_card_removed_800x480.png"
         },
         {
           "name": "keyboard_screen",
@@ -2428,6 +2783,21 @@
           "path": "img/800x480/seed_address_verification_screen__regtest_800x480.png"
         },
         {
+          "name": "seed_address_verification_success_screen",
+          "display_name": "seed_address_verification_success_screen",
+          "path": "img/800x480/seed_address_verification_success_screen_800x480.png"
+        },
+        {
+          "name": "seed_address_verification_success_screen__change_address",
+          "display_name": "seed_address_verification_success_screen (_change_address)",
+          "path": "img/800x480/seed_address_verification_success_screen__change_address_800x480.png"
+        },
+        {
+          "name": "seed_address_verification_success_screen__taproot",
+          "display_name": "seed_address_verification_success_screen (_taproot)",
+          "path": "img/800x480/seed_address_verification_success_screen__taproot_800x480.png"
+        },
+        {
           "name": "tools_calc_final_word_screen",
           "display_name": "tools_calc_final_word_screen",
           "path": "img/800x480/tools_calc_final_word_screen_800x480.png"
@@ -2466,6 +2836,36 @@
           "name": "tools_address_explorer_address_list_screen",
           "display_name": "tools_address_explorer_address_list_screen",
           "path": "img/800x480/tools_address_explorer_address_list_screen_800x480.png"
+        },
+        {
+          "name": "tools_address_explorer_address_type_screen",
+          "display_name": "tools_address_explorer_address_type_screen",
+          "path": "img/800x480/tools_address_explorer_address_type_screen_800x480.png"
+        },
+        {
+          "name": "tools_address_explorer_address_type_screen__custom_derivation",
+          "display_name": "tools_address_explorer_address_type_screen (_custom_derivation)",
+          "path": "img/800x480/tools_address_explorer_address_type_screen__custom_derivation_800x480.png"
+        },
+        {
+          "name": "tools_address_explorer_address_type_screen__wallet_descriptor",
+          "display_name": "tools_address_explorer_address_type_screen (_wallet_descriptor)",
+          "path": "img/800x480/tools_address_explorer_address_type_screen__wallet_descriptor_800x480.png"
+        },
+        {
+          "name": "power_options_screen",
+          "display_name": "power_options_screen",
+          "path": "img/800x480/power_options_screen_800x480.png"
+        },
+        {
+          "name": "seed_transcribe_seedqr_format_screen",
+          "display_name": "seed_transcribe_seedqr_format_screen",
+          "path": "img/800x480/seed_transcribe_seedqr_format_screen_800x480.png"
+        },
+        {
+          "name": "seed_transcribe_seedqr_format_screen__24_word",
+          "display_name": "seed_transcribe_seedqr_format_screen (_24_word)",
+          "path": "img/800x480/seed_transcribe_seedqr_format_screen__24_word_800x480.png"
         },
         {
           "name": "reset_screen",
