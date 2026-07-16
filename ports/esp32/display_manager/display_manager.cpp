@@ -336,6 +336,40 @@ extern "C" void dm_set_screensaver_timeout(uint32_t ms)
     lvgl_port_unlock();
 }
 
+/* Toast overlay wrappers. dm_show_toast forwards to the thread-safe staging entry
+ * overlay_manager_show_toast() (deep-copies the spec strings, drains on the LVGL
+ * loop); dm_dismiss_toast forwards to the LVGL-thread-only toast_overlay_dismiss().
+ * Both take the LVGL-port lock like dm_set_screensaver_timeout: the MicroPython task
+ * is the caller and dismiss mutates the widget tree immediately. The spec is built on
+ * the stack from flat args — its strings are only read during the call. */
+extern "C" void dm_show_toast(const char *label_text, const char *icon_glyph,
+                              uint32_t outline_color, uint32_t font_color, uint32_t duration_ms)
+{
+    if (!lvgl_port_lock(0)) {
+        ESP_LOGE(TAG, "dm_show_toast: display lock unavailable");
+        return;
+    }
+    toast_overlay_spec_t spec = {
+        .label_text = label_text ? label_text : "",
+        .icon_glyph = icon_glyph,  // NULL -> text-only
+        .outline_color = outline_color,
+        .font_color = font_color,
+        .duration_ms = duration_ms,
+    };
+    overlay_manager_show_toast(&spec);
+    lvgl_port_unlock();
+}
+
+extern "C" void dm_dismiss_toast(void)
+{
+    if (!lvgl_port_lock(0)) {
+        ESP_LOGE(TAG, "dm_dismiss_toast: display lock unavailable");
+        return;
+    }
+    toast_overlay_dismiss();
+    lvgl_port_unlock();
+}
+
 /* Memory instrumentation for the font-memory budget work (font-memory-plan.md,
  * Task D). The binding builds a dict from this plain-C struct; the lvgl.h /
  * esp_heap_caps.h dependency stays here rather than leaking into the bindings'

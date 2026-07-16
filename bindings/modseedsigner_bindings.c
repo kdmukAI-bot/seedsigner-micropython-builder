@@ -548,6 +548,66 @@ static mp_obj_t mp_seedsigner_lvgl_seed_transcribe_zoomed_qr_screen(size_t n_arg
 }
 static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_transcribe_zoomed_qr_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_transcribe_zoomed_qr_screen);
 
+// --- Passthrough screens to reach full app parity (screens @ 057b6c6) -----------
+// Each is a standard dict-cfg screen: the Python runner passes a localized cfg dict,
+// run_cfg_screen forwards it as JSON, and the screen-side C++ parses + validates it.
+// No bespoke marshaling — the cfg contract lives entirely in the Python app. Standard
+// polled screens returning on_button_selected (or nav back). Named by the canonical
+// screen fn (see seedsigner views/*). Grouped here to close the last binding gap.
+
+static mp_obj_t mp_seedsigner_lvgl_power_options_screen(size_t n_args, const mp_obj_t *args) {
+    // 2/4-tile large-icon grid (shares main_menu geometry). cfg: button_list (label +
+    // icon per item), top_nav.title. Returns tile index; back -> RET_BACK_BUTTON.
+    return run_cfg_screen(power_options_screen, "power_options_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_power_options_screen_obj, 0, 1, mp_seedsigner_lvgl_power_options_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_seed_address_verification_success_screen(size_t n_args, const mp_obj_t *args) {
+    // LargeIconStatus subclass (SUCCESS icon + OK). cfg: status_headline, address,
+    // address_type_text, index_text, button_list, top_nav.title.
+    return run_cfg_screen(seed_address_verification_success_screen, "seed_address_verification_success_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_address_verification_success_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_address_verification_success_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_seed_transcribe_seedqr_format_screen(size_t n_args, const mp_obj_t *args) {
+    // Standard/Compact SeedQR chooser, bottom-pinned. cfg: button_list, top_nav.title,
+    // standard_label, standard_text, compact_label, compact_text.
+    return run_cfg_screen(seed_transcribe_seedqr_format_screen, "seed_transcribe_seedqr_format_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_seed_transcribe_seedqr_format_screen_obj, 0, 1, mp_seedsigner_lvgl_seed_transcribe_seedqr_format_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_tools_address_explorer_address_type_screen(size_t n_args, const mp_obj_t *args) {
+    // Receive/Change chooser. cfg: button_list, top_nav.title, and either
+    // (fingerprint, fingerprint_label, derivation_text, derivation_label) or
+    // (wallet_descriptor_text, wallet_descriptor_label).
+    return run_cfg_screen(tools_address_explorer_address_type_screen, "tools_address_explorer_address_type_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_tools_address_explorer_address_type_screen_obj, 0, 1, mp_seedsigner_lvgl_tools_address_explorer_address_type_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_psbt_op_return_screen(size_t n_args, const mp_obj_t *args) {
+    // PSBT OP_RETURN review. cfg: text OR (hex + hex_label), button_list, is_bottom_list.
+    return run_cfg_screen(psbt_op_return_screen, "psbt_op_return_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_psbt_op_return_screen_obj, 0, 1, mp_seedsigner_lvgl_psbt_op_return_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_reset_screen(size_t n_args, const mp_obj_t *args) {
+    // Info screen shown while the device restarts; no nav buttons. cfg: text.
+    return run_cfg_screen(reset_screen, "reset_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_reset_screen_obj, 0, 1, mp_seedsigner_lvgl_reset_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_power_off_not_required_screen(size_t n_args, const mp_obj_t *args) {
+    // Info + back button ("powering off isn't required on this hardware"). cfg: text.
+    return run_cfg_screen(power_off_not_required_screen, "power_off_not_required_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_power_off_not_required_screen_obj, 0, 1, mp_seedsigner_lvgl_power_off_not_required_screen);
+
+static mp_obj_t mp_seedsigner_lvgl_donate_screen(size_t n_args, const mp_obj_t *args) {
+    // Donation info: paragraph + accent URL line. cfg: text, url.
+    return run_cfg_screen(donate_screen, "donate_screen", n_args, args);
+}
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(seedsigner_lvgl_donate_screen_obj, 0, 1, mp_seedsigner_lvgl_donate_screen);
+
 static mp_obj_t mp_seedsigner_lvgl_poll_for_result(void) {
     if (s_result_count == 0) {
         return mp_const_none;
@@ -896,6 +956,61 @@ static mp_obj_t mp_seedsigner_lvgl_display_size(void) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(seedsigner_lvgl_display_size_obj, mp_seedsigner_lvgl_display_size);
 
+// --- Toast overlay (transient banner) -------------------------------------
+// Platform-symmetric with the Pi Zero .so; see docs/toast-binding-contract.md.
+// A toast is NOT a screen: it has no cfg->JSON->run_screen path and no result. It's
+// a fire-and-forget push to the native overlay manager, which composites it on the
+// LVGL top layer over whatever screen is live and owns auto-dismiss / input-dismiss /
+// one-at-a-time / screensaver coexistence. The library is policy-free — the app
+// resolves severity -> (glyph, colors) and passes finished values.
+
+// Look up an optional key in a cfg dict; MP_OBJ_NULL if absent (vs mp_const_none,
+// which the app never sends for these but we treat as "use default" too).
+static mp_obj_t cfg_dict_get(mp_obj_t dict, qstr key) {
+    mp_map_t *map = mp_obj_dict_get_map(dict);
+    mp_map_elem_t *e = mp_map_lookup(map, MP_OBJ_NEW_QSTR(key), MP_MAP_LOOKUP);
+    return e ? e->value : MP_OBJ_NULL;
+}
+
+// show_toast(cfg) -> None. Parse the cfg dict directly into flat args (NOT via
+// run_cfg_screen/JSON — the native API takes a struct) and stage it thread-safely.
+// cfg: label_text (str, required), icon (str PUA glyph -> icon_glyph, optional),
+// outline_color / font_color (int 0xRRGGBB, default white), duration_ms (int,
+// default 3000; 0 = stay until dismissed/replaced).
+static mp_obj_t mp_seedsigner_lvgl_show_toast(mp_obj_t cfg_obj) {
+    if (!mp_obj_is_type(cfg_obj, &mp_type_dict)) {
+        mp_raise_msg(&mp_type_TypeError, MP_ERROR_TEXT("show_toast expects a dict"));
+    }
+
+    mp_obj_t label = cfg_dict_get(cfg_obj, MP_QSTR_label_text);
+    const char *label_text = (label && label != mp_const_none) ? mp_obj_str_get_str(label) : "";
+
+    mp_obj_t icon = cfg_dict_get(cfg_obj, MP_QSTR_icon);
+    const char *icon_glyph = (icon && icon != mp_const_none) ? mp_obj_str_get_str(icon) : NULL;
+
+    mp_obj_t oc = cfg_dict_get(cfg_obj, MP_QSTR_outline_color);
+    uint32_t outline_color = (oc && oc != mp_const_none) ? (uint32_t)mp_obj_get_int_truncated(oc) : 0xFFFFFF;
+
+    mp_obj_t fc = cfg_dict_get(cfg_obj, MP_QSTR_font_color);
+    uint32_t font_color = (fc && fc != mp_const_none) ? (uint32_t)mp_obj_get_int_truncated(fc) : 0xFFFFFF;
+
+    mp_obj_t dur = cfg_dict_get(cfg_obj, MP_QSTR_duration_ms);
+    uint32_t duration_ms = (dur && dur != mp_const_none) ? (uint32_t)mp_obj_get_int(dur) : 3000;
+
+    dm_show_toast(label_text, icon_glyph, outline_color, font_color, duration_ms);
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(seedsigner_lvgl_show_toast_obj, mp_seedsigner_lvgl_show_toast);
+
+// dismiss_toast() -> None. Dismiss the current toast immediately (no-op if none).
+// LVGL-thread only (dm_* wrapper takes the LVGL-port lock); routine toasts self-
+// expire on duration_ms, so the app never calls this from a producer thread.
+static mp_obj_t mp_seedsigner_lvgl_dismiss_toast(void) {
+    dm_dismiss_toast();
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_0(seedsigner_lvgl_dismiss_toast_obj, mp_seedsigner_lvgl_dismiss_toast);
+
 static const mp_rom_map_elem_t seedsigner_lvgl_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR__seedsigner_lvgl_screens) },
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&seedsigner_lvgl_init_obj) },
@@ -935,6 +1050,16 @@ static const mp_rom_map_elem_t seedsigner_lvgl_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_seed_export_xpub_details_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_export_xpub_details_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_seed_review_passphrase_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_review_passphrase_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_seed_transcribe_zoomed_qr_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_transcribe_zoomed_qr_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_power_options_screen), MP_ROM_PTR(&seedsigner_lvgl_power_options_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_seed_address_verification_success_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_address_verification_success_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_seed_transcribe_seedqr_format_screen), MP_ROM_PTR(&seedsigner_lvgl_seed_transcribe_seedqr_format_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_tools_address_explorer_address_type_screen), MP_ROM_PTR(&seedsigner_lvgl_tools_address_explorer_address_type_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_psbt_op_return_screen), MP_ROM_PTR(&seedsigner_lvgl_psbt_op_return_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_reset_screen), MP_ROM_PTR(&seedsigner_lvgl_reset_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_power_off_not_required_screen), MP_ROM_PTR(&seedsigner_lvgl_power_off_not_required_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_donate_screen), MP_ROM_PTR(&seedsigner_lvgl_donate_screen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_show_toast), MP_ROM_PTR(&seedsigner_lvgl_show_toast_obj) },
+    { MP_ROM_QSTR(MP_QSTR_dismiss_toast), MP_ROM_PTR(&seedsigner_lvgl_dismiss_toast_obj) },
     { MP_ROM_QSTR(MP_QSTR_main_menu_screen), MP_ROM_PTR(&seedsigner_lvgl_main_menu_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_opening_splash_screen), MP_ROM_PTR(&seedsigner_lvgl_opening_splash_screen_obj) },
     { MP_ROM_QSTR(MP_QSTR_screensaver_screen), MP_ROM_PTR(&seedsigner_lvgl_screensaver_screen_obj) },

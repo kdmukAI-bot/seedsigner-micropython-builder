@@ -66,6 +66,22 @@ void dm_set_endonym_image_provider(ss_pack_provider_t provider, void *user);
  * Wraps overlay_manager_set_screensaver_timeout() in the LVGL-port lock. */
 void dm_set_screensaver_timeout(uint32_t ms);
 
+/* Toast overlay (transient banner composited over the live screen via the top
+ * layer). Flat args are marshaled into a toast_overlay_spec_t inside the .cpp, so
+ * toast_overlay.h / overlay_manager.h stay out of the binding's QSTR-scan include
+ * set (same header-hiding split as dm_mem_stats).
+ *
+ * dm_show_toast: raise or REPLACE the current toast. label_text is required (NULL
+ * treated as empty); icon_glyph is a seedsigner-icon PUA glyph or NULL (text-only);
+ * colors are 0xRRGGBB; duration_ms auto-dismisses (0 = stay until dismissed/replaced).
+ * Wraps the thread-safe staging entry overlay_manager_show_toast().
+ * dm_dismiss_toast: dismiss the current toast immediately (no-op if none). Wraps the
+ * LVGL-thread-only toast_overlay_dismiss(). Both take the LVGL-port lock (mirroring
+ * dm_set_screensaver_timeout), since the MicroPython task is the caller. */
+void dm_show_toast(const char *label_text, const char *icon_glyph,
+                   uint32_t outline_color, uint32_t font_color, uint32_t duration_ms);
+void dm_dismiss_toast(void);
+
 /* Memory instrumentation (docs/font-memory-plan.md, Task D). A plain-C snapshot
  * of the internal LVGL builtin pool and the ESP-IDF PSRAM/internal heaps, kept
  * free of lvgl.h / esp_heap_caps.h types so the MicroPython binding can consume
