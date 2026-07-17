@@ -225,7 +225,12 @@ static mp_obj_t run_cfg_screen(display_manager_ui_callback_t fn, const char *nam
     } else {
         vstr_add_str(&json, "{}");
     }
-    const char *err = run_screen(fn, (void *)json.buf);
+    // vstr_add_* do NOT keep a trailing '\0'; run_screen treats the buffer as a
+    // C string, so pass the null-terminated form. Without this the C++ JSON
+    // parser reads past json.len into uninitialized heap once the serialized
+    // config exceeds the initial vstr alloc (256 B) -- an intermittent
+    // "invalid JSON" that only bites longer configs (e.g. a 6-item menu).
+    const char *err = run_screen(fn, (void *)vstr_null_terminated_str(&json));
     vstr_clear(&json);
     if (err) {
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("%s"), err);
@@ -859,8 +864,9 @@ static mp_obj_t mp_seedsigner_lvgl_settings_locale_picker_screen(size_t n_args, 
         vstr_add_str(&json, "{}");
     }
     // Canonical name after the reorg (was locale_picker_screen); the app calls it by
-    // this name (see seedsigner views/view.py).
-    const char *err = run_screen(settings_locale_picker_screen, (void *)json.buf);
+    // this name (see seedsigner views/view.py). Null-terminate the vstr: run_screen
+    // reads it as a C string and vstr_add_* leave no trailing '\0' (see run_cfg_screen).
+    const char *err = run_screen(settings_locale_picker_screen, (void *)vstr_null_terminated_str(&json));
     vstr_clear(&json);
 
     // The picker fetched + copied every endonym during the build above, so the
