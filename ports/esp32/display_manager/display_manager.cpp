@@ -126,6 +126,37 @@ static lv_display_t *lvgl_disp = NULL;
 static lv_indev_t *lvgl_touch_indev = NULL;
 static bool initialized = false;
 
+/* --- TEMP warning-edges pulse-rate instrumentation (measurement only; NOT for
+ * release / not part of any screens PR). Counts refresh cycles that actually
+ * rendered (LV_EVENT_RENDER_READY) and flush-callback calls / stripes
+ * (LV_EVENT_FLUSH_FINISH), logging per-second rates when non-zero. Lets us compare
+ * the whole-QR transcribe pulse cost on the SPI P4-35 before/after the strip fix. */
+static volatile uint32_t s_fps_render = 0;
+static volatile uint32_t s_fps_flush = 0;
+static volatile uint32_t s_render_t0 = 0;
+static void dm_render_start_cb(lv_event_t *e) { (void)e; s_render_t0 = lv_tick_get(); }
+static void dm_fps_render_cb(lv_event_t *e)
+{
+    (void)e;
+    s_fps_render = s_fps_render + 1;
+    uint32_t dur = lv_tick_elaps(s_render_t0);
+    if (dur >= 15) {  // one-off slow renders (e.g. a full-screen build) stand out here
+        ESP_LOGI("SS_FPS", "slow render: %u ms", (unsigned)dur);
+    }
+}
+static void dm_fps_flush_cb(lv_event_t *e) { (void)e; s_fps_flush = s_fps_flush + 1; }
+static void dm_fps_timer_cb(lv_timer_t *t)
+{
+    (void)t;
+    uint32_t r = s_fps_render;
+    uint32_t f = s_fps_flush;
+    s_fps_render = 0;
+    s_fps_flush = 0;
+    if (r || f) {
+        ESP_LOGI("SS_FPS", "render/s=%u flush/s=%u", (unsigned)r, (unsigned)f);
+    }
+}
+
 extern "C" void init(void)
 {
     if (initialized) return;
@@ -154,6 +185,16 @@ extern "C" void init(void)
      * from the MicroPython task). The dispatcher then fires inside the esp_lvgl_port
      * task's lv_timer_handler() and owns the screensaver on its own. */
     overlay_manager_init();
+
+    /* TEMP instrumentation (see dm_fps_* above): register per-second render/flush
+     * counters on the display. Same single-threaded boot window as
+     * overlay_manager_init() -> no lock. */
+    if (lvgl_disp) {
+        lv_display_add_event_cb(lvgl_disp, dm_render_start_cb, LV_EVENT_RENDER_START, NULL);
+        lv_display_add_event_cb(lvgl_disp, dm_fps_render_cb, LV_EVENT_RENDER_READY, NULL);
+        lv_display_add_event_cb(lvgl_disp, dm_fps_flush_cb, LV_EVENT_FLUSH_FINISH, NULL);
+        lv_timer_create(dm_fps_timer_cb, 1000, NULL);
+    }
 
     initialized = true;
 }

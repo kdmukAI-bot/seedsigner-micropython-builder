@@ -22,6 +22,16 @@ static const char *TAG = "camera_scanner";
 #define BOARD_CAMERA_PARTITION_MODE 0
 #endif
 
+/* 480-decode experiment (build-time, env SS_CAM_DECODE_480=1 -> CMake compile
+ * definition): on partition-mode boards the QR-scan pipeline (and both
+ * decoders) run at 480x480 while the panel square stays 320x320 — the display
+ * sink decimates 3->2 (drops every 3rd column/row; 480*2/3 == 320 exactly,
+ * aliasing accepted). Lets the 3.5 be benchmarked at the 4.3's decode
+ * resolution. Default off = deployed behavior. */
+#ifndef BOARD_CAMERA_DECODE_480
+#define BOARD_CAMERA_DECODE_480 0
+#endif
+
 #if BOARD_HAS_CAMERA
 
 /* The engine headers lack an extern "C" guard. Force C linkage HERE, before any
@@ -62,6 +72,62 @@ static camera_preview_overlay_t  *s_overlay  = NULL;
 static scan_coordinator_t        *s_coord    = NULL;
 static lv_obj_t                  *s_screen   = NULL;
 static bool                       s_running  = false;
+
+/* ── Instrumentation-run knobs: staged for the next start(), consumed once
+ * (so a forgotten slot cannot leak knobs into a later session). Mapped onto
+ * the engine's cam_pipeline_qr_instr_t just before the coordinator creates
+ * the QR consumer. ── */
+static cam_scanner_instr_opts_t   s_instr_opts;
+static bool                       s_instr_opts_set = false;
+
+void cam_scanner_instr_defaults(cam_scanner_instr_opts_t *out)
+{
+    if (!out) {
+        return;
+    }
+    memset(out, 0, sizeof(*out));
+    out->hash_gate = 1; /* every other knob's default is 0 */
+}
+
+void cam_scanner_set_instr(const cam_scanner_instr_opts_t *opts)
+{
+    if (opts) {
+        s_instr_opts = *opts;
+        s_instr_opts_set = true;
+    } else {
+        s_instr_opts_set = false;
+    }
+}
+
+/* Consume the staged opts into the engine's next-create config. Called on the
+ * scan path of start(), right before scan_coordinator_create(). */
+static void cam_instr_stage_engine_config(void)
+{
+    if (!s_instr_opts_set) {
+        cam_pipeline_qr_set_next_instr(NULL);
+        return;
+    }
+    s_instr_opts_set = false;
+    cam_pipeline_qr_instr_t icfg;
+    cam_pipeline_qr_instr_defaults(&icfg);
+    icfg.num_decoders_override = (uint8_t)s_instr_opts.num_decoders;
+    icfg.sweep_cap             = s_instr_opts.sweep_cap;
+    icfg.ladder_select         = (uint8_t)s_instr_opts.ladder_select;
+    icfg.blend_gate_permille   = s_instr_opts.blend_gate_permille;
+    icfg.gate_dedup            = s_instr_opts.gate_dedup != 0;
+    icfg.debounce_ms           = (uint32_t)(s_instr_opts.debounce_ms > 0
+                                                ? s_instr_opts.debounce_ms : 0);
+    icfg.seed_override         = s_instr_opts.seed_override != 0;
+    icfg.seed_offset           = s_instr_opts.seed_offset;
+    icfg.lock_freeze           = s_instr_opts.lock_freeze != 0;
+    icfg.fixed_threshold       = s_instr_opts.fixed_threshold != 0;
+    icfg.effort_thorough       = s_instr_opts.effort_thorough != 0;
+    icfg.hash_gate             = s_instr_opts.hash_gate != 0;
+    icfg.instr_log             = s_instr_opts.instr_log != 0;
+    icfg.capture_nothing       = s_instr_opts.capture_nothing != 0;
+    icfg.burst                 = s_instr_opts.burst != 0;
+    cam_pipeline_qr_set_next_instr(&icfg);
+}
 
 #if SCAN_USES_PORTRAIT
 /* Portrait scan session state + the pillarboxed camera-preview chrome (progress bar,
@@ -453,8 +519,22 @@ const char *cam_scanner_start(bool focus_assist)
         board_pipeline_default_config(s_screen, board_i2c_get_handle());
     uint32_t square = (BOARD_DISP_H_RES < BOARD_DISP_V_RES)
                           ? BOARD_DISP_H_RES : BOARD_DISP_V_RES;
-    pcfg.display_width  = square;
-    pcfg.display_height = square;
+    /* decode_square: what the pipeline produces and the decoders consume.
+     * Equals the on-panel square except in the 480-decode experiment, where
+     * the pipeline runs 480x480 and the display sink decimates 3->2 back down
+     * to the 320 panel square. All chrome/overlay geometry keeps using
+     * `square` (panel space). */
+    uint32_t decode_square = square;
+#if BOARD_CAMERA_PARTITION_MODE && BOARD_CAMERA_DECODE_480
+    if (!focus_assist) {
+        decode_square = square * 3 / 2;   /* 320 -> 480 */
+        board_pipeline_lvgl_display_config_t *ddc =
+            (board_pipeline_lvgl_display_config_t *)pcfg.display_config;
+        ddc->decimate_3to2 = true;
+    }
+#endif
+    pcfg.display_width  = decode_square;
+    pcfg.display_height = decode_square;
 
     /* Per-session mode: the QR scan renders in native portrait (direct-blit,
      * no rotate) to free core 0; focus-assist stays landscape image-widget. */
@@ -596,12 +676,17 @@ const char *cam_scanner_start(bool focus_assist)
         }
     }
 
+    /* Instrumentation-run knobs (default: none staged -> deployed behavior).
+     * Staged into the engine here so the QR consumer the coordinator creates
+     * picks them up. */
+    cam_instr_stage_engine_config();
+
     /* Coordinator: engine per-frame outcome -> transport-dedup -> NEW ring +
      * status cell; report() -> cam_present -> overlay. */
     scan_coordinator_config_t ccfg = {};
     ccfg.pipeline       = s_pipeline;
-    ccfg.frame_width    = square;
-    ccfg.frame_height   = square;
+    ccfg.frame_width    = decode_square;   /* == square unless 480-decode */
+    ccfg.frame_height   = decode_square;
     ccfg.present        = cam_present;
     ccfg.present_ctx    = s_overlay;
     ccfg.on_complete    = cam_complete;
@@ -616,7 +701,8 @@ const char *cam_scanner_start(bool focus_assist)
      *    a scan. (The old "SPI boards keep core 0 busy" rationale predates the
      *    gutter redirect and is stale.)
      * Landscape image-widget sessions still composite through LVGL on core 0,
-     * so they stay single-decoder. */
+     * so they stay single-decoder. Instrumented runs can force either value
+     * via set_instr(num_decoders=...) — the engine-side override wins. */
     ccfg.num_decoders   = 1;
 #if SCAN_USES_PORTRAIT
     if (use_portrait) {
@@ -664,7 +750,9 @@ const char *cam_scanner_start(bool focus_assist)
 #endif
 
     s_running = true;
-    ESP_LOGI(TAG, "scanner started (%ux%u square)", (unsigned)square, (unsigned)square);
+    ESP_LOGI(TAG, "scanner started (%ux%u panel square, %ux%u decode)",
+             (unsigned)square, (unsigned)square,
+             (unsigned)decode_square, (unsigned)decode_square);
     return NULL;
 }
 
@@ -838,6 +926,93 @@ void cam_scanner_report_complete(void)
     scan_coordinator_report_complete(s_coord);
 }
 
+size_t cam_scanner_instr_poll_csv(int which, char *buf, size_t buf_len)
+{
+    cam_pipeline_qr_handle_t qr =
+        s_coord ? scan_coordinator_qr_handle(s_coord) : NULL;
+    if (!qr) {
+        return 0;
+    }
+    return cam_pipeline_qr_instr_poll_csv(qr, which, buf, buf_len);
+}
+
+bool cam_scanner_instr_poll_stats(char *buf, size_t buf_len, uint32_t *last_seq)
+{
+    cam_pipeline_qr_handle_t qr =
+        s_coord ? scan_coordinator_qr_handle(s_coord) : NULL;
+    if (!qr) {
+        return false;
+    }
+    return cam_pipeline_qr_instr_poll_stats(qr, buf, buf_len, last_seq);
+}
+
+bool cam_scanner_instr_poll_capture(const uint8_t **payload, size_t *len,
+                                    cam_scanner_capture_meta_t *out)
+{
+    if (!payload || !len || !out) {
+        return false;
+    }
+    cam_pipeline_qr_handle_t qr =
+        s_coord ? scan_coordinator_qr_handle(s_coord) : NULL;
+    if (!qr) {
+        return false;
+    }
+    cam_pipeline_qr_capture_meta_t m;
+    const uint8_t *buf = NULL;
+    size_t n = 0;
+    if (!cam_pipeline_qr_instr_poll_capture(qr, &buf, &n, &m)) {
+        return false;
+    }
+    *payload = buf;
+    *len = n;
+    out->cls          = m.cls;
+    out->seq          = m.seq;
+    out->dispatch_seq = m.dispatch_seq;
+    out->ts_us        = m.ts_us;
+    out->width        = m.width;
+    out->height       = m.height;
+    out->decoder_id   = m.decoder_id;
+    out->outcome      = m.outcome;
+    out->blend_score  = m.blend_score;
+    out->side_px      = m.side_px;
+    out->sharpness    = m.sharpness;
+    out->luma         = m.luma;
+    return true;
+}
+
+void cam_scanner_instr_counters(cam_scanner_instr_counters_t *out)
+{
+    if (!out) {
+        return;
+    }
+    memset(out, 0, sizeof(*out));
+    cam_pipeline_qr_handle_t qr =
+        s_coord ? scan_coordinator_qr_handle(s_coord) : NULL;
+    if (!qr) {
+        return;
+    }
+    cam_pipeline_qr_instr_counters_t c;
+    cam_pipeline_qr_instr_get_counters(qr, &c);
+    out->decode_rows     = c.decode_rows;
+    out->decode_drops    = c.decode_drops;
+    out->gate_rows       = c.gate_rows;
+    out->gate_drops      = c.gate_drops;
+    out->captures        = c.captures;
+    out->capture_drops   = c.capture_drops;
+    out->frag_arrived    = c.frag_arrived;
+    out->frag_dispatched = c.frag_dispatched;
+    out->frag_expired    = c.frag_expired;
+}
+
+void cam_scanner_reset_lock(void)
+{
+    cam_pipeline_qr_handle_t qr =
+        s_coord ? scan_coordinator_qr_handle(s_coord) : NULL;
+    if (qr) {
+        cam_pipeline_qr_reset_lock(qr);
+    }
+}
+
 #else /* !BOARD_HAS_CAMERA — bindings still link; start() reports the absence. */
 
 const char *cam_scanner_start(bool focus_assist) { (void)focus_assist; return "board has no camera"; }
@@ -848,5 +1023,12 @@ void cam_scanner_read_status(cam_scanner_status_t *out) { if (out) { memset(out,
 bool cam_scanner_poll_miss_frame(const uint8_t **payload, size_t *len, cam_scanner_miss_meta_t *meta) { (void)payload; (void)len; (void)meta; return false; }
 void cam_scanner_report(int status, int percent) { (void)status; (void)percent; }
 void cam_scanner_report_complete(void) {}
+void cam_scanner_instr_defaults(cam_scanner_instr_opts_t *out) { if (out) { memset(out, 0, sizeof(*out)); out->hash_gate = 1; } }
+void cam_scanner_set_instr(const cam_scanner_instr_opts_t *opts) { (void)opts; }
+size_t cam_scanner_instr_poll_csv(int which, char *buf, size_t buf_len) { (void)which; (void)buf; (void)buf_len; return 0; }
+bool cam_scanner_instr_poll_stats(char *buf, size_t buf_len, uint32_t *last_seq) { (void)buf; (void)buf_len; (void)last_seq; return false; }
+bool cam_scanner_instr_poll_capture(const uint8_t **payload, size_t *len, cam_scanner_capture_meta_t *meta) { (void)payload; (void)len; (void)meta; return false; }
+void cam_scanner_instr_counters(cam_scanner_instr_counters_t *out) { if (out) { memset(out, 0, sizeof(*out)); } }
+void cam_scanner_reset_lock(void) {}
 
 #endif /* BOARD_HAS_CAMERA */

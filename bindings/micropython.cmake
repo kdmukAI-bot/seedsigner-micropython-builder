@@ -57,4 +57,12 @@ target_link_libraries(usermod_dm INTERFACE
     __idf_esp-hashlib-ext
 )
 
+# 480-decode experiment marker: lets modcamera_scanner.c export DECODE_480 so
+# frozen Python (e.g. the instrumentation sequencer's BUILD_TAG) can tell the
+# two firmware variants apart at runtime. Mirrors the camera_scanner
+# component's env-driven define (see ports/esp32/camera_scanner/CMakeLists.txt).
+if("$ENV{SS_CAM_DECODE_480}" STREQUAL "1")
+    target_compile_definitions(usermod_dm INTERFACE BOARD_CAMERA_DECODE_480=1)
+endif()
+
 target_link_libraries(usermod INTERFACE usermod_dm)

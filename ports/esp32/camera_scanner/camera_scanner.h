@@ -128,6 +128,78 @@ void cam_scanner_report(int status, int percent);
 /* CONSUMER task: terminal completion -> on_complete() once. Idempotent. */
 void cam_scanner_report_complete(void);
 
+/* ── Instrumentation-run knobs + telemetry (scalar mirror of the engine's
+ * cam_pipeline_qr_instr_t; see docs/instrumentation-run-spec.md). All ints so
+ * this header stays QSTR-scan-clean. Defaults (cam_scanner_instr_defaults) =
+ * deployed behavior. ── */
+typedef struct {
+    int num_decoders;       /* 0 = board default; 1/2 = override             */
+    int sweep_cap;          /* 0 = effort default; >0 numeric probe budget   */
+    int ladder_select;      /* 0 stock; 1 additive-deep                      */
+    int blend_gate_permille;/* 0 = shadow                                    */
+    int gate_dedup;         /* bool: PENDING-dedup                           */
+    int debounce_ms;        /* stage-0 stability debounce; 0 = off           */
+    int seed_override;      /* bool: pin the sweep seed ...                  */
+    int seed_offset;        /*   ... at this offset ...                      */
+    int lock_freeze;        /*   ... and freeze the lock                     */
+    int fixed_threshold;    /* bool: legacy fixed-threshold decode           */
+    int effort_thorough;    /* bool: THOROUGH effort (static-media slots)    */
+    int hash_gate;          /* bool: content-change gate enable (default 1)  */
+    int instr_log;          /* bool: CSV rows + captures + extended stats    */
+    int capture_nothing;    /* bool: sample NOTHING frames                   */
+    int burst;              /* bool: capture every dispatched frame          */
+} cam_scanner_instr_opts_t;
+
+void cam_scanner_instr_defaults(cam_scanner_instr_opts_t *out);
+
+/* Stage knobs for the NEXT cam_scanner_start() (consumed once; NULL clears). */
+void cam_scanner_set_instr(const cam_scanner_instr_opts_t *opts);
+
+/* CONSUMER task: drain complete CSV rows (which: 0 = decode CSV, 1 = gate
+ * CSV). Returns bytes copied into buf (whole newline-terminated rows only;
+ * 0 = nothing pending / telemetry off). */
+size_t cam_scanner_instr_poll_csv(int which, char *buf, size_t buf_len);
+
+/* CONSUMER task: latest formatted 2 s stats block for the run.log mirror.
+ * True when a block newer than *last_seq was copied (updates *last_seq). */
+bool cam_scanner_instr_poll_stats(char *buf, size_t buf_len, uint32_t *last_seq);
+
+/* Scalar mirror of the engine capture meta (classes: 0 miss, 1 blend-flagged,
+ * 2 decoded sample, 3 nothing, 4 burst). */
+typedef struct {
+    int      cls;
+    uint32_t seq;
+    uint32_t dispatch_seq;
+    int64_t  ts_us;
+    uint32_t width, height;
+    int      decoder_id;
+    int      outcome;      /* 0 nothing, 1 miss, 2 decoded                  */
+    int      blend_score;  /* -1 when not computed                          */
+    float    side_px;
+    float    sharpness;
+    int      luma;
+} cam_scanner_capture_meta_t;
+
+/* CONSUMER task: drain the oldest pending capture (grayscale crop; buffer
+ * valid ONLY until the next call). */
+bool cam_scanner_instr_poll_capture(const uint8_t **payload, size_t *len,
+                                    cam_scanner_capture_meta_t *meta);
+
+/* Live producer counters (drop audit + fragment accounting). */
+typedef struct {
+    uint32_t decode_rows, decode_drops;
+    uint32_t gate_rows, gate_drops;
+    uint32_t captures, capture_drops;
+    uint32_t frag_arrived, frag_dispatched, frag_expired;
+} cam_scanner_instr_counters_t;
+
+void cam_scanner_instr_counters(cam_scanner_instr_counters_t *out);
+
+/* Cold-start the adaptive-threshold lock on the live decoders (see
+ * k_quirc_reset_lock). Called between BBQR-bench completion trials so each is an
+ * independent cold-start sample. Safe while scanning; no-op with no camera. */
+void cam_scanner_reset_lock(void);
+
 #ifdef __cplusplus
 }
 #endif

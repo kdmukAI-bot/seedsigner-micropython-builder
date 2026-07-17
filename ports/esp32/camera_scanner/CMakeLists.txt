@@ -25,3 +25,13 @@ idf_component_register(
 target_compile_options(${COMPONENT_LIB} PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>:-fexceptions>
 )
+
+# 480-decode experiment (partition-mode boards): SS_CAM_DECODE_480=1 in the
+# environment makes QR-scan sessions run the pipeline + decoders at 480x480
+# while the display sink decimates 3->2 back to the 320 panel square. Env-var
+# (not -D cache) so both of ESP-IDF's evaluation passes agree — same pattern
+# as BOARD_CONFIG_DIR. Default off = deployed behavior.
+if("$ENV{SS_CAM_DECODE_480}" STREQUAL "1")
+    target_compile_definitions(${COMPONENT_LIB} PRIVATE BOARD_CAMERA_DECODE_480=1)
+    message(STATUS "camera_scanner: 480-decode experiment ENABLED (SS_CAM_DECODE_480=1)")
+endif()

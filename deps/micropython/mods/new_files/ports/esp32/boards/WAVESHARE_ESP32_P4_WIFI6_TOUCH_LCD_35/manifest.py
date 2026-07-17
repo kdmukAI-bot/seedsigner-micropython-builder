@@ -65,3 +65,8 @@ try:
     module("seedsigner_frozen_build.py", base_path="$(MPY_DIR)/../../../frozen_app")
 except OSError:
     pass  # frozen_app not staged (e.g. CI) -> build without the frozen app tree
+
+# Instrumentation-run sequencer (docs/instrumentation-run-spec.md): frozen so a
+# freshly flashed instrumentation build needs only a 2-line /main.py (or none,
+# via tools/push_main.py). Lives in the builder's tools/ tree.
+module("instrumented_run.py", base_path="$(MPY_DIR)/../../../tools")
