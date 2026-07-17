@@ -607,14 +607,24 @@ const char *cam_scanner_start(bool focus_assist)
     ccfg.on_complete    = cam_complete;
     ccfg.complete_ctx   = s_overlay;
     ccfg.new_ring_depth = 0;  /* default */
-    /* A 2nd decoder pays off only where its core is otherwise free: the portrait
-     * DSI scan drops the per-frame 90° rotate off core 0. Landscape image-widget
-     * sessions and SPI-partition boards keep core 0 busy, so they stay single. */
+    /* A 2nd decoder pays off where its core is otherwise free:
+     *  - portrait DSI scan (4.3): the native-portrait direct blit drops the
+     *    per-frame 90° rotate off core 0;
+     *  - partition-mode SPI boards (3.5): the gutter shadow-FB flush redirect
+     *    makes the camera consumer the sole SPI writer and LVGL never renders
+     *    over the live square (zero-copy stripe blit), so core 0 idles during
+     *    a scan. (The old "SPI boards keep core 0 busy" rationale predates the
+     *    gutter redirect and is stale.)
+     * Landscape image-widget sessions still composite through LVGL on core 0,
+     * so they stay single-decoder. */
     ccfg.num_decoders   = 1;
 #if SCAN_USES_PORTRAIT
     if (use_portrait) {
         ccfg.num_decoders = 2;
     }
+#endif
+#if BOARD_CAMERA_PARTITION_MODE
+    ccfg.num_decoders = 2;
 #endif
     s_coord = scan_coordinator_create(&ccfg);
     if (!s_coord) {
