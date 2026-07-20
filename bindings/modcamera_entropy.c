@@ -12,14 +12,20 @@
  *     camera_entropy.capture()
  *     while (r := camera_entropy.get_result()) is None:
  *         pass                                  # poll a few ms for the latch
- *     chain, frame, n = r
- *     final = hashlib.sha256(chain + frame).digest()   # the entropy result
+ *     chain, frame, n = r                       # both mutable — see get_result()
+ *     hasher = hashlib.sha256()                 # fed incrementally: `chain + frame`
+ *     hasher.update(chain)                      # would build a third full-size copy
+ *     hasher.update(frame)                      # of the frame just to hash it
+ *     final = hasher.digest()                   # the entropy result
+ *     camera_entropy.secure_zero(frame)         # scrub the copies once hashed
+ *     camera_entropy.secure_zero(chain)
  *     camera_entropy.stop()                     # (or .resume() to reshoot)
  *
  * The chain digest EXCLUDES the latched final image; the host mixes it in via the
  * final SHA-256, matching the SeedSigner reference so the result is reproducible.
  */
 #include <stdint.h>
+#include <string.h>
 
 #include "py/obj.h"
 #include "py/runtime.h"
@@ -101,10 +107,18 @@ static mp_obj_t mp_camera_entropy_capture(void) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(camera_entropy_capture_obj, mp_camera_entropy_capture);
 
-// get_result() -> (chain: bytes, frame: bytes, frames_chained: int) | None.
+// get_result() -> (chain: bytearray, frame: bytearray, frames_chained: int) | None.
 // None until the latch completes after capture() (poll a few ms). `chain` is the
 // 32-byte digest over seed + preview frames; `frame` is the latched RGB565 final
-// image. The host computes the entropy as sha256(chain + frame).
+// image. The host computes the entropy as sha256(chain || frame).
+//
+// MUTABLE bytearrays rather than bytes, deliberately: both are seed material, and
+// what the host receives are copies it owns. Immutable bytes could only ever be
+// de-referenced, and neither VM zeroes memory it frees — so the plaintext frame
+// would sit in freed blocks until something happened to reuse them. A bytearray can
+// be scrubbed in place; see secure_zero() below, which the host calls once it has
+// hashed them. The native latch these are copied from is scrubbed separately by
+// cam_pipeline_entropy on teardown.
 static mp_obj_t mp_camera_entropy_get_result(void) {
     const uint8_t *chain = NULL, *frame = NULL;
     size_t chain_len = 0, frame_len = 0;
@@ -113,8 +127,8 @@ static mp_obj_t mp_camera_entropy_get_result(void) {
         return mp_const_none;
     }
     mp_obj_t out[3];
-    out[0] = mp_obj_new_bytes(chain, chain_len);
-    out[1] = mp_obj_new_bytes(frame, frame_len);
+    out[0] = mp_obj_new_bytearray(chain_len, chain);
+    out[1] = mp_obj_new_bytearray(frame_len, frame);
     out[2] = mp_obj_new_int_from_uint(n);
     return mp_obj_new_tuple(3, out);
 }
@@ -127,6 +141,37 @@ static mp_obj_t mp_camera_entropy_resume(void) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(camera_entropy_resume_obj, mp_camera_entropy_resume);
 
+/* memset reached through a volatile function pointer. The compiler must load the
+ * pointer and call through it, so it cannot prove the write is dead and drop it —
+ * while still getting a real memset's speed, which matters when the frame is
+ * megabytes. A hand-rolled `volatile uint8_t *` loop is equally DSE-proof but byte
+ * at a time. */
+static void *(*const volatile secure_memset)(void *, int, size_t) = memset;
+
+// secure_zero(buf) -> None. Overwrite a writable buffer with zeros, in place.
+//
+// For the host to scrub the get_result() copies (or any other buffer holding seed
+// material) once they have been hashed. Two properties matter here and neither is
+// reachable from pure Python:
+//   * IN PLACE. `buf[:] = b"\x00" * len(buf)` is allowed to reallocate, which would
+//     free the original plaintext buffer un-scrubbed — precisely backwards. Writing
+//     through the buffer protocol touches the caller's own memory and nothing else.
+//   * NOT OPTIMIZED AWAY. A plain memset over memory never read again is a dead
+//     store, and compilers do eliminate it. See secure_memset above.
+//
+// Raises TypeError on a read-only object (e.g. bytes), so a scrub that could not
+// possibly land fails loudly instead of silently doing nothing.
+//
+// Deliberately a mechanical wipe and nothing else: no part of the seed derivation
+// moves into C, so that math stays readable, auditable Python.
+static mp_obj_t mp_camera_entropy_secure_zero(mp_obj_t buf_in) {
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(buf_in, &bufinfo, MP_BUFFER_RW);
+    secure_memset(bufinfo.buf, 0, bufinfo.len);
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(camera_entropy_secure_zero_obj, mp_camera_entropy_secure_zero);
+
 static const mp_rom_map_elem_t camera_entropy_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_camera_entropy) },
     { MP_ROM_QSTR(MP_QSTR_start), MP_ROM_PTR(&camera_entropy_start_obj) },
@@ -137,6 +182,7 @@ static const mp_rom_map_elem_t camera_entropy_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_capture), MP_ROM_PTR(&camera_entropy_capture_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_result), MP_ROM_PTR(&camera_entropy_get_result_obj) },
     { MP_ROM_QSTR(MP_QSTR_resume), MP_ROM_PTR(&camera_entropy_resume_obj) },
+    { MP_ROM_QSTR(MP_QSTR_secure_zero), MP_ROM_PTR(&camera_entropy_secure_zero_obj) },
 };
 static MP_DEFINE_CONST_DICT(camera_entropy_module_globals, camera_entropy_module_globals_table);
 
