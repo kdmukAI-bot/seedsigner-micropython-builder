@@ -21,6 +21,15 @@ static const char *TAG = "camera_entropy";
 #define BOARD_CAMERA_PARTITION_MODE 0
 #endif
 
+/* High-resolution entropy still, per board (P4 only): the latched final image is
+ * a SQUARE at 2x the display square (960 on the P4-43, 640 on the P4-35), grabbed
+ * by a second PPA pass, hashed full-resolution, and shown downsampled with pillar
+ * bars. 0 = no still: latch the display-resolution preview square (S3 / no PPA).
+ * See docs/_integration/entropy-highres-still-todo.md. */
+#ifndef BOARD_ENTROPY_STILL_DIM
+#define BOARD_ENTROPY_STILL_DIM 0
+#endif
+
 #if BOARD_HAS_CAMERA
 
 /* The engine headers lack an extern "C" guard. Force C linkage HERE, before any
@@ -49,7 +58,9 @@ static lv_obj_t                      *s_screen   = NULL;
 static bool                           s_running  = false;
 static bool                           s_await_confirm = false;  /* capture()→CONFIRM latch */
 static volatile uint32_t              s_frames   = 0;  /* live progress counter */
-static uint32_t                       s_square   = 0;  /* latched-frame side length (px) */
+static uint32_t                       s_square   = 0;  /* display/preview square side (px) */
+static uint32_t                       s_still_w  = 0;  /* latched-still width  (px) */
+static uint32_t                       s_still_h  = 0;  /* latched-still height (px) */
 static uint8_t                        s_seed[32];      /* copy of optional seed */
 
 /* Overlay strings are HOST-PROVIDED + already localized (cam_entropy_set_labels, called
@@ -186,6 +197,10 @@ const char *cam_entropy_start(const uint8_t *seed_hash, size_t seed_len)
                           ? BOARD_DISP_H_RES : BOARD_DISP_V_RES;
     pcfg.display_width  = square;
     pcfg.display_height = square;
+    /* High-resolution square still (P4). 0 on boards without it → the pipeline
+     * allocates no still buffer and the consumer latches the preview square. */
+    pcfg.still_width  = BOARD_ENTROPY_STILL_DIM;
+    pcfg.still_height = BOARD_ENTROPY_STILL_DIM;
 
     s_pipeline = cam_pipeline_create(&pcfg);
     if (!s_pipeline) {
@@ -201,11 +216,19 @@ const char *cam_entropy_start(const uint8_t *seed_hash, size_t seed_len)
     }
 
     s_frames = 0;
-    s_square = square;  /* latched-frame dims for the CONFIRM full-display image */
+    s_square = square;  /* display/preview square (overlay geometry) */
+    /* The latched still is the high-res square when this board grabs one; else it
+     * is the preview square (the consumer reports which via get_result's len, but
+     * the confirm-image processing below wants the intended dims up front). */
+    uint32_t still_dim = BOARD_ENTROPY_STILL_DIM ? BOARD_ENTROPY_STILL_DIM : square;
+    s_still_w = still_dim;
+    s_still_h = still_dim;
     cam_pipeline_entropy_config_t ecfg = {};
     ecfg.pipeline     = s_pipeline;
-    ecfg.frame_width  = square;
+    ecfg.frame_width  = square;                    /* preview frames (chained) */
     ecfg.frame_height = square;
+    ecfg.still_width  = BOARD_ENTROPY_STILL_DIM;   /* 0 → latch the preview square */
+    ecfg.still_height = BOARD_ENTROPY_STILL_DIM;
     ecfg.seed_hash    = seed;
     ecfg.on_frame     = on_entropy_frame;
     ecfg.user_ctx     = NULL;
@@ -265,7 +288,8 @@ const char *cam_entropy_start(const uint8_t *seed_hash, size_t seed_len)
     }
 
     s_running = true;
-    ESP_LOGI(TAG, "entropy capture started (%ux%u square)", (unsigned)square, (unsigned)square);
+    ESP_LOGI(TAG, "entropy capture started (%ux%u preview square, %ux%u still)",
+             (unsigned)square, (unsigned)square, (unsigned)s_still_w, (unsigned)s_still_h);
     return NULL;
 }
 
@@ -308,6 +332,8 @@ void cam_entropy_stop(void)
     memset(s_seed, 0, sizeof(s_seed));
     s_frames = 0;
     s_square = 0;
+    s_still_w = 0;
+    s_still_h = 0;
     s_await_confirm = false;
     /* Option A: leave our black cam screen loaded as the active screen — camera image +
      * overlay widgets gone, it shows black, covering the teardown→next-load gap. We drop
@@ -338,28 +364,62 @@ void cam_entropy_capture(void)
     overlay_set_phase(CAMERA_ENTROPY_PHASE_CAPTURING);
 }
 
-/* BUILDER-1: on entering CONFIRM, render the latched RAW final frame full-display
- * (aspect crop-to-fill + luminance contrast stretch, via the screens-repo
- * image_entropy_process) and hand it to the overlay as the review image. This is
- * DISPLAY-ONLY: the entropy chain and get_result()'s (chain, frame) stay the RAW
- * latched bytes — processed pixels are never fed back into the entropy hash.
+/* BUILDER-1: on entering CONFIRM, render the latched RAW final still full-display
+ * (aspect-FIT — a centered square with pillar bars, box-filter downsampled from the
+ * high-res still, plus a luminance contrast stretch, via the screens-repo
+ * image_entropy_process) and hand it to the overlay as the review image. The
+ * downsample (averaging several sensor pixels per shown pixel) is deliberately what
+ * makes the DISPLAYED pixels differ from the HASHED pixels. This is DISPLAY-ONLY:
+ * the entropy chain and get_result()'s (chain, frame) stay the RAW latched bytes —
+ * processed pixels are never fed back into the entropy hash.
  *
- * Non-partition boards only (the DSI/image-widget path, e.g. the P4-43): under
- * BOARD_CAMERA_PARTITION_MODE the camera owns the preview square and LVGL's flush
- * is redirected to the gutters, so a full-display LVGL image can't cover the
- * square — those boards keep the frozen center-square review (compiled out here). */
+ * Runs on BOTH display architectures. On a partition board (BOARD_CAMERA_PARTITION_MODE,
+ * the P4-35) the camera owns the preview square and LVGL's flush is redirected to the
+ * gutters, so a full-display LVGL image would be invisible — previously this whole path
+ * was compiled out there and that board kept the frozen centre square. It now suspends
+ * the fence first: capture() has already frozen the pipeline, so the camera is no longer
+ * writing and LVGL can safely own the whole panel for the still review image (and its
+ * Accept button). resume() re-fences before unfreezing. board_display_partition_suspend/
+ * _resume are no-op stubs on non-partition boards, so the P4-43 path is unchanged. */
+/* Deallocator handed to the overlay alongside the confirm-image buffer. The overlay is
+ * platform-agnostic (pure LVGL, no ESP-IDF), so it cannot know the frame came from
+ * heap_caps_malloc — it just calls this back when the frame is replaced or its widget
+ * is deleted. Must match the allocation in push_confirm_image(). */
+static void cam_confirm_image_free(void *p)
+{
+    heap_caps_free(p);
+}
+
 static void push_confirm_image(void)
 {
-#if !BOARD_CAMERA_PARTITION_MODE
-    if (!s_entropy || !s_overlay || s_square == 0) {
+    if (!s_entropy || !s_overlay || s_still_w == 0) {
         return;
     }
     const uint8_t *raw = NULL;
     size_t raw_len = 0;
     if (!cam_pipeline_entropy_get_result(s_entropy, NULL, NULL, &raw, &raw_len, NULL) ||
-        !raw || raw_len < (size_t)s_square * s_square * 2) {
-        return;  /* no latch yet / unexpected size — leave the frozen square */
+        !raw) {
+        return;  /* no latch yet */
     }
+    /* The latch is normally the high-res still (s_still_w x s_still_h). If a board
+     * without still support — or a still-buffer alloc that fell back — latched the
+     * preview square instead, get_result reports the smaller length; process it at
+     * the square dims so we never read past the buffer. Anything shorter than even
+     * the preview square is unexpected: leave the frozen square. */
+    int32_t src_w, src_h;
+    if (raw_len >= (size_t)s_still_w * s_still_h * 2) {
+        src_w = (int32_t)s_still_w;
+        src_h = (int32_t)s_still_h;
+    } else if (raw_len >= (size_t)s_square * s_square * 2) {
+        src_w = (int32_t)s_square;
+        src_h = (int32_t)s_square;
+    } else {
+        return;
+    }
+    /* Partition boards: hand the whole panel back to LVGL before drawing anything into
+     * the square. Its precondition — a frozen pipeline — is already met, because
+     * capture() froze it before the latch we just read. No-op elsewhere. */
+    board_display_partition_suspend();
     const int32_t dw = BOARD_DISP_H_RES;
     const int32_t dh = BOARD_DISP_V_RES;
     /* Full-panel RGB565 scratch in PSRAM (same size class as the overlay's own
@@ -370,14 +430,28 @@ static void push_confirm_image(void)
         ESP_LOGW(TAG, "confirm-image alloc failed (%d B SPIRAM)", (int)((size_t)dw * dh * 2));
         return;
     }
-    image_entropy_process(raw, (int32_t)s_square, (int32_t)s_square,
-                          IMAGE_ENTROPY_PIXFMT_RGB565, disp, dw, dh);
+    /* Box downscale + a mild unsharp mask (not the plain box the Pi Zero uses) for
+     * the P4 confirm image: a cheap edge-acuity "pop" so the frozen review frame
+     * reads as crisper than the live preview, without the multi-second cost of a
+     * wide bicubic reconstruction. See image_entropy.h. */
+    image_entropy_process_filtered(raw, src_w, src_h,
+                                   IMAGE_ENTROPY_PIXFMT_RGB565, disp, dw, dh,
+                                   IMAGE_ENTROPY_FILTER_BOX_SHARPEN);
+    /* HAND THE PSRAM BUFFER OVER — do not copy and do not free it here. The copying
+     * setter allocates w*h*2 from the LVGL heap, which is a 128 KB pool
+     * (CONFIG_LV_MEM_SIZE_KILOBYTES): a full-display frame is 480*800*2 = 750 KB on the
+     * P4-43, so that allocation can never succeed and the setter silently left the
+     * frozen square instead of the review image. The _owned form renders straight out
+     * of this PSRAM buffer, and the overlay releases it with the deallocator we pass. */
     if (lvgl_port_lock(0)) {
-        camera_entropy_overlay_set_confirm_image(s_overlay, disp, dw, dh);
+        camera_entropy_overlay_set_confirm_image_owned(s_overlay, disp, dw, dh,
+                                                       cam_confirm_image_free);
         lvgl_port_unlock();
+        disp = NULL;  /* ownership transferred */
     }
-    heap_caps_free(disp);  /* the overlay deep-copied it */
-#endif
+    if (disp) {
+        heap_caps_free(disp);  /* never handed over (lock failed) — release it */
+    }
 }
 
 bool cam_entropy_get_result(const uint8_t **chain, size_t *chain_len,
@@ -402,6 +476,11 @@ bool cam_entropy_get_result(const uint8_t **chain, size_t *chain_len,
 
 void cam_entropy_resume(void)
 {
+    /* Re-fence the camera square BEFORE unfreezing: the camera must not resume writing
+     * the square while LVGL still owns the whole panel, or both write the bus at once —
+     * the two-writer collision partition mode exists to prevent. No-op on non-partition
+     * boards, and a no-op here too if push_confirm_image never suspended. */
+    board_display_partition_resume();
     if (s_entropy) {
         cam_pipeline_entropy_resume(s_entropy);
     }
