@@ -157,6 +157,27 @@ static mp_obj_t mp_camera_scanner_report_complete(void) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(camera_scanner_report_complete_obj, mp_camera_scanner_report_complete);
 
+// begin_segments(total_segments) -> None. Announce an INDEXED animated-QR cycle
+// (BBQR/Specter) of `total_segments` pieces: switches the overlay from the continuous
+// fill to per-piece cells. total_segments <= 0 is a no-op. Called ONCE, when the first
+// decoded frame reveals the cycle size. The screen owns the decoded set and derives the
+// percent from its own lit count (see cam_scanner_begin_segments).
+static mp_obj_t mp_camera_scanner_begin_segments(mp_obj_t total_obj) {
+    cam_scanner_begin_segments(mp_obj_get_int(total_obj));
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_1(camera_scanner_begin_segments_obj, mp_camera_scanner_begin_segments);
+
+// segment_event(status, piece_index) -> None. One segmented-scan decode event. status
+// is one of FRAME_* (forwarded raw, like report()): FRAME_NEW lights piece_index and
+// advances the derived percent; FRAME_REPEAT re-marks an already-lit piece_index (the
+// real re-read index, NOT -1); FRAME_MISS updates the dot only (piece_index = -1).
+static mp_obj_t mp_camera_scanner_segment_event(mp_obj_t status_obj, mp_obj_t piece_obj) {
+    cam_scanner_segment_event(mp_obj_get_int(status_obj), mp_obj_get_int(piece_obj));
+    return mp_const_none;
+}
+static MP_DEFINE_CONST_FUN_OBJ_2(camera_scanner_segment_event_obj, mp_camera_scanner_segment_event);
+
 static const mp_rom_map_elem_t camera_scanner_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_camera_scanner) },
     { MP_ROM_QSTR(MP_QSTR_start), MP_ROM_PTR(&camera_scanner_start_obj) },
@@ -167,6 +188,8 @@ static const mp_rom_map_elem_t camera_scanner_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_read_status), MP_ROM_PTR(&camera_scanner_read_status_obj) },
     { MP_ROM_QSTR(MP_QSTR_report), MP_ROM_PTR(&camera_scanner_report_obj) },
     { MP_ROM_QSTR(MP_QSTR_report_complete), MP_ROM_PTR(&camera_scanner_report_complete_obj) },
+    { MP_ROM_QSTR(MP_QSTR_begin_segments), MP_ROM_PTR(&camera_scanner_begin_segments_obj) },
+    { MP_ROM_QSTR(MP_QSTR_segment_event), MP_ROM_PTR(&camera_scanner_segment_event_obj) },
     // Frame-status vocabulary (mirrors scan_coordinator / Python DecodeQRStatus).
     { MP_ROM_QSTR(MP_QSTR_FRAME_NONE), MP_ROM_INT(CAM_SCAN_FRAME_NONE) },
     { MP_ROM_QSTR(MP_QSTR_FRAME_NEW), MP_ROM_INT(CAM_SCAN_FRAME_NEW) },
