@@ -1,4 +1,4 @@
-.PHONY: docker-shell docker-build-all dist clean clean-purge-cache full-reset
+.PHONY: docker-shell stage-app docker-build-all dist clean clean-purge-cache full-reset
 
 # Local dev uses the same prebaked GHCR image as CI.
 # Override IMAGE if you need a pinned tag.
@@ -20,8 +20,18 @@ docker-shell:
 	@mkdir -p $(HOME)/.cache
 	$(DOCKER_RUN) -it $(IMAGE) bash
 
-# One-liner: setup + firmware build + screenshot build inside Docker
-docker-build-all:
+# Host-side: stage the SeedSigner app + embit into frozen_app/ for the frozen
+# build (tools/stage_frozen_app.py). Runs on the host because the Docker build
+# mounts only this repo, so the app/embit siblings must be mirrored in first.
+# Version override: SEEDSIGNER_VERSION=v9.9.9 make stage-app
+# Source override:  SS_APP_DIR=... SS_EMBIT_DIR=... (or .env) -- defaults to the
+# sibling checkouts; CI points these at the deps/seedsigner + deps/embit submodules.
+stage-app:
+	python3 tools/stage_frozen_app.py --board $(BOARD)
+
+# One-liner: setup + firmware build + screenshot build inside Docker.
+# Depends on stage-app so `make docker-build-all` auto-stages the frozen app tree.
+docker-build-all: stage-app
 	@mkdir -p $(HOME)/.cache
 	$(DOCKER_RUN) -t $(IMAGE) bash -lc './scripts/docker_build_all.sh'
 

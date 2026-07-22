@@ -13,3 +13,11 @@
 [submodule "deps/esp-secp256k1"]
 	path = deps/esp-secp256k1
 	url = https://github.com/kdmukAI-bot/esp-secp256k1.git
+[submodule "deps/seedsigner"]
+	path = deps/seedsigner
+	url = https://github.com/kdmukAI-bot/seedsigner.git
+	branch = integration/lvgl-mpy
+[submodule "deps/embit"]
+	path = deps/embit
+	url = https://github.com/kdmukAI-bot/embit.git
+	branch = perf/psbt-parse-speedups-v0.8.0

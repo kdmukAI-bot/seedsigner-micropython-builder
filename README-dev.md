@@ -1,9 +1,68 @@
 # Developer Guide
 
 Day-to-day build/flash usage — Docker build targets, supported boards, flashing
-— lives in [README.md](README.md) and `CLAUDE.md`. This document covers the parts
-of the workflow that are **not** part of a normal build, chiefly the prebaked
-base image.
+— lives in [README.md](README.md) and `CLAUDE.md`. This document covers the
+workflow around the build: how the frozen app is staged and versioned, and how the
+prebaked base image is rebuilt and published.
+
+## Frozen app build & versioning
+
+The firmware freezes a copy of the SeedSigner app + `embit` into the image. Staging and
+version-baking are handled by `tools/stage_frozen_app.py`, driven by `make stage-app` — which
+`make docker-build-all` runs automatically on the host (the Docker build mounts only this repo, so
+the app/embit sources must be mirrored into `frozen_app/` first).
+
+### Staging
+
+```bash
+make stage-app BOARD=<board>       # mirror app+embit -> frozen_app/, bake version + provenance
+```
+
+Sources resolve via `tools/_devenv`: `SS_APP_DIR` (default `../seedsigner`) and `SS_EMBIT_DIR`
+(default `../embit`), both `.env`-overridable — so local dev stages your **sibling working trees**
+(the live dev tip), while CI points these at the `deps/seedsigner` / `deps/embit` submodules. The
+stager clean-mirrors `seedsigner/` and `embit/` into `frozen_app/` (excluding `resources/`,
+`__pycache__`, `*.pyc`; a wipe-then-copy, so a removed module can't linger in the freeze), then
+writes two frozen modules:
+
+- `frozen_app/seedsigner/_version.py` — the on-device version (auto-frozen with the package).
+- `frozen_app/seedsigner_frozen_build.py` — the provenance marker (SHAs, dirty count, build time,
+  board).
+
+`frozen_app/` is gitignored and regenerated on every stage.
+
+### Version source: env override → git fallback
+
+`tools/_version_bake.py` determines the version, in precedence order:
+
+1. **Env override** — set `SEEDSIGNER_VERSION` (plus optional `SEEDSIGNER_VERSION_FORK`,
+   `SEEDSIGNER_SHORT_COMMIT_HASH`, `SEEDSIGNER_VERSION_TIMESTAMP`). Used by release / CI builds,
+   where the version is decided up front and the build host must not import the app:
+   ```bash
+   SEEDSIGNER_VERSION=v0.8.7 make stage-app BOARD=<board>
+   ```
+2. **Git fallback** — otherwise the app's own `helpers/version.py` logic runs in an isolated
+   subprocess against the app source, capturing its git / CI state.
+
+Frozen firmware content is import-only (it can't `open()` a JSON file), so the version ships as a
+`.py` module — the on-device analogue of the app's `version.json`. The app reads it via
+`from seedsigner import _version` under `IS_MICROPYTHON` (guarded; falls back to
+`Controller.VERSION = "unknown"`).
+
+### Bumping the app / embit pins
+
+`deps/seedsigner` and `deps/embit` are branch-tracked submodules (see the main README). Advance a
+pin to its branch tip with `git submodule update --remote <path>`, then commit the bump. Local dev
+doesn't use the submodules — the stager reads your sibling working trees — so `--remote` is for
+capturing a pin for CI.
+
+### Overlay dev lane and CI dist (in progress)
+
+Two follow-ups from the frozen-build plan are not yet wired: a `/overlay` dev-iteration lane (push
+just the `seedsigner` package to a flash dir that shadows the frozen copy, for fast edits without a
+firmware rebuild) and a merge-only CI job that publishes a downloadable, self-launching
+`dist/<BOARD>/` (the `/main.py` launcher baked into a VFS partition). Until then, a locally built
+image is launched by provisioning `/main.py` with `tools/set_p4_boot_app.py` (see the main README).
 
 ## The prebaked base image
 

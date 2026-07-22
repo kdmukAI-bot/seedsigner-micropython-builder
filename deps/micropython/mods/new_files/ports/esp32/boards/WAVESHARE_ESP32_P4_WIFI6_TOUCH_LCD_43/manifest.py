@@ -50,9 +50,11 @@ module("seedsigner_lvgl_screens.py", base_path="$(MPY_DIR)/../../../deps/third-p
 # resolution is ATOMIC per top-level name, so a dev override of a frozen
 # `seedsigner` must overlay the WHOLE package, not single files.
 # `seedsigner/resources` is data (never imported) and stays off the freeze / on
-# the microSD. The sources are staged into <repo>/frozen_app by hand (the build
-# container only mounts this repo). seedsigner_frozen_build is the on-device
-# proof marker. See docs/knowledge/esp32-p4-vfs-import-overhead.md.
+# the microSD. The sources are staged into <repo>/frozen_app by
+# tools/stage_frozen_app.py (`make stage-app`, which docker-build-all runs on the
+# host -- the build container only mounts this repo). That stager also bakes the
+# version into seedsigner/_version.py and regenerates the seedsigner_frozen_build
+# provenance marker. See docs/knowledge/esp32-p4-vfs-import-overhead.md.
 #
 # frozen_app/ is gitignored and staged before a dev/deploy build, so a clean
 # checkout that does NOT stage it -- e.g. CI, which only verifies the firmware
