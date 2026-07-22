@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22 00:30:20Z",
+  "generated_at": "2026-07-22 22:46:19Z",
   "resolutions": [
     {
       "width": 240,
@@ -127,6 +127,11 @@
           "path": "img/240x240/opening_splash_screen__micropython_no_partners_240x240.png"
         },
         {
+          "name": "opening_splash_screen__long_version_multiline",
+          "display_name": "opening_splash_screen (_long_version_multiline)",
+          "path": "img/240x240/opening_splash_screen__long_version_multiline_240x240.png"
+        },
+        {
           "name": "large_icon_status_screen",
           "display_name": "large_icon_status_screen",
           "path": "img/240x240/large_icon_status_screen_240x240.png"
@@ -232,6 +237,36 @@
           "path": "img/240x240/camera_preview_overlay_screen__fill_landscape_240x240.png"
         },
         {
+          "name": "camera_preview_overlay_screen__segmented_middle_first",
+          "display_name": "camera_preview_overlay_screen (_segmented_middle_first)",
+          "path": "img/240x240/camera_preview_overlay_screen__segmented_middle_first_240x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_sparse",
+          "display_name": "camera_preview_overlay_screen (_segmented_sparse)",
+          "path": "img/240x240/camera_preview_overlay_screen__segmented_sparse_240x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_near_full",
+          "display_name": "camera_preview_overlay_screen (_segmented_near_full)",
+          "path": "img/240x240/camera_preview_overlay_screen__segmented_near_full_240x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_repeated",
+          "display_name": "camera_preview_overlay_screen (_segmented_repeated)",
+          "path": "img/240x240/camera_preview_overlay_screen__segmented_repeated_240x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_dense",
+          "display_name": "camera_preview_overlay_screen (_segmented_dense)",
+          "path": "img/240x240/camera_preview_overlay_screen__segmented_dense_240x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_degenerate_240",
+          "display_name": "camera_preview_overlay_screen (_segmented_degenerate_240)",
+          "path": "img/240x240/camera_preview_overlay_screen__segmented_degenerate_240_240x240.png"
+        },
+        {
           "name": "camera_preview_pillarboxed_screen",
           "display_name": "camera_preview_pillarboxed_screen",
           "path": "img/240x240/camera_preview_pillarboxed_screen_240x240.png"
@@ -250,6 +285,36 @@
           "name": "camera_preview_pillarboxed_screen__complete",
           "display_name": "camera_preview_pillarboxed_screen (_complete)",
           "path": "img/240x240/camera_preview_pillarboxed_screen__complete_240x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_middle_first",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_middle_first)",
+          "path": "img/240x240/camera_preview_pillarboxed_screen__segmented_middle_first_240x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_sparse",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_sparse)",
+          "path": "img/240x240/camera_preview_pillarboxed_screen__segmented_sparse_240x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_near_full",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_near_full)",
+          "path": "img/240x240/camera_preview_pillarboxed_screen__segmented_near_full_240x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_repeated",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_repeated)",
+          "path": "img/240x240/camera_preview_pillarboxed_screen__segmented_repeated_240x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_dense",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_dense)",
+          "path": "img/240x240/camera_preview_pillarboxed_screen__segmented_dense_240x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_degenerate",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_degenerate)",
+          "path": "img/240x240/camera_preview_pillarboxed_screen__segmented_degenerate_240x240.png"
         },
         {
           "name": "camera_entropy_overlay_screen",
@@ -712,6 +777,21 @@
           "path": "img/240x240/donate_screen_240x240.png"
         },
         {
+          "name": "version_screen",
+          "display_name": "version_screen",
+          "path": "img/240x240/version_screen_240x240.png"
+        },
+        {
+          "name": "version_screen__release_image",
+          "display_name": "version_screen (_release_image)",
+          "path": "img/240x240/version_screen__release_image_240x240.png"
+        },
+        {
+          "name": "version_screen__long_branch_name",
+          "display_name": "version_screen (_long_branch_name)",
+          "path": "img/240x240/version_screen__long_branch_name_240x240.png"
+        },
+        {
           "name": "psbt_op_return_screen",
           "display_name": "psbt_op_return_screen",
           "path": "img/240x240/psbt_op_return_screen_240x240.png"
@@ -854,6 +934,11 @@
           "path": "img/320x240/opening_splash_screen__micropython_no_partners_320x240.png"
         },
         {
+          "name": "opening_splash_screen__long_version_multiline",
+          "display_name": "opening_splash_screen (_long_version_multiline)",
+          "path": "img/320x240/opening_splash_screen__long_version_multiline_320x240.png"
+        },
+        {
           "name": "large_icon_status_screen",
           "display_name": "large_icon_status_screen",
           "path": "img/320x240/large_icon_status_screen_320x240.png"
@@ -959,6 +1044,36 @@
           "path": "img/320x240/camera_preview_overlay_screen__fill_landscape_320x240.png"
         },
         {
+          "name": "camera_preview_overlay_screen__segmented_middle_first",
+          "display_name": "camera_preview_overlay_screen (_segmented_middle_first)",
+          "path": "img/320x240/camera_preview_overlay_screen__segmented_middle_first_320x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_sparse",
+          "display_name": "camera_preview_overlay_screen (_segmented_sparse)",
+          "path": "img/320x240/camera_preview_overlay_screen__segmented_sparse_320x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_near_full",
+          "display_name": "camera_preview_overlay_screen (_segmented_near_full)",
+          "path": "img/320x240/camera_preview_overlay_screen__segmented_near_full_320x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_repeated",
+          "display_name": "camera_preview_overlay_screen (_segmented_repeated)",
+          "path": "img/320x240/camera_preview_overlay_screen__segmented_repeated_320x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_dense",
+          "display_name": "camera_preview_overlay_screen (_segmented_dense)",
+          "path": "img/320x240/camera_preview_overlay_screen__segmented_dense_320x240.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_degenerate_240",
+          "display_name": "camera_preview_overlay_screen (_segmented_degenerate_240)",
+          "path": "img/320x240/camera_preview_overlay_screen__segmented_degenerate_240_320x240.png"
+        },
+        {
           "name": "camera_preview_pillarboxed_screen",
           "display_name": "camera_preview_pillarboxed_screen",
           "path": "img/320x240/camera_preview_pillarboxed_screen_320x240.png"
@@ -977,6 +1092,36 @@
           "name": "camera_preview_pillarboxed_screen__complete",
           "display_name": "camera_preview_pillarboxed_screen (_complete)",
           "path": "img/320x240/camera_preview_pillarboxed_screen__complete_320x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_middle_first",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_middle_first)",
+          "path": "img/320x240/camera_preview_pillarboxed_screen__segmented_middle_first_320x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_sparse",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_sparse)",
+          "path": "img/320x240/camera_preview_pillarboxed_screen__segmented_sparse_320x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_near_full",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_near_full)",
+          "path": "img/320x240/camera_preview_pillarboxed_screen__segmented_near_full_320x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_repeated",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_repeated)",
+          "path": "img/320x240/camera_preview_pillarboxed_screen__segmented_repeated_320x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_dense",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_dense)",
+          "path": "img/320x240/camera_preview_pillarboxed_screen__segmented_dense_320x240.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_degenerate",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_degenerate)",
+          "path": "img/320x240/camera_preview_pillarboxed_screen__segmented_degenerate_320x240.png"
         },
         {
           "name": "camera_entropy_overlay_screen",
@@ -1439,6 +1584,21 @@
           "path": "img/320x240/donate_screen_320x240.png"
         },
         {
+          "name": "version_screen",
+          "display_name": "version_screen",
+          "path": "img/320x240/version_screen_320x240.png"
+        },
+        {
+          "name": "version_screen__release_image",
+          "display_name": "version_screen (_release_image)",
+          "path": "img/320x240/version_screen__release_image_320x240.png"
+        },
+        {
+          "name": "version_screen__long_branch_name",
+          "display_name": "version_screen (_long_branch_name)",
+          "path": "img/320x240/version_screen__long_branch_name_320x240.png"
+        },
+        {
           "name": "psbt_op_return_screen",
           "display_name": "psbt_op_return_screen",
           "path": "img/320x240/psbt_op_return_screen_320x240.png"
@@ -1581,6 +1741,11 @@
           "path": "img/480x320/opening_splash_screen__micropython_no_partners_480x320.png"
         },
         {
+          "name": "opening_splash_screen__long_version_multiline",
+          "display_name": "opening_splash_screen (_long_version_multiline)",
+          "path": "img/480x320/opening_splash_screen__long_version_multiline_480x320.png"
+        },
+        {
           "name": "large_icon_status_screen",
           "display_name": "large_icon_status_screen",
           "path": "img/480x320/large_icon_status_screen_480x320.png"
@@ -1681,6 +1846,36 @@
           "path": "img/480x320/camera_preview_overlay_screen__fill_landscape_480x320.png"
         },
         {
+          "name": "camera_preview_overlay_screen__segmented_middle_first",
+          "display_name": "camera_preview_overlay_screen (_segmented_middle_first)",
+          "path": "img/480x320/camera_preview_overlay_screen__segmented_middle_first_480x320.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_sparse",
+          "display_name": "camera_preview_overlay_screen (_segmented_sparse)",
+          "path": "img/480x320/camera_preview_overlay_screen__segmented_sparse_480x320.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_near_full",
+          "display_name": "camera_preview_overlay_screen (_segmented_near_full)",
+          "path": "img/480x320/camera_preview_overlay_screen__segmented_near_full_480x320.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_repeated",
+          "display_name": "camera_preview_overlay_screen (_segmented_repeated)",
+          "path": "img/480x320/camera_preview_overlay_screen__segmented_repeated_480x320.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_dense",
+          "display_name": "camera_preview_overlay_screen (_segmented_dense)",
+          "path": "img/480x320/camera_preview_overlay_screen__segmented_dense_480x320.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_degenerate_240",
+          "display_name": "camera_preview_overlay_screen (_segmented_degenerate_240)",
+          "path": "img/480x320/camera_preview_overlay_screen__segmented_degenerate_240_480x320.png"
+        },
+        {
           "name": "camera_preview_pillarboxed_screen",
           "display_name": "camera_preview_pillarboxed_screen",
           "path": "img/480x320/camera_preview_pillarboxed_screen_480x320.png"
@@ -1699,6 +1894,36 @@
           "name": "camera_preview_pillarboxed_screen__complete",
           "display_name": "camera_preview_pillarboxed_screen (_complete)",
           "path": "img/480x320/camera_preview_pillarboxed_screen__complete_480x320.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_middle_first",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_middle_first)",
+          "path": "img/480x320/camera_preview_pillarboxed_screen__segmented_middle_first_480x320.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_sparse",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_sparse)",
+          "path": "img/480x320/camera_preview_pillarboxed_screen__segmented_sparse_480x320.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_near_full",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_near_full)",
+          "path": "img/480x320/camera_preview_pillarboxed_screen__segmented_near_full_480x320.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_repeated",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_repeated)",
+          "path": "img/480x320/camera_preview_pillarboxed_screen__segmented_repeated_480x320.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_dense",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_dense)",
+          "path": "img/480x320/camera_preview_pillarboxed_screen__segmented_dense_480x320.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_degenerate",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_degenerate)",
+          "path": "img/480x320/camera_preview_pillarboxed_screen__segmented_degenerate_480x320.png"
         },
         {
           "name": "camera_entropy_overlay_screen",
@@ -2161,6 +2386,21 @@
           "path": "img/480x320/donate_screen_480x320.png"
         },
         {
+          "name": "version_screen",
+          "display_name": "version_screen",
+          "path": "img/480x320/version_screen_480x320.png"
+        },
+        {
+          "name": "version_screen__release_image",
+          "display_name": "version_screen (_release_image)",
+          "path": "img/480x320/version_screen__release_image_480x320.png"
+        },
+        {
+          "name": "version_screen__long_branch_name",
+          "display_name": "version_screen (_long_branch_name)",
+          "path": "img/480x320/version_screen__long_branch_name_480x320.png"
+        },
+        {
           "name": "psbt_op_return_screen",
           "display_name": "psbt_op_return_screen",
           "path": "img/480x320/psbt_op_return_screen_480x320.png"
@@ -2303,6 +2543,11 @@
           "path": "img/800x480/opening_splash_screen__micropython_no_partners_800x480.png"
         },
         {
+          "name": "opening_splash_screen__long_version_multiline",
+          "display_name": "opening_splash_screen (_long_version_multiline)",
+          "path": "img/800x480/opening_splash_screen__long_version_multiline_800x480.png"
+        },
+        {
           "name": "large_icon_status_screen",
           "display_name": "large_icon_status_screen",
           "path": "img/800x480/large_icon_status_screen_800x480.png"
@@ -2403,6 +2648,36 @@
           "path": "img/800x480/camera_preview_overlay_screen__fill_landscape_800x480.png"
         },
         {
+          "name": "camera_preview_overlay_screen__segmented_middle_first",
+          "display_name": "camera_preview_overlay_screen (_segmented_middle_first)",
+          "path": "img/800x480/camera_preview_overlay_screen__segmented_middle_first_800x480.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_sparse",
+          "display_name": "camera_preview_overlay_screen (_segmented_sparse)",
+          "path": "img/800x480/camera_preview_overlay_screen__segmented_sparse_800x480.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_near_full",
+          "display_name": "camera_preview_overlay_screen (_segmented_near_full)",
+          "path": "img/800x480/camera_preview_overlay_screen__segmented_near_full_800x480.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_repeated",
+          "display_name": "camera_preview_overlay_screen (_segmented_repeated)",
+          "path": "img/800x480/camera_preview_overlay_screen__segmented_repeated_800x480.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_dense",
+          "display_name": "camera_preview_overlay_screen (_segmented_dense)",
+          "path": "img/800x480/camera_preview_overlay_screen__segmented_dense_800x480.png"
+        },
+        {
+          "name": "camera_preview_overlay_screen__segmented_degenerate_240",
+          "display_name": "camera_preview_overlay_screen (_segmented_degenerate_240)",
+          "path": "img/800x480/camera_preview_overlay_screen__segmented_degenerate_240_800x480.png"
+        },
+        {
           "name": "camera_preview_pillarboxed_screen",
           "display_name": "camera_preview_pillarboxed_screen",
           "path": "img/800x480/camera_preview_pillarboxed_screen_800x480.png"
@@ -2421,6 +2696,36 @@
           "name": "camera_preview_pillarboxed_screen__complete",
           "display_name": "camera_preview_pillarboxed_screen (_complete)",
           "path": "img/800x480/camera_preview_pillarboxed_screen__complete_800x480.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_middle_first",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_middle_first)",
+          "path": "img/800x480/camera_preview_pillarboxed_screen__segmented_middle_first_800x480.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_sparse",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_sparse)",
+          "path": "img/800x480/camera_preview_pillarboxed_screen__segmented_sparse_800x480.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_near_full",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_near_full)",
+          "path": "img/800x480/camera_preview_pillarboxed_screen__segmented_near_full_800x480.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_repeated",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_repeated)",
+          "path": "img/800x480/camera_preview_pillarboxed_screen__segmented_repeated_800x480.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_dense",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_dense)",
+          "path": "img/800x480/camera_preview_pillarboxed_screen__segmented_dense_800x480.png"
+        },
+        {
+          "name": "camera_preview_pillarboxed_screen__segmented_degenerate",
+          "display_name": "camera_preview_pillarboxed_screen (_segmented_degenerate)",
+          "path": "img/800x480/camera_preview_pillarboxed_screen__segmented_degenerate_800x480.png"
         },
         {
           "name": "camera_entropy_overlay_screen",
@@ -2881,6 +3186,21 @@
           "name": "donate_screen",
           "display_name": "donate_screen",
           "path": "img/800x480/donate_screen_800x480.png"
+        },
+        {
+          "name": "version_screen",
+          "display_name": "version_screen",
+          "path": "img/800x480/version_screen_800x480.png"
+        },
+        {
+          "name": "version_screen__release_image",
+          "display_name": "version_screen (_release_image)",
+          "path": "img/800x480/version_screen__release_image_800x480.png"
+        },
+        {
+          "name": "version_screen__long_branch_name",
+          "display_name": "version_screen (_long_branch_name)",
+          "path": "img/800x480/version_screen__long_branch_name_800x480.png"
         },
         {
           "name": "psbt_op_return_screen",
