@@ -128,18 +128,6 @@ jobs:
             echo "cmake=$(cmake --version | head -n1)"
           } | tee logs/provenance.txt
 
-      - name: Collect firmware artifacts
-        run: |
-          BUILD_DIR="$PWD/build/$BOARD"   # BOARD comes from the job env (ESP32-P4)
-          mkdir -p out/bootloader out/partition_table out/logs
-          cp "$BUILD_DIR/micropython.bin" out/
-          cp "$BUILD_DIR/micropython.elf" out/
-          cp "$BUILD_DIR/flash_args" out/
-          cp "$BUILD_DIR/bootloader/bootloader.bin" out/bootloader/
-          cp "$BUILD_DIR/partition_table/partition-table.bin" out/partition_table/
-          cp -r logs/* out/logs/ 2>/dev/null || true
-          cp logs/provenance.txt out/logs/ 2>/dev/null || true
-
       - name: Collect screenshot artifacts
         run: |
           mkdir -p out/screenshots
@@ -151,14 +139,6 @@ jobs:
         # a board that boots the app on first power-up (no REPL).
         if: github.event_name == 'push'
         run: make dist BOARD="$BOARD"
-
-      - name: Upload firmware artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: firmware-waveshare-esp32-p4
-          path: |
-            out/
-            out/logs/
 
       - name: Upload flashable dist (merge to main only)
         if: github.event_name == 'push'
