@@ -14,13 +14,14 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [opened, synchronize, reopened]
 
+# Minimal permissions: the build job only reads the repo (checkout) and uploads
+# an artifact via the Actions runtime token, which needs no repo scope. The
+# GitHub Pages deploy / PR-comment / preview-cleanup jobs that required broader
+# write scopes (pages/id-token/pull-requests, contents:write) have been removed.
 permissions:
-  contents: write
-  pages: write
-  id-token: write
-  pull-requests: write
+  contents: read
 
 jobs:
   resolve-image-owner:
@@ -39,7 +40,6 @@ jobs:
         run: echo "owner_lc=kdmukai-bot" >> "$GITHUB_OUTPUT"
 
   build:
-    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     needs: resolve-image-owner
     runs-on: ubuntu-24.04
     defaults:
@@ -52,11 +52,18 @@ jobs:
       # ESP32-P4 is the first-release target; CI builds the P4 board (RISC-V).
       IDF_TOOLS_TARGETS: esp32p4
       BOARD: WAVESHARE_ESP32_P4_WIFI6_TOUCH_LCD_43
+      # ccache: the launcher wiring is already in place -- the base image ships
+      # ccache and build_firmware.sh passes IDF_CCACHE_ENABLE=1, which routes the
+      # IDF CMake compiler launcher through ccache. What was missing is cross-run
+      # persistence: point CCACHE_DIR at the workspace (NOT $HOME, which differs
+      # between steps in a container job) so actions/cache can save/restore it.
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: "2G"
     container:
       image: ghcr.io/${{ needs.resolve-image-owner.outputs.owner_lc }}/seedsigner-micropython-builder-base:latest
     steps:
       - name: Checkout builder repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.builder_ref || github.ref }}
           submodules: true
@@ -66,7 +73,6 @@ jobs:
           # actions/checkout inits submodules non-recursively, so the nested
           # submodules two levels down are absent -- and the build needs them:
           #   board_common -> esp-camera-pipeline -> k_quirc   (ESP-IDF component)
-          #   seedsigner-lvgl-screens -> third_party/lvgl      (screenshot generator)
           #   esp-secp256k1 -> secp256k1-zkp                   (libsecp256k1 amalgamation)
           # All submodule URLs in these subtrees are now public HTTPS GitHub, so they
           # resolve anonymously with no URL rewrite. Scope recursion to these
@@ -108,10 +114,38 @@ jobs:
         if: github.event_name == 'push'
         run: ./scripts/ci/ci.sh stage-frozen
 
-      - name: Build firmware + screenshots
+      - name: Restore ccache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ${{ github.workspace }}/.ccache
+          # Unique per-run key so the post-job save is NEVER skipped: actions/cache
+          # skips saving on an exact primary-key hit, which would freeze the cache
+          # at its first contents (0 MB) -- the trap that kept seedsigner-raspi-lvgl
+          # cold for weeks. run_attempt keeps re-runs unique too. The prefix
+          # restore-key pulls the newest prior cache; PR builds warm from main's.
+          key: ccache-firmware-${{ env.BOARD }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ccache-firmware-${{ env.BOARD }}-
+
+      - name: Configure ccache
+        # Fail loudly if the base image ever loses the binary: IDF's CMake launcher
+        # only warns and compiles cold when ccache is absent. Zero stats so the
+        # post-build report reflects only this run.
         run: |
-          ./scripts/ci_build.sh "$PWD/deps"
-          ./scripts/run_screenshot_generator.sh "$PWD/deps"
+          command -v ccache
+          ccache --version
+          ccache --zero-stats
+          ccache -p | grep -Ei 'cache_dir|max_size' || true
+
+      - name: Build firmware
+        run: ./scripts/ci_build.sh "$PWD/deps"
+
+      - name: Report ccache stats
+        # Visibility is the whole point -- a "hits" line is the only proof the
+        # cache is live. raspi-lvgl printed "ccache enabled" for weeks while 100%
+        # cold. Runs on failure too, so a broken build still shows cache state.
+        if: always()
+        run: ccache --show-stats --verbose || ccache --show-stats || true
 
       - name: Record build provenance
         run: |
@@ -128,11 +162,6 @@ jobs:
             echo "cmake=$(cmake --version | head -n1)"
           } | tee logs/provenance.txt
 
-      - name: Collect screenshot artifacts
-        run: |
-          mkdir -p out/screenshots
-          cp -r "$PWD/deps/seedsigner-lvgl-screens/tools/apps/screenshot_generator/screenshots" out/screenshots/
-
       - name: Package flashable dist (merge to main only)
         # Firmware + baked /main.py launcher image -> dist/<BOARD>/ with a flash_args
         # that includes the vfs partition, so `esptool write_flash @flash_args` yields
@@ -142,118 +171,7 @@ jobs:
 
       - name: Upload flashable dist (merge to main only)
         if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: flashable-dist-waveshare-esp32-p4
           path: dist/${{ env.BOARD }}/
-
-      - name: Upload screenshot artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenshots-waveshare-esp32-p4
-          path: out/screenshots/
-
-  deploy-screenshots:
-    needs: build
-    runs-on: ubuntu-24.04
-    # Skipped on fork PRs: GitHub forces GITHUB_TOKEN to read-only for
-    # pull_request events from a fork, so the gh-pages push cannot run. Pushes
-    # (merge to main) and same-repo PRs still deploy; a fork->upstream PR skips
-    # this gracefully — the gallery deploys when the bot's own push CI runs.
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false)
-    steps:
-      - name: Download screenshot artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: screenshots-waveshare-esp32-p4
-          path: screenshots
-
-      - name: Determine deploy path
-        id: path
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "dest_dir=previews/pr-${{ github.event.number }}" >> "$GITHUB_OUTPUT"
-            echo "msg=Deploy PR #${{ github.event.number }} preview" >> "$GITHUB_OUTPUT"
-          else
-            echo "dest_dir=." >> "$GITHUB_OUTPUT"
-            echo "msg=Deploy stable screenshots" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./screenshots
-          destination_dir: ${{ steps.path.outputs.dest_dir }}
-          commit_message: ${{ steps.path.outputs.msg }}
-          keep_files: true
-
-      - name: Post PR Preview Comment
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        env:
-          DEST_DIR: ${{ steps.path.outputs.dest_dir }}
-        with:
-          script: |
-            const destDir = process.env.DEST_DIR;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const issue_number = context.payload.pull_request.number;
-            
-            // Construct Pages URL (assuming standard github.io domain)
-            const pagesUrl = `https://${owner}.github.io/${repo}/${destDir}/`;
-            
-            const marker = '<!-- ss-lvgl-render-tests -->';
-            const body = `${marker}\n### SeedSigner LVGL screen tests: [view results gallery](${pagesUrl})`;
-            
-            const comments = await github.paginate(github.rest.issues.listComments, {
-              owner,
-              repo,
-              issue_number,
-            });
-            
-            const existingComment = comments.find(c => c.body.includes(marker));
-            
-            if (existingComment) {
-              await github.rest.issues.updateComment({
-                owner,
-                repo,
-                comment_id: existingComment.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner,
-                repo,
-                issue_number,
-                body,
-              });
-            }
-
-
-  cleanup-pr-preview-pages:
-    runs-on: ubuntu-24.04
-    # Also skipped on fork PRs: removing the preview pushes to gh-pages, which
-    # the read-only fork-PR token cannot do.
-    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.fork == false
-    steps:
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-
-      - name: Remove PR preview directory
-        env:
-          PR_NUM: ${{ github.event.number }}
-        run: |
-          TARGET="previews/pr-${PR_NUM}"
-          if [ -d "$TARGET" ]; then
-            rm -rf "$TARGET"
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A
-            git commit -m "pages: remove preview for closed PR #${PR_NUM}"
-            git push
-          else
-            echo "No preview directory for PR #${PR_NUM}; nothing to clean."
-          fi
