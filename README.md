@@ -156,6 +156,12 @@ CI checks out this repo with `submodules: true` (populating `seedsigner-lvgl-scr
 `deps/micropython/upstream` at their pinned commits), applies mods, builds firmware, and
 uploads artifacts.
 
+**Pull requests** run a fast compile-only firmware check (the app is not frozen in). **On merge to
+`main`**, GitHub CI additionally stages the frozen app from the pinned `deps/seedsigner` /
+`deps/embit` submodules, builds it in, and publishes a downloadable **`flashable-dist-*`** artifact
+for the ESP32-P4-43 — a self-booting image anyone can flash (see below). GitLab / Codeberg build the
+ESP32-S3 dev boards and skip the frozen-app bake for now.
+
 
 ## Build outputs
 
@@ -182,22 +188,32 @@ Logs are written under `logs/` with timestamp-first naming.
 
 ## Build & flash your own firmware
 
-Once the submodules are set up (see [Cloning and submodule setup](#cloning-and-submodule-setup)),
-building a flashable image is two commands — `docker-build-all` auto-stages the frozen app, and
-`make dist` packages the flash-ready artifacts into `dist/<BOARD>/`:
+There are two ways to get a flashable image.
+
+**1. Download a prebuilt image (easiest).** On merge to `main`, CI publishes a **`flashable-dist-*`**
+artifact for the ESP32-P4-43 (see [CI](#ci)). Download and unzip it — it contains the same
+`dist/<BOARD>/` layout as below and self-boots — then skip to [flashing](#flashing).
+
+**2. Build it yourself.** Once the submodules are set up (see
+[Cloning and submodule setup](#cloning-and-submodule-setup)), building a flashable image is two
+commands — `docker-build-all` auto-stages the frozen app, and `make dist` packages the flash-ready
+artifacts into `dist/<BOARD>/`:
 
 ```bash
 make docker-build-all BOARD=WAVESHARE_ESP32_P4_WIFI6_TOUCH_LCD_43
 make dist             BOARD=WAVESHARE_ESP32_P4_WIFI6_TOUCH_LCD_43
 ```
 
-`dist/<BOARD>/` then holds `micropython.bin`, `bootloader/`, `partition_table/`, and the generated
-`flash_args` manifest. (The raw build tree is also left under `build/<BOARD>/`.)
+`dist/<BOARD>/` then holds `micropython.bin`, `bootloader/`, `partition_table/`, `vfs.bin` (the baked
+`/main.py` launcher — see below), and the generated `flash_args` manifest that flashes all of them.
+(The raw build tree is also left under `build/<BOARD>/`.)
 
 | Board | Chip |
 |---|---|
 | `WAVESHARE_ESP32_S3_TOUCH_LCD_35B`, `WAVESHARE_ESP32_S3_TOUCH_LCD_35` | `esp32s3` |
 | `WAVESHARE_ESP32_P4_WIFI6_TOUCH_LCD_35`, `WAVESHARE_ESP32_P4_WIFI6_TOUCH_LCD_43` | `esp32p4` |
+
+### Flashing
 
 Flash from `dist/<BOARD>/`, using the generated offsets:
 
@@ -213,16 +229,17 @@ python -m esptool --chip esp32p4 --port /dev/ttyACM0 write_flash @flash_args
 - **Never pipe `write_flash`** (e.g. `| head`) — a SIGPIPE mid-write can leave a partially flashed
   image.
 
-**Launching the app.** The firmware has the app frozen in, but a freshly flashed board boots to
-the REPL — nothing calls `Controller.start()` yet. Drop the launcher and boot the app with:
+**Launching the app.** A `dist/` flash **self-boots** — `make dist` bakes a `/main.py` launcher into
+`vfs.bin`, which `flash_args` writes into the board's internal filesystem, so a freshly flashed board
+boots straight into the app on first power-up. No extra step is needed.
+
+The exception is a **firmware-only** package (`BAKE_LAUNCHER=0 make dist`, or flashing just
+`micropython.bin`): with no `/main.py`, the board boots to the REPL. Provision the launcher over
+serial with:
 
 ```bash
 python3 tools/set_p4_boot_app.py --port /dev/ttyACM0
 ```
-
-> A self-launching image — the `/main.py` launcher baked into the flashed partition so a bare
-> flash boots straight into the app, plus a downloadable pre-built image published by CI — is in
-> progress. See [README-dev.md](README-dev.md#overlay-dev-lane-and-ci-dist-in-progress).
 
 
 ## Manual GitHub Actions runs
