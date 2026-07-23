@@ -45,6 +45,13 @@ jobs:
       - name: Collect artifacts
         run: scripts/ci/ci.sh collect-artifacts
 
+      # NOTE: the merge-only flashable-dist bake (stage-frozen + collect-dist) is
+      # intentionally NOT run here. Codeberg/Forgejo build the ESP32-S3 dev boards,
+      # which do not yet freeze the app (no board manifest.py), so a baked /main.py
+      # would import a non-frozen seedsigner and drop to the REPL. The self-booting
+      # dist is published only by GitHub (ESP32-P4-43, the release target). Enable
+      # here once the S3 frozen-app manifest lands.
+
       - name: Upload firmware artifacts
         uses: actions/upload-artifact@v3
         with:

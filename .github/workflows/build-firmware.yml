@@ -100,6 +100,14 @@ jobs:
           source "$IDF_PATH/export.sh"
           idf.py --version
 
+      - name: Stage frozen app (merge to main only)
+        # PRs stay compile-only (no frozen_app/ -> manifest try/except skips the
+        # freeze). On push to main, stage the app+embit from the pinned deps/
+        # submodules so the build below bakes them in and `make dist` can publish a
+        # self-booting image. Version comes from deps/seedsigner git via env.
+        if: github.event_name == 'push'
+        run: ./scripts/ci/ci.sh stage-frozen
+
       - name: Build firmware + screenshots
         run: |
           ./scripts/ci_build.sh "$PWD/deps"
@@ -137,6 +145,13 @@ jobs:
           mkdir -p out/screenshots
           cp -r "$PWD/deps/seedsigner-lvgl-screens/tools/apps/screenshot_generator/screenshots" out/screenshots/
 
+      - name: Package flashable dist (merge to main only)
+        # Firmware + baked /main.py launcher image -> dist/<BOARD>/ with a flash_args
+        # that includes the vfs partition, so `esptool write_flash @flash_args` yields
+        # a board that boots the app on first power-up (no REPL).
+        if: github.event_name == 'push'
+        run: make dist BOARD="$BOARD"
+
       - name: Upload firmware artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -144,6 +159,13 @@ jobs:
           path: |
             out/
             out/logs/
+
+      - name: Upload flashable dist (merge to main only)
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: flashable-dist-waveshare-esp32-p4
+          path: dist/${{ env.BOARD }}/
 
       - name: Upload screenshot artifacts
         uses: actions/upload-artifact@v4

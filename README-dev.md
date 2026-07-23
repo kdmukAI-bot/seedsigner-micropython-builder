@@ -56,13 +56,47 @@ pin to its branch tip with `git submodule update --remote <path>`, then commit t
 doesn't use the submodules — the stager reads your sibling working trees — so `--remote` is for
 capturing a pin for CI.
 
-### Overlay dev lane and CI dist (in progress)
+### Overlay dev lane
 
-Two follow-ups from the frozen-build plan are not yet wired: a `/overlay` dev-iteration lane (push
-just the `seedsigner` package to a flash dir that shadows the frozen copy, for fast edits without a
-firmware rebuild) and a merge-only CI job that publishes a downloadable, self-launching
-`dist/<BOARD>/` (the `/main.py` launcher baked into a VFS partition). Until then, a locally built
-image is launched by provisioning `/main.py` with `tools/set_p4_boot_app.py` (see the main README).
+To iterate on app code against an already-flashed **frozen** firmware without a rebuild, use the
+overlay lane. A frozen firmware always resolves `seedsigner` from `.frozen`, so a `/lib` push is
+inert — but the launcher (`tools/_launcher.py`) prepends `/overlay` to `sys.path`, so a package
+written there shadows the frozen copy:
+
+```bash
+python3 tools/deploy_app.py --mode overlay         # push seedsigner -> /overlay/seedsigner, reset
+python3 tools/deploy_app.py --mode overlay-clear   # remove it -> the frozen app runs again
+```
+
+Overlay mode pushes only the `seedsigner` package (host-compiled to `.mpy`) and regenerates
+`/overlay/seedsigner/_version.py` via the same `_version_bake` helper, so an overlaid app reports its
+own version through the same `from seedsigner import _version`. `embit`/`urtypes` stay frozen (and
+fast). VFS imports cost ~60–70 ms/`stat`, so keep the overlay to just the package under active edit.
+Set `SEEDSIGNER_VERSION=...` to stamp a distinct overlay version.
+
+Both run modes share one `_version` line, so the reported version always tracks whichever copy is
+running: **frozen** (baked in; fast boot, reflash to change) or **overlay** (`/overlay/seedsigner`
+shadows the frozen app for edit→push→reboot iteration; `overlay-clear` returns to frozen).
+
+### Self-booting dist + merge-only CI
+
+A frozen firmware has no launcher of its own — a bare flash boots to the REPL until a flash `/main.py`
+runs. `make dist` bakes that launcher into a littlefs2 image (`vfs.bin`) and flashes it into the
+board's internal filesystem, so a flashed `dist/` boots the app on first power-up. The image is built
+from MicroPython's own vendored littlefs2 for byte-compatibility; the mechanism (the runtime
+auto-`vfs` partition, geometry, and the low-block-allocation trick) is documented in
+[docs/knowledge/esp32-auto-vfs-partition-and-launcher-bake.md](docs/knowledge/esp32-auto-vfs-partition-and-launcher-bake.md).
+
+On merge to `main`, GitHub CI stages the frozen app from the pinned `deps/seedsigner` + `deps/embit`
+submodules (version computed from `deps/seedsigner` git via the env-override path, so the runner
+never imports the app), builds it in, and publishes a downloadable `flashable-dist-*` artifact for the
+ESP32-P4-43. PRs stay compile-only (no `frozen_app/` → the board manifest's `try/except` skips the
+freeze). GitLab and Codeberg build the ESP32-S3 dev boards, which don't yet freeze the app, so they
+skip the launcher bake — a note in each config marks where to enable it once the S3 frozen-app
+manifest lands.
+
+`BAKE_LAUNCHER=0 make dist` produces a firmware-only package (boots to the REPL until `/main.py` is
+provisioned with `tools/set_p4_boot_app.py`).
 
 ## The prebaked base image
 

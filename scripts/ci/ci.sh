@@ -67,6 +67,47 @@ case "$COMMAND" in
     ;;
 
   # ---------------------------------------------------------------------------
+  # Frozen-app dist (MERGE-ONLY: publishes a flashable, self-booting image)
+  #
+  # PRs keep the fast compile-only build (no frozen_app/ -> the board manifest's
+  # try/except skips the freeze). On merge to main the platform config calls
+  # `stage-frozen` BEFORE `build` (so the firmware bakes the app in) and
+  # `collect-dist` AFTER `collect-artifacts`.
+  # ---------------------------------------------------------------------------
+
+  stage-frozen)
+    # Stage the app + embit from the pinned deps/ submodules into frozen_app/.
+    # The version is computed from deps/seedsigner git and passed via env (the
+    # override path in tools/_version_bake.py) so the runner never imports the
+    # app -- important in CI, where version.py's own CI branch would otherwise
+    # read the BUILDER's GITHUB_REF instead of the app's.
+    git config --global --add safe.directory '*' 2>/dev/null || true
+    # Normally already inited by the platform checkout; init defensively and
+    # NON-recursively (the app's nested submodules, e.g. resources/
+    # seedsigner-translations, are excluded from the freeze).
+    git submodule update --init deps/seedsigner deps/embit
+    SS_DIR="$REPO_ROOT/deps/seedsigner"
+    export SS_APP_DIR="$SS_DIR"
+    export SS_EMBIT_DIR="$REPO_ROOT/deps/embit"
+    export SEEDSIGNER_VERSION="$(git -C "$SS_DIR" describe --tags --always --dirty 2>/dev/null \
+      || git -C "$SS_DIR" rev-parse --short HEAD)"
+    export SEEDSIGNER_SHORT_COMMIT_HASH="$(git -C "$SS_DIR" rev-parse --short HEAD 2>/dev/null || echo unknown)"
+    export SEEDSIGNER_VERSION_TIMESTAMP="$(TZ=UTC git -C "$SS_DIR" show -s \
+      --date=iso-strict-local --format=%cd HEAD 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%S)"
+    echo "[ci] stage-frozen: version=$SEEDSIGNER_VERSION commit=$SEEDSIGNER_SHORT_COMMIT_HASH ts=$SEEDSIGNER_VERSION_TIMESTAMP"
+    python3 tools/stage_frozen_app.py --board "$BOARD"
+    ;;
+
+  collect-dist)
+    # Package the flashable dist/<BOARD>/ (firmware + baked /main.py launcher
+    # image) and stage it under out/ for the platform's artifact upload.
+    make dist BOARD="$BOARD"
+    mkdir -p out/dist
+    cp -r "dist/$BOARD" out/dist/
+    echo "[ci] collect-dist: out/dist/$BOARD (flashable, self-booting image)"
+    ;;
+
+  # ---------------------------------------------------------------------------
   # Pages deployment (same pattern as seedsigner-lvgl-screens)
   # ---------------------------------------------------------------------------
 
@@ -150,6 +191,10 @@ case "$COMMAND" in
     echo "  build                    Build firmware + screenshots"
     echo "  record-provenance        Write build metadata to logs/provenance.txt"
     echo "  collect-artifacts        Gather firmware + screenshots into out/"
+    echo ""
+    echo "Frozen-app dist commands (merge-only):"
+    echo "  stage-frozen             Stage app+embit from deps/ submodules -> frozen_app/ (run BEFORE build)"
+    echo "  collect-dist             make dist + copy flashable dist/<BOARD>/ into out/ (run AFTER build)"
     echo ""
     echo "Pages commands:"
     echo "  deploy-pages SRC BRANCH [DEST]   Deploy directory to a git branch"
