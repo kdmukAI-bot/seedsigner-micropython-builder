@@ -40,6 +40,10 @@ docker-build-all: stage-app
 BOARD ?= WAVESHARE_ESP32_S3_TOUCH_LCD_35B
 DIST_DIR = dist/$(BOARD)
 
+# BAKE_LAUNCHER=0 skips the /main.py launcher bake (firmware-only dist that boots to
+# the REPL until a launcher is written; only useful for an app-less build).
+BAKE_LAUNCHER ?= 1
+
 dist:
 	@if [ ! -f build/$(BOARD)/flash_args ]; then \
 		echo "ERROR: No build artifacts for BOARD=$(BOARD). Run: make docker-build-all"; \
@@ -51,6 +55,15 @@ dist:
 	cp build/$(BOARD)/micropython.bin $(DIST_DIR)/
 	cp build/$(BOARD)/bootloader/bootloader.bin $(DIST_DIR)/bootloader/
 	cp build/$(BOARD)/partition_table/partition-table.bin $(DIST_DIR)/partition_table/
+	@# Bake the frozen-app launcher into a littlefs2 image for the auto-vfs partition so a
+	@# fresh flash of this dist boots the app instead of the REPL. Geometry is derived from
+	@# the built partition table + flash_args; the vfs offset is appended to flash_args.
+	@if [ "$(BAKE_LAUNCHER)" = "1" ]; then \
+		python3 tools/build_launcher_fs.py --board $(BOARD) \
+			--build-dir build/$(BOARD) --dist-dir $(DIST_DIR); \
+	else \
+		echo "[dist] BAKE_LAUNCHER=0 -> firmware-only dist (no /main.py; boots to REPL)"; \
+	fi
 	@CHIP=$$(case "$(BOARD)" in *ESP32_P4*) echo esp32p4;; *) echo esp32s3;; esac); \
 	echo ""; \
 	echo "Flash with:"; \
