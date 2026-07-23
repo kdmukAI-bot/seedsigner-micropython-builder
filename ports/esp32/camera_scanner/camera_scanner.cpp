@@ -838,6 +838,54 @@ void cam_scanner_report_complete(void)
     scan_coordinator_report_complete(s_coord);
 }
 
+/* ── Segmented (indexed-cycle) progress ─────────────────────────────────────────
+ * BBQR/Specter animated QRs cycle a fixed, INDEXED set of N pieces (scan the middle
+ * part first → the middle cell lights). The screen renders that as per-piece cells
+ * instead of the continuous 0→100% fill.
+ *
+ * Unlike report(), these carry NO percent, so they don't fit the coordinator's
+ * (status, percent) dedup model — they BYPASS it and drive the active scan chrome
+ * directly, reusing cam_present's portrait-vs-landscape selection (the Pi drives the
+ * overlay directly too, keeping the two platforms behaviourally identical). Same
+ * threading as cam_present: CONSUMER task, hold the LVGL port lock. The chrome
+ * pointer being NULL (no live session) makes these no-ops. ── */
+void cam_scanner_begin_segments(int total_segments)
+{
+#if SCAN_USES_PORTRAIT
+    if (s_scan_portrait) {
+        if (s_pv_chrome && lvgl_port_lock(0)) {
+            camera_preview_pillarboxed_begin_segments(s_pv_chrome, total_segments);
+            lvgl_port_unlock();
+        }
+        return;
+    }
+#endif
+    if (s_overlay && lvgl_port_lock(0)) {
+        camera_preview_overlay_begin_segments(s_overlay, total_segments);
+        lvgl_port_unlock();
+    }
+}
+
+void cam_scanner_segment_event(int status, int piece_index)
+{
+    /* cam_scan_frame_status_t and camera_overlay_frame_status_t share values
+     * (NONE=0, NEW/ADDED=1, REPEAT/REPEATED=2, MISS=3) — cast, like report(). */
+    camera_overlay_frame_status_t st = (camera_overlay_frame_status_t)status;
+#if SCAN_USES_PORTRAIT
+    if (s_scan_portrait) {
+        if (s_pv_chrome && lvgl_port_lock(0)) {
+            camera_preview_pillarboxed_segment_event(s_pv_chrome, st, piece_index);
+            lvgl_port_unlock();
+        }
+        return;
+    }
+#endif
+    if (s_overlay && lvgl_port_lock(0)) {
+        camera_preview_overlay_segment_event(s_overlay, st, piece_index);
+        lvgl_port_unlock();
+    }
+}
+
 #else /* !BOARD_HAS_CAMERA — bindings still link; start() reports the absence. */
 
 const char *cam_scanner_start(bool focus_assist) { (void)focus_assist; return "board has no camera"; }
@@ -848,5 +896,7 @@ void cam_scanner_read_status(cam_scanner_status_t *out) { if (out) { memset(out,
 bool cam_scanner_poll_miss_frame(const uint8_t **payload, size_t *len, cam_scanner_miss_meta_t *meta) { (void)payload; (void)len; (void)meta; return false; }
 void cam_scanner_report(int status, int percent) { (void)status; (void)percent; }
 void cam_scanner_report_complete(void) {}
+void cam_scanner_begin_segments(int total_segments) { (void)total_segments; }
+void cam_scanner_segment_event(int status, int piece_index) { (void)status; (void)piece_index; }
 
 #endif /* BOARD_HAS_CAMERA */

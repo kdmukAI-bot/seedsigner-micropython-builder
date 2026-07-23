@@ -128,6 +128,29 @@ void cam_scanner_report(int status, int percent);
 /* CONSUMER task: terminal completion -> on_complete() once. Idempotent. */
 void cam_scanner_report_complete(void);
 
+/*
+ * CONSUMER task: segmented (indexed-cycle) animated-QR progress — the BBQR/Specter
+ * analogue of report(). An indexed cycle has a fixed set of N pieces that arrive
+ * out-of-order; the overlay renders one cell per piece instead of a continuous fill.
+ *
+ * begin_segments() announces the cycle size ONCE (call it when the first decoded
+ * frame reveals N); total_segments <= 0 is a no-op. segment_event() then streams one
+ * event per decode frame and the SCREEN derives the percent from its own lit count:
+ *   status = cam_scan_frame_status_t (numerically identical to the screens'
+ *            camera_overlay_frame_status_t — forwarded with a cast, like report()):
+ *     NEW    -> light piece `piece_index` (0-based), advance percent, mark it current.
+ *     REPEAT -> re-read of an already-lit piece: re-mark it current (white), no advance.
+ *               Pass the real re-read index, NOT -1.
+ *     MISS   -> nothing decoded; dot only. piece_index = -1.
+ *
+ * These are event-driven and carry NO percent, so they BYPASS the coordinator's
+ * (status, percent) dedup and drive the active scan chrome (landscape overlay OR
+ * portrait pillarboxed) directly under the LVGL lock — matching the Pi. No-ops before
+ * start() / when no scan chrome is live.
+ */
+void cam_scanner_begin_segments(int total_segments);
+void cam_scanner_segment_event(int status, int piece_index);
+
 #ifdef __cplusplus
 }
 #endif
