@@ -1,0 +1,20 @@
+{
+    "deploy": [
+        "../deploy.md"
+    ],
+    "deploy_options": {
+        "flash_offset": "0"
+    },
+    "docs": "",
+    "features": [
+        "External Flash",
+        "External RAM",
+        "WiFi"
+    ],
+    "images": [],
+    "mcu": "esp32p4",
+    "product": "CrowPanel Advance 5in ESP32-P4",
+    "thumbnail": "",
+    "url": "https://www.elecrow.com/crowpanel-advanced-5inch-esp32-p4-hmi-ai-display-800x480-ips-touch-screen-with-wifi-6.html",
+    "vendor": "Elecrow"
+}

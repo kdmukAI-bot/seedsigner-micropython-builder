@@ -9,8 +9,15 @@ Build orchestration repo for SeedSigner MicroPython firmware without maintaining
 | [ESP32-P4-WIFI6-Touch-LCD-4.3](https://www.waveshare.com/esp32-p4-wifi6-touch-lcd-4.3.htm) | Waveshare | 4.3″ | [$43](https://www.waveshare.com/esp32-p4-wifi6-touch-lcd-4.3.htm?sku=33875) | ✅ Supported · ⭐ **Recommended** |
 | [JC4880P443](https://www.aliexpress.us/item/3256809431944589.html) | Guition | 4.3″ | $35 | ✅ Supported |
 | [ESP32-P4-WIFI6-Touch-LCD-3.5](https://www.waveshare.com/esp32-p4-wifi6-touch-lcd-3.5.htm) | Waveshare | 3.5″ | [$38](https://www.waveshare.com/esp32-p4-wifi6-touch-lcd-3.5.htm?sku=33511) | ✅ Supported |
-| [ESP32-P4-WIFI6-Touch-LCD-5](https://www.waveshare.com/esp32-p4-wifi6-touch-lcd-5.htm) | Waveshare | 5″ | [$53](https://www.waveshare.com/esp32-p4-wifi6-touch-lcd-5.htm?sku=33763) | 🚧 Planned |
+| [CrowPanel Advance 5″ ESP32-P4](https://www.elecrow.com/crowpanel-advanced-5inch-esp32-p4-hmi-ai-display-800x480-ips-touch-screen-with-wifi-6.html) | Elecrow | 5″ | $32 | 🛠️ **Bring-up in progress** |
+| [ESP32-P4-WIFI6-Touch-LCD-5](https://www.waveshare.com/esp32-p4-wifi6-touch-lcd-5.htm) | Waveshare | 5″ | [$53](https://www.waveshare.com/esp32-p4-wifi6-touch-lcd-5.htm?sku=33763) | ⏸️ Paused |
 | [ESP32-S3-Touch-LCD-3.5B](https://www.waveshare.com/esp32-s3-touch-lcd-3.5b.htm) | Waveshare | 3.5″ | — | 🔬 Under evaluation |
+
+The Elecrow CrowPanel is the first board here with a **landscape-native panel** (800×480 parallel
+RGB), so it needs none of the per-frame rotation the portrait boards pay for. Bring-up plan and
+status: [`docs/elecrow-crowpanel-p4-5in-bringup-plan.md`](docs/elecrow-crowpanel-p4-5in-bringup-plan.md).
+The Waveshare 5″ is paused behind two unresolved defects — see
+[`docs/knowledge/esp32-p4-dsi-rotation-cost-scaling.md`](docs/knowledge/esp32-p4-dsi-rotation-cost-scaling.md).
 
 Prices are list prices as of July 2026. See **[Board hardware details](docs/supported-hardware.md)**
 for per-board specs, enclosure options, and the display / performance differences.
@@ -227,6 +234,7 @@ make dist             BOARD=WAVESHARE_ESP32_P4_WIFI6_TOUCH_LCD_43
 |---|---|
 | `WAVESHARE_ESP32_S3_TOUCH_LCD_35B`, `WAVESHARE_ESP32_S3_TOUCH_LCD_35` | `esp32s3` |
 | `WAVESHARE_ESP32_P4_WIFI6_TOUCH_LCD_35`, `WAVESHARE_ESP32_P4_WIFI6_TOUCH_LCD_43` | `esp32p4` |
+| `GUITION_JC4880P443`, `ELECROW_CROWPANEL_ADV_P4_50` | `esp32p4` |
 
 ### Flashing
 

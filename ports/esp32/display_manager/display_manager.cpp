@@ -144,8 +144,16 @@ extern "C" void init(void)
              lv_rb_psram_is_enabled() ? "enabled" : "disabled");
 
     /* Select the display profile that matches this board's resolution.
-     * Landscape mode swaps H/V: LVGL width = V_RES, height = H_RES. */
-    set_display(BOARD_LCD_V_RES, BOARD_LCD_H_RES);
+     *
+     * Ask the display LVGL actually created rather than recomputing it from the
+     * board's panel dimensions. Those two agree only on a portrait-native panel
+     * that gets rotated for landscape (BOARD_LCD_V_RES x BOARD_LCD_H_RES, which
+     * is what this used to hardcode). A landscape-native panel is not rotated at
+     * all, so the swap would ask for a 480x800 profile on an 800x480 board and
+     * abort with "no display profile". board_init() owns that decision; this
+     * just reads the result. */
+    set_display(lv_display_get_horizontal_resolution(lvgl_disp),
+                lv_display_get_vertical_resolution(lvgl_disp));
 
     /* Start the native overlay manager's dispatcher lv_timer now that the LVGL
      * display + touch indev exist. This runs once, here in init() — the same
