@@ -189,6 +189,15 @@ Not captured: the `DISP CPU`-equivalent timing the gate asked for. That
 instrumentation is emitted by the camera pipeline's display path, which does not
 run without a camera — so it lands in phase 4, not here.
 
+**Portrait-board regression (both cross-board changes).** The `display_manager`
+fix above and the touch-transform gating in phase 2 are not Elecrow-specific, so
+both were checked against a rotated-portrait board. `GUITION_JC4880P443` compiles
+clean, and the Waveshare P4-43 was flashed and exercised on device: ST7701 comes
+up at 480x800, the GT911 still receives portrait maxes (so the landscape
+transform is still applied there), `set_display()` resolves to the same 800x480
+profile as before with no abort, the app boots, `DISP CPU` holds at ~19 ms, and
+touch behaves as expected. No behaviour change on a rotated panel.
+
 ### Phase 2 — touch — ✅ DONE, gate passed
 The GT911 came up as part of phase 1 (pins wired, driver initialises at
 `x_max=800, y_max=480`, reports `TouchPad_ID:0x39,0x31,0x31`).
