@@ -10,8 +10,10 @@ building.
 
 What it does:
   1. Resolve the app + embit sources via tools/_devenv (env/.env-overridable; no
-     hard-coded paths). Local dev uses the sibling working trees; CI points these
-     at the pinned deps/seedsigner + deps/embit submodules.
+     hard-coded paths). BOTH default to the pinned deps/seedsigner + deps/embit
+     submodules, local and CI alike, so what gets frozen is decided by the pin.
+     Building a working tree's local edits is a deliberate SS_APP_DIR override,
+     never the accident of whatever state a sibling clone was left in.
   2. Clean-mirror `seedsigner/` and `embit/` into frozen_app/ (excluding
      resources/, __pycache__/, *.pyc), deleting stale files so removed modules
      don't linger in the freeze.

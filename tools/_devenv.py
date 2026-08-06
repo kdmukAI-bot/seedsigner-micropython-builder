@@ -2,11 +2,12 @@
 
 NO hard-coded local paths live in committed files. Instead:
   * this repo's OWN paths resolve relative to __file__ (REPO_ROOT);
-  * sibling repos (the app, embit, btc-datagen) come from env vars, with
-    sibling-layout defaults (…/<dev>/<repo>) so a standard checkout needs no
-    config, and a non-standard layout is a one-line override.
+  * the app and embit default to this repo's PINNED SUBMODULES (deps/…), so what
+    a build freezes is decided by the pin and is reproducible from a fresh clone;
+  * every path is still a one-line env override for a non-standard layout or a
+    deliberate build of local working-tree edits.
 
-Precedence: process env  >  a `.env` file at the repo root  >  the sibling default.
+Precedence: process env  >  a `.env` file at the repo root  >  the default.
 `.env` is gitignored (it holds a workstation's real paths); `.env.example` is the
 committed contract. See docs/language-pack-repo-integration-todo.md.
 
@@ -14,6 +15,11 @@ Language packs: this repo POINTS ONLY AT THE APP (finalized 2026-07-06 design). 
 app bundles its deployable packs at `src/lang-packs`; we copy those bytes to the SD.
 This repo does NOT know the pack repo and does NOT build packs — whatever the app
 bundled is what deploys, and absent packs = a valid English-only deploy.
+
+⚠ `src/lang-packs/` is GITIGNORED in the app repo — it is a build artifact, not
+tracked content. A clean checkout (which is what the pinned submodule is) therefore
+has NO packs, and a build off the default resolves to an English-only image. Set
+SS_PACKS_DIR at a tree that actually holds built pack bytes to get a localized one.
 
 This is a LOCAL-DEV helper only — SeedSigner-OS and the production MicroPython build
 assemble their own pieces and do not use these scripts.
@@ -48,9 +54,17 @@ def get(key, default=None):
     return os.environ.get(key) or _DOTENV.get(key) or default
 
 
-# --- sibling repos (env-overridable, sibling-layout defaults) ----------------
-SS_APP_DIR = get("SS_APP_DIR", os.path.join(_DEV_ROOT, "seedsigner"))
-SS_EMBIT_DIR = get("SS_EMBIT_DIR", os.path.join(_DEV_ROOT, "embit"))
+# --- app + embit sources (env-overridable; PINNED-SUBMODULE defaults) --------
+# These default to this repo's OWN pinned submodules, not to a sibling working
+# clone, so a build's app code is whatever the pin says and nothing else. The
+# sibling default that used to live here silently froze whatever state a local
+# working tree happened to be in — including local-only commits that exist on no
+# remote, producing images nobody (including us, after a fresh clone) could
+# reproduce. Point SS_APP_DIR at a working clone to deliberately build local
+# edits; the default is the reproducible one.
+SS_APP_DIR = get("SS_APP_DIR", os.path.join(REPO_ROOT, "deps", "seedsigner"))
+SS_EMBIT_DIR = get("SS_EMBIT_DIR", os.path.join(REPO_ROOT, "deps", "embit"))
+# btc-datagen has no submodule here — it stays a sibling-layout default.
 SS_BTC_DATAGEN_DIR = get("SS_BTC_DATAGEN_DIR", os.path.join(_DEV_ROOT, "btc-datagen"))
 
 # --- derived paths -----------------------------------------------------------

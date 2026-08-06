@@ -73,7 +73,12 @@ dist:
 	else \
 		echo "[dist] BAKE_LAUNCHER=0 -> firmware-only dist (no /main.py; boots to REPL)"; \
 	fi
-	@CHIP=$$(case "$(BOARD)" in *ESP32_P4*) echo esp32p4;; *) echo esp32s3;; esac); \
+	@# Read the chip from the build itself rather than pattern-matching the board name:
+	@# only the Waveshare names carry an "ESP32_P4" substring, so a name-based guess
+	@# mislabels every other P4 board (GUITION_JC4880P443, ELECROW_..._P4_50) as an S3
+	@# and prints a flash command that refuses to run.
+	@CHIP=$$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['target'])" \
+		build/$(BOARD)/project_description.json); \
 	echo ""; \
 	echo "Flash with:"; \
 	echo "  cd $(DIST_DIR) && python -m esptool --chip $$CHIP write_flash @flash_args"
