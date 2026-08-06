@@ -1,8 +1,10 @@
 # Elecrow CrowPanel Advance 5" ESP32-P4 — bring-up plan
 
-**Status:** phases 0, 1 and 2 complete — all three gates passed and device-verified.
-Next up is phase 3 (SD card + frozen-app dist). Phase 4 is unblocked: the camera
-module is populated and the sensor is an `SC2336`.
+**Status:** phases 0-3 complete — all four gates passed and device-verified, SD
+included. Phase 4 is part-done: the SC2336 is detected and streams at 30 fps with
+reopen-after-cancel working, but the gate is not met — no QR has been scanned yet and
+colour/exposure are untuned. That last step needs a lit scene and a QR in front of the
+lens, not more code.
 
 **Board:** [CrowPanel Advanced 5inch ESP32-P4 HMI AI Display 800x480 IPS](https://www.elecrow.com/crowpanel-advanced-5inch-esp32-p4-hmi-ai-display-800x480-ips-touch-screen-with-wifi-6.html)
 · vendor sources: [Elecrow-RD/-CrowPanel-Advanced-5inch-ESP32-P4-...](https://github.com/Elecrow-RD/-CrowPanel-Advanced-5inch-ESP32-P4-HMI-AI-Display-800x480-IPS-Touch-Screen)
@@ -96,7 +98,9 @@ is XML — parse it, don't read the PDF). Full pin/net detail now lives in hardw
    chip-ID `0x3107/0x3108` reads `0xCB3A`; the vendor's own example agrees
    (`CONFIG_CAMERA_SC2336=y`). A **third** sensor for the fleet, but unlike the
    Guition's OV02C10 it needs no add-on component — `esp_cam_sensor` ships an SC2336
-   driver. The SCCB bus is **its own** (GPIO33/34 at 1.8 V), reset is on **STC8 P1.3**
+   driver. The SCCB bus is **its own** (GPIO33/34 — P4 side at 3.3 V, pulled up to
+   `VDDPST_5`; BSS138 shifters Q6/Q7 gated on `DOVDD_1V8` put the *sensor* side at
+   1.8 V, so firmware drives ordinary 3.3 V pins), reset is on **STC8 P1.3**
    (and the companion MCU releases it by default — the sensor answers without firmware
    touching it), and XVCLK comes from a **dedicated 24 MHz oscillator**, so there is no
    XVCLK GPIO to drive.
@@ -223,19 +227,90 @@ provided the port does not reset the board on close. See the workflow reminders.
   during reset; let the driver probe both 0x5D and 0x14.
 - **Gate:** navigate the app by touch.
 
-### Phase 3 — storage + frozen app
-- SD card: `BOARD_HAS_SDCARD` with CLK 43 / CMD 44 / D0 39, **1-bit bus width** —
-  DAT1–3 are not routed to the P4, so a 4-bit config will fail. Then the standard
-  frozen-app + baked lang-pack dist (`make stage-app`, `make dist`).
-- **Gate:** self-booting dist runs the app from internal flash with no microSD.
+### Phase 3 — storage + frozen app — ✅ DONE, gate passed
+**Gate result (device-verified):** the self-booting dist runs the app from internal
+flash with no microSD. `main.py` starts at 323 ms, the controller is ready at 735 ms,
+and the Home menu (Scan / Seeds / Tools / Settings) renders at 800x480. The baked vfs
+is 2,101,248 bytes at `0xc50000`; `0xc50000 + 0x3b0000 = 0x1000000`, so it fills the
+16 MiB layout exactly, with no partition-table change needed.
 
-### Phase 4 — camera
-The module **is** populated and the sensor **is** an `SC2336` (see open questions).
-`BOARD_HAS_CAMERA` is still 0; turning it on means:
+**The SD path is device-verified too**, with `BOARD_HAS_SDCARD` on and
+`BOARD_SD_WIDTH 1`: `sd_bus_width()` reports 1, `sd_ensure()` and `sd_live()` both
+return True, the full 7.34 GiB volume is visible (`statvfs` 1,925,705 x 4096 blocks,
+`namemax` 255 so LFN is live), and a 10,240-byte write/read round-trip comes back
+byte-identical. Boot cost is ~365 ms (controller-ready 735 ms without a card,
+1099 ms with one).
+
+Note the diagnostic signature of an **empty slot**: every mount attempt returns
+`sdmmc_init_ocr: send_op_cond (1) returned 0x107` (ESP_ERR_TIMEOUT), and the hotplug
+poll repeats it once a second. That is indistinguishable from a wiring fault, so
+confirm a card is actually seated before debugging the bus.
+
+Card formatting matters and is not fully free-form: this firmware's FatFs is built
+with `FF_FS_EXFAT 0` (`MICROPY_FATFS_EXFAT` is defined nowhere in the port), so an
+**exFAT card will never mount** — which is the factory default for SDXC (>=64 GB).
+Use FAT32. On-device `vfs.VfsFat.mkfs()` does exist, but it makes FAT16 as a
+*superfloppy* (`FM_FAT | FM_SFD`, no partition table) and only falls back to
+MBR-partitioned FAT32 when the card is too big for FAT16 — so for a card that also
+has to be read by a desktop, format it off-device as MBR + FAT32.
+
+Two things the plan did not anticipate:
+- **This board has no on-chip LDO on the SD rail.** The rest of the P4 fleet powers the
+  SDMMC rail from LDO channel 4 and must acquire it in firmware; here both the card VDD
+  (`J5.VDD`) and the SoC IO domain carrying the pins (`VDDPST_5`, via `R25` 0R) sit on
+  the board's `VDD_3V3`, and the LDO4 link `R109` is **NC**. Acquiring a channel would
+  regulate an unloaded cap. That decision is now explicit per board in
+  `BOARD_SD_PWR_LDO_CHAN` (0 here, 4 on the Waveshare P4s); a P4 board that declares
+  `BOARD_HAS_SDCARD` without it fails the build rather than silently mis-powering.
+- **The Python facade hardcoded a 4-bit bus.** `machine.SDCard(slot=0, width=4)` is a
+  fleet assumption, not a board fact, and asking for 4 lines on a board that routes one
+  cannot enumerate. The width now comes from the C side (`sd_bus_width()`).
+
+Both are cross-board changes — see the regression note under phase 1.
+
+### Phase 4 — camera — 🟡 streaming on device; gate not yet met
+**Done and device-verified.** `BOARD_HAS_CAMERA` is on and the sensor is detected
+(`sc2336: Detected Camera sensor PID=0xcb3a`). The pipeline streams 1280x720 at
+**cam 30.0 fps / disp 15.0 fps / decode 14.5 fps** (gray 15.4 ms, quirc 50.9 ms) into
+a 480x480 scan square, PPA `rot=0` (no rotation, as predicted for a landscape-native
+panel), pillarboxed at `x_offset=160`. CPU: core1 100% (qr_decode 94%), core0 52%.
+
+**The reopen case passes** — `stop()` then `start()` returns to streaming. That is the
+exact failure that blocks the Waveshare 5, and it does not reproduce here.
+
+**One fleet-wide fix was needed.** `board_pipeline.c` handed the CSI driver the main
+I2C bus handle unconditionally, which is right only because every previous board hung
+its sensor off the main bus. This is the first board with a **dedicated SCCB bus**, so
+the sensor was probed on the wrong pins and detection NACKed — a failure identical to
+an absent or unpowered sensor. The bus is now chosen from
+`BOARD_CAM_SCCB_I2C_PORT == BOARD_I2C_PORT`; boards sharing the main bus are
+unaffected. See `docs/knowledge/esp32-p4-camera-dedicated-sccb-bus.md`.
+
+**Still owed by the gate:**
+- **Scan a real QR.** Not yet attempted — needs a QR in front of the lens in usable
+  light. Everything upstream of the decode is confirmed running.
+- **Colour/exposure tuning.** The preview is a magenta, heavily-gained image in a dark
+  room. `BOARD_CAMERA_TONE_GAMMA_X10` / `BOARD_CAMERA_TONE_BLACK_LEVEL` are unset, so
+  the tone curve logs `disabled (linear)` and no black level is subtracted — the same
+  shape as the Guition's pedestal trap, where the CCM tints the residual pedestal
+  purple and AWB amplifies it (`docs/knowledge/guition-jc4880p443-camera-tuning.md`).
+  Tuning needs a lit reference scene; do not guess values.
+- **Orientation.** `BOARD_CAMERA_ROTATION` / `BOARD_CAMERA_MIRROR_Y` are left at 0
+  pending a recognisable image to judge the mount against.
+
+Note the IPA path here is cheaper than the Guition's: `esp_cam_sensor` ships
+`cfg/sc2336_default.json` keyed `"SC2336"` — the sensor's own reported name — so
+esp_video's lookup hits it and owns the ISP pipeline. `BOARD_CAMERA_IPA_CONFIG_NAME`
+is therefore deliberately undefined. Defining it (to take ownership for per-session AE
+metering, as the Guition does) means copying the tuning file under a key the sensor
+does *not* report.
+
+Original notes for the phase, retained:
 - `CONFIG_CAMERA_SC2336=y` in `sdkconfig.board`. No new component needed —
   `esp_cam_sensor` ships this driver, unlike the Guition's OV02C10.
 - Four differences from the rest of the fleet: SCCB is on its **own** bus (I2C2,
-  GPIO33/34 at 1.8 V, so `BOARD_CAM_SCCB_I2C_PORT` is 1, not the main bus);
+  GPIO33/34, so `BOARD_CAM_SCCB_I2C_PORT` is 1, not the main bus — the P4 pins are
+  3.3 V; only the far side of the Q6/Q7 shifters is 1.8 V);
   **reset is an STC8 register** (`BOARD_STC8_OUT_CSI_RST`) rather than a GPIO, and
   is released by default; **XVCLK comes from a dedicated 24 MHz oscillator**, so
   neither XCLK Kconfig option applies; and the sensor is **1280×720**, not the

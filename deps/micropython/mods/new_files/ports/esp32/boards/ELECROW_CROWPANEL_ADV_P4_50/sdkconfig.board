@@ -7,26 +7,50 @@ CONFIG_SPIRAM_MEMTEST=y
 CONFIG_SPIRAM_IGNORE_NOTFOUND=n
 
 # ── Camera (MIPI-CSI, SC2336) ──────────────────────────────────────────────
-# The module IS populated on our unit and the sensor is a SmartSens SC2336
-# (2 MP 1280x720): SCCB answers at 0x30, chip-ID 0x3107/0x3108 reads 0xCB3A, and
-# the vendor's own camera example selects CONFIG_CAMERA_SC2336.
+# The esp_video CSI/ISP video devices are pulled in by board_common, but the
+# SENSOR DRIVER and the ISP pipeline controller are per-application Kconfig, so
+# each build enables them here. Without the sensor driver, esp_video_init()
+# returns OK but detects no sensor and registers NO /dev/video0, so
+# cam_pipeline_create() fails at open("/dev/video0").
+# See docs/knowledge/esp32-p4-camera-missing-sensor-kconfig.md.
 #
-# The driver is deliberately NOT selected yet — the camera is phase 4 and
-# BOARD_HAS_CAMERA is still 0, so enabling the sensor here would only have
-# esp_video probe hardware nothing else is set up to stream. When phase 4 starts:
-#   CONFIG_CAMERA_SC2336=y
-#   CONFIG_CAMERA_SC2336_AUTO_DETECT_MIPI_INTERFACE_SENSOR=y
-# and no add-on component is needed — esp_cam_sensor ships this driver, unlike
-# the Guition's OV02C10.
+# The sensor is a SmartSens SC2336 (2 MP 1280x720): SCCB answers at 0x30 and
+# chip-ID 0x3107/0x3108 reads 0xCB3A. No add-on component is needed —
+# esp_cam_sensor ships this driver, unlike the Guition's OV02C10.
 #
-# Four differences from the rest of the P4 fleet (traced from the schematic):
-#  - SCCB is its OWN I2C bus (GPIO33/34) at 1.8V, not the main touch bus
-#  - the sensor reset is a companion-MCU register, not a GPIO (released by default)
-#  - XVCLK comes from a dedicated 24 MHz oscillator, so neither the LEDC nor the
-#    ESP clock-router XCLK option applies — the sensor is externally clocked
-#  - RAW-Bayer with manual exposure/gain, so it needs esp_ipa's closed-loop
-#    AE/AWB, as the OV02C10 does
+# Format and gain map mirror the board vendor's own working camera example
+# (Lesson13-Camera_Real-Time): RAW8 1280x720 30fps, 2 lanes, digital-gain
+# priority. NOTE the format symbols spell the resolution with a LOWERCASE x in
+# esp_cam_sensor 0.9.0 (the vendor's older component used uppercase) — the
+# uppercase spelling silently fails to match and leaves the default in place.
+# Both are RAW8_1280x720 here, so this is belt-and-braces, but a future format
+# change must use the 0.9.0 spelling.
+CONFIG_CAMERA_SC2336=y
+CONFIG_CAMERA_SC2336_AUTO_DETECT_MIPI_INTERFACE_SENSOR=y
+CONFIG_CAMERA_SC2336_MIPI_RAW8_1280x720_30FPS=y
+CONFIG_CAMERA_SC2336_DIG_GAIN_PRIORITY=y
+# XVCLK is a dedicated 24 MHz oscillator on this board, so no XCLK pin is driven.
+# The clock-router option is still the one to pick over LEDC: it is what the
+# vendor example uses and it burns no GPIO.
+# CONFIG_CAMERA_XCLK_USE_LEDC is not set
+CONFIG_CAMERA_XCLK_USE_ESP_CLOCK_ROUTER=y
+# ISP pipeline controller: required for RAW8 -> RGB565 and for the closed-loop
+# AE/AWB this RAW-Bayer sensor cannot do for itself. The tuning file comes free
+# here: esp_cam_sensor ships cfg/sc2336_default.json keyed "SC2336", the sensor's
+# own reported name, so esp_video's lookup hits it and owns the pipeline. That is
+# why board_config.h deliberately leaves BOARD_CAMERA_IPA_CONFIG_NAME undefined.
+CONFIG_ESP_VIDEO_ENABLE_ISP_PIPELINE_CONTROLLER=y
+# Backup buffer ENABLED (=n disables it). The vendor example leaves it off, but
+# our pipeline stops and restarts the camera (scan -> cancel -> reopen) where the
+# Guition showed the CSI driver needs its internal DMA backup buffer or the first
+# frame stalls and the priming DQBUF blocks forever.
+CONFIG_ESP_VIDEO_DISABLE_MIPI_CSI_DRIVER_BACKUP_BUFFER=n
+# Timer task stack: the ISP pipeline controller runs on the FreeRTOS timer task
+# and the 2048 default overflows.
 CONFIG_FREERTOS_TIMER_TASK_STACK_DEPTH=4096
+# Fixed exposure override OFF — esp_ipa's closed loop drives the same control
+# every few frames, so a fixed value here would be overwritten immediately.
+CONFIG_BOARD_CSI_AE_TARGET=0
 
 # Route k_quirc decoder context + flood-fill scratch to PSRAM: keeps their ~80 KB
 # internal-RAM footprint off the fragmented internal heap so the camera QR-decode task

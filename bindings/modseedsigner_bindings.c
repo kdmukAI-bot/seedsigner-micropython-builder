@@ -971,6 +971,16 @@ static mp_obj_t mp_seedsigner_lvgl_display_size(void) {
 }
 static MP_DEFINE_CONST_FUN_OBJ_0(seedsigner_lvgl_display_size_obj, mp_seedsigner_lvgl_display_size);
 
+// sd_bus_width() -> int. How many SDMMC data lines this board actually routes, so the
+// facade's machine.SDCard(slot=0, width=...) matches the wiring instead of assuming the
+// fleet's 4. A board that brings out only DAT0 cannot enumerate a card if asked for 4.
+// Behind dm_sd_bus_width() for the same reason as display_size(): board_config.h stays
+// out of this file's QSTR-scan include set.
+static mp_obj_t mp_seedsigner_lvgl_sd_bus_width(void) {
+    return mp_obj_new_int(dm_sd_bus_width());
+}
+static MP_DEFINE_CONST_FUN_OBJ_0(seedsigner_lvgl_sd_bus_width_obj, mp_seedsigner_lvgl_sd_bus_width);
+
 // --- Toast overlay (transient banner) -------------------------------------
 // Platform-symmetric with the Pi Zero .so; see docs/toast-binding-contract.md.
 // A toast is NOT a screen: it has no cfg->JSON->run_screen path and no result. It's
@@ -1085,6 +1095,7 @@ static const mp_rom_map_elem_t seedsigner_lvgl_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_get_memory_stats), MP_ROM_PTR(&seedsigner_lvgl_mem_stats_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_cache_psram), MP_ROM_PTR(&seedsigner_lvgl_set_cache_psram_obj) },
     { MP_ROM_QSTR(MP_QSTR_display_size), MP_ROM_PTR(&seedsigner_lvgl_display_size_obj) },
+    { MP_ROM_QSTR(MP_QSTR_sd_bus_width), MP_ROM_PTR(&seedsigner_lvgl_sd_bus_width_obj) },
 };
 static MP_DEFINE_CONST_DICT(seedsigner_lvgl_module_globals, seedsigner_lvgl_module_globals_table);
 

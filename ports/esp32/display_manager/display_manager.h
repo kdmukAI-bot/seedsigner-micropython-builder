@@ -135,6 +135,11 @@ void dm_set_cache_psram(bool enabled);
  * written only when non-NULL (safe to pass NULL for a dimension you don't want). */
 void dm_display_size(int *width, int *height);
 
+/* Returns the SDMMC data-bus width this board wires (1 or 4), for the Python facade's
+ * machine.SDCard construction. A compile-time board fact, so no lock and no ordering
+ * requirement — safe to call before the card is mounted. */
+int dm_sd_bus_width(void);
+
 #ifdef __cplusplus
 }
 #endif

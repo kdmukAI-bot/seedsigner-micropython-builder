@@ -70,6 +70,21 @@ and their own firmware gets NULL back from it — their code logs "LVGL rgb port
 fail" and carries on, working by accident because the display object was created
 anyway.
 
+### Likely fixed in 2.8.0 — the upgrade path out of this
+
+`docs/camera-pipeline-research-5.md` (finding F3) records that **esp_lvgl_port
+2.8.0** added *"Supported RGB/MIPI-DSI interfaces for chips by `SOC_*`"*, an
+ESP32-P4 RGB example, and RGB565 swapped colour — citing the Espressif Component
+Registry changelog. Gating on `SOC_LCD_RGB_SUPPORTED` instead of
+`CONFIG_IDF_TARGET_ESP32S3` is exactly the fix for what is described above, and
+the P4 sets that SOC flag.
+
+**Not verified here** — this is read off that changelog note, not tested. If the
+hand-rolled path below ever becomes a maintenance burden, bumping the component
+and re-testing `lvgl_port_add_disp_rgb()` on a P4 is the thing to try first. Note
+that a bump also affects every other board's display path, so it is not a local
+change.
+
 This is not a P4 hardware limitation: the P4 has an RGB/LCD_CAM peripheral
 (`SOC_LCD_RGB_SUPPORTED`) and `esp_lcd_new_rgb_panel()` drives it fine. Only the
 LVGL port wrapper is gated.

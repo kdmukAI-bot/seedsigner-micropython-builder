@@ -14,6 +14,7 @@
 #include "esp_heap_caps.h"
 #include "esp_lvgl_port.h"
 #include "esp_log.h"
+#include "esp_timer.h"   // SS_FPS render timing (opt-in display instrumentation)
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -101,21 +102,32 @@ static void route_draw_buffers_to_psram(void)
 }
 
 #if BOARD_HAS_SDCARD && defined(CONFIG_IDF_TARGET_ESP32P4)
-// The P4 Touch LCD 4.3 powers the microSD card's VDD from on-chip LDO channel 4
-// (LDO_VO4 → SDMMC IO), per the Waveshare BSP. MicroPython's machine.SDCard does
-// NOT configure this rail, so without it the slot is unpowered and the card never
-// enumerates (block count -1, writes fail, mkfs → EBUSY). Acquire LDO_VO4 at 3.3V
-// once at boot and hold it for the device's lifetime so machine.SDCard works.
+// Most of the P4 fleet feeds the SDMMC rail from an on-chip LDO channel (LDO_VO4 →
+// SDMMC IO), and MicroPython's machine.SDCard has no API to enable it — so without
+// this the slot is unpowered and the card never enumerates (block count -1, writes
+// fail, mkfs → EBUSY). Acquire the channel at 3.3V once at boot and hold it for the
+// device's lifetime.
+//
+// Which channel (if any) is a per-board fact, not a P4 fact: a board may instead
+// bridge the SDMMC IO domain straight to its 3.3V rail and leave the LDO's output
+// link depopulated, in which case acquiring a channel would regulate nothing.
+// BOARD_SD_PWR_LDO_CHAN carries that decision; 0 means "no on-chip LDO here".
+#if !defined(BOARD_SD_PWR_LDO_CHAN)
+#error "P4 board with BOARD_HAS_SDCARD must define BOARD_SD_PWR_LDO_CHAN (channel number, or 0 for a board-supplied rail)"
+#endif
+#endif
+
+#if BOARD_HAS_SDCARD && defined(CONFIG_IDF_TARGET_ESP32P4) && BOARD_SD_PWR_LDO_CHAN > 0
 static esp_ldo_channel_handle_t s_sd_ldo = NULL;
 static void sd_power_on(void)
 {
     if (s_sd_ldo) return;
-    esp_ldo_channel_config_t cfg = { .chan_id = 4, .voltage_mv = 3300 };
+    esp_ldo_channel_config_t cfg = { .chan_id = BOARD_SD_PWR_LDO_CHAN, .voltage_mv = 3300 };
     esp_err_t err = esp_ldo_acquire_channel(&cfg, &s_sd_ldo);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "SD LDO power-on failed: %s", esp_err_to_name(err));
     } else {
-        ESP_LOGI(TAG, "SD card VDD powered via on-chip LDO ch4 @3.3V");
+        ESP_LOGI(TAG, "SD card VDD powered via on-chip LDO ch%d @3.3V", BOARD_SD_PWR_LDO_CHAN);
     }
 }
 #else
@@ -125,6 +137,84 @@ static void sd_power_on(void) {}
 static lv_display_t *lvgl_disp = NULL;
 static lv_indev_t *lvgl_touch_indev = NULL;
 static bool initialized = false;
+
+/* ── Render/flush instrumentation (SS_FPS) — OPT-IN, default OFF ────────────
+ * Measures what the UI actually costs on a given panel: how long LVGL spends
+ * rendering a frame, and how many flushes that frame takes. Exists because the
+ * only display timing we otherwise have ("DISP CPU") is emitted by the camera
+ * pipeline, so every screen that is NOT the camera preview — menus, transitions,
+ * the zoomed transcribe scroll — was unmeasured.
+ *
+ * The flush COUNT is the point, not just the duration: it separates "expensive
+ * to draw" from "expensive to push to the panel". On the RGB board a full repaint
+ * in partial mode costs 8 flushes / ~23 ms average, versus 1 flush / ~8 ms with
+ * direct mode — see BOARD_RGB_NUM_FBS in the Elecrow board_config.h.
+ *
+ * Reports on RENDER_READY (once per rendered frame) and only when something
+ * actually rendered, so an idle UI stays silent. Flip to 1 when doing display
+ * perf work; it is left compiled out so normal builds carry no log noise. */
+#define SS_FPS_INSTRUMENT 0
+#if SS_FPS_INSTRUMENT
+static uint32_t s_render_start_ms = 0;
+static uint32_t s_flushes = 0;      /* flushes within the current render */
+static uint32_t s_frames = 0;       /* frames since the last report */
+static uint32_t s_render_ms_sum = 0;
+static uint32_t s_render_ms_max = 0;
+static uint32_t s_report_ms = 0;
+
+static void ss_fps_render_start_cb(lv_event_t *e)
+{
+    (void)e;
+    s_render_start_ms = (uint32_t)(esp_timer_get_time() / 1000);
+    s_flushes = 0;
+}
+
+static void ss_fps_flush_finish_cb(lv_event_t *e)
+{
+    (void)e;
+    s_flushes++;
+}
+
+static void ss_fps_render_ready_cb(lv_event_t *e)
+{
+    (void)e;
+    uint32_t now = (uint32_t)(esp_timer_get_time() / 1000);
+    uint32_t dur = now - s_render_start_ms;
+
+    s_frames++;
+    s_render_ms_sum += dur;
+    if (dur > s_render_ms_max) s_render_ms_max = dur;
+
+    /* A single slow frame is the interesting event for animation jank, so call
+     * it out immediately with its flush count — that ratio is what distinguishes
+     * "expensive to draw" from "expensive to push to the panel". */
+    if (dur >= 15) {
+        ESP_LOGI("SS_FPS", "slow render: %lu ms in %lu flush(es)",
+                 (unsigned long)dur, (unsigned long)s_flushes);
+    }
+
+    if (now - s_report_ms >= 2000) {
+        if (s_frames) {
+            ESP_LOGI("SS_FPS", "%lu frames/2s  avg %lu ms  max %lu ms",
+                     (unsigned long)s_frames,
+                     (unsigned long)(s_render_ms_sum / s_frames),
+                     (unsigned long)s_render_ms_max);
+        }
+        s_frames = 0;
+        s_render_ms_sum = 0;
+        s_render_ms_max = 0;
+        s_report_ms = now;
+    }
+}
+
+static void ss_fps_attach(lv_display_t *disp)
+{
+    lv_display_add_event_cb(disp, ss_fps_render_start_cb, LV_EVENT_RENDER_START, NULL);
+    lv_display_add_event_cb(disp, ss_fps_render_ready_cb, LV_EVENT_RENDER_READY, NULL);
+    lv_display_add_event_cb(disp, ss_fps_flush_finish_cb, LV_EVENT_FLUSH_FINISH, NULL);
+    ESP_LOGI("SS_FPS", "render instrumentation attached");
+}
+#endif /* SS_FPS_INSTRUMENT */
 
 extern "C" void init(void)
 {
@@ -162,6 +252,10 @@ extern "C" void init(void)
      * from the MicroPython task). The dispatcher then fires inside the esp_lvgl_port
      * task's lv_timer_handler() and owns the screensaver on its own. */
     overlay_manager_init();
+
+#if SS_FPS_INSTRUMENT
+    ss_fps_attach(lvgl_disp);
+#endif
 
     initialized = true;
 }
@@ -448,4 +542,18 @@ extern "C" void dm_display_size(int *width, int *height)
     if (height) {
         *height = profile.height;
     }
+}
+
+/* SDMMC data-bus width this board actually wires, for the Python facade's
+ * machine.SDCard(slot=0, width=...). Not cosmetic: on a board that routes only DAT0
+ * (the CrowPanel P4 5" terminates DAT1-3 at the socket), asking for 4 bits configures
+ * lines the SoC never reaches and the card fails to enumerate. Boards that predate the
+ * macro stay at the 4 the facade used to hardcode. */
+extern "C" int dm_sd_bus_width(void)
+{
+#if defined(BOARD_SD_WIDTH)
+    return BOARD_SD_WIDTH;
+#else
+    return 4;
+#endif
 }

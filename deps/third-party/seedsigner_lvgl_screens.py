@@ -44,6 +44,17 @@ _sd_scratch = bytearray(512)         # preallocated one-sector probe buffer (no 
 _SD_POLL_INTERVAL_MS = 1000          # min gap between hotplug bus probes
 _sd_last_poll = None
 
+# SDMMC data lines this board actually routes. A board fact, not a fleet constant: most
+# route all four, but one that brings out only DAT0 cannot enumerate a card if asked for
+# 4, so the C side reports what is wired. Resolved once here (it is compile-time truth)
+# rather than inside _ensure_sd, whose fail-soft except would swallow a missing binding
+# into a silent "no SD card" -- firmware predating the binding falls back to the 4 this
+# used to hardcode.
+try:
+    _SD_BUS_WIDTH = sd_bus_width()
+except NameError:
+    _SD_BUS_WIDTH = 4
+
 
 def _ensure_sd():
     """Mount the microSD at _SD_MOUNT if not already, holding the block device in _sd_dev.
@@ -71,7 +82,7 @@ def _ensure_sd():
         import vfs
         if _sd_dev is None:
             import machine
-            _sd_dev = machine.SDCard(slot=0, width=4)   # slot 0 = IOMUX; VDD via LDO_VO4
+            _sd_dev = machine.SDCard(slot=0, width=_SD_BUS_WIDTH)   # slot 0 = IOMUX
         else:
             # Remount after a hotplug removal: re-init the SDMMC *slot* in place so a
             # freshly-powered (reinserted) card re-enumerates. Construction ran the slot
